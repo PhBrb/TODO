@@ -32,67 +32,66 @@ Our app will implement Nir Eyal's Hook Model cycle:
 ### 🎯 A. Reward Engineering (Variable Payoff)
 
 #### 1. Variable Reward System
-- **Implementation:** Tasks reward XP on a variable-ratio schedule (not every task gives the same XP)
+- **Implementation:** Tasks reward XP/Currency on a variable-ratio schedule (not every task gives the same XP)
 - **Mechanics:**
-  - Base XP for task completion
-  - Random bonus XP multiplier (1.5x-3x) for ~20% of tasks
-  - "Lucky task" concept: 1 in 20 tasks gives a special bonus (e.g., rare decoration item)
-- **Psychology:** Slot-machine effect keeps users completing "just one more task"
+  - Base reward for completion
+  - Tasks can be created with user specified difficulty, more difficult tasks give more reward
+  - Random bonus multiplier (1.0x - 1.3x)
+  - "Lucky task" concept: 1 in 20 tasks gives a special bonus (e.g., rare decoration item/gem), sometimes as a surprise, sometimes with it is indicated
+- **Psychology:** Rewards and randomness
 
 #### 2. Daily Chest / Mystery Box
 - **Implementation:** Users earn a "Daily Chest" after completing their first task of the day
 - **Mechanics:**
-  - Chest opens immediately but contains a delayed reward (e.g., "Your special item will be ready in 6 hours")
+  - Chest opens after 12 hours
   - Creates anticipation and reason to return later
-  - Chest quality scales with streak length (Bronze → Silver → Gold → Diamond)
-- **Visual:** Animated chest in the room that grows more ornate with higher streaks
+- **Visual:** Animated chest in the room that grows more ornate when closer to opening
+- **Psychology:** Randomness
 
 #### 3. Near-Miss Design
 - **Implementation:** "Almost perfect" feedback for tasks
 - **Mechanics:**
-  - When user completes 8/10 repetitive tasks, show: "So close! Just 2 more for a bonus!"
-  - Visual progress bar that fills but doesn't quite reach the next level
-  - Special animation when user is 1 task short of a milestone
-- **Psychology:** Triggers "one more try" behavior
+  - When user completes eg. 8/10 tasks, show: "So close! Just 2 more for a bonus!". Implement reward at different levels 5, 10, 15, 25
+  - Visual progress bar that fills. Once one bonus is reached, the bar is already "close" to the next bonus.
+- **Psychology:** Always close to next reward
 
 #### 4. Multi-Currency System
 - **Implementation:** Three currency types with different uses:
-  - **XP (Experience Points):** Earned from all tasks, used for leveling up
-  - **Coins:** Earned from daily tasks, used for common decorations
-  - **Gems:** Rare, earned from streaks/achievements, used for premium items
-- **Visual:** Different colored orbs in the room's "treasury" area
+  - **XP (Experience Points):** Earned from all tasks, used for ...
+  - **Coins:** Earned from all tasks, used for common decorations
+  - **Gems:** Rare, random drops on task completion and ... , used for special items or events
+- **Visual:** Different colored crystals in the room's "treasury" area
 
 #### 5. Overlapping Reward Timers
 - **Implementation:** Multiple concurrent countdowns:
-  - Daily streak timer (24h)
-  - Weekly challenge timer (7 days)
-  - Limited-time event timer (48h-72h)
-  - Room upgrade construction timer (varies)
+  - Complete x tasks per day (through "Near-Miss Design")
+  - Complete x task per week
+  - Limited-time event (1h), starts randomly, increases rewards
+  - Room upgrade construction timer for a few items
 - **UI:** Visual countdown clocks integrated into the room's walls
-- **Psychology:** Always at least one timer nearing expiration
+- **Psychology:** ...
 
 #### 6. Instant Celebratory Feedback
 - **Implementation:** Rich animations and sounds for every action:
   - Confetti when completing a streak milestone
-  - Plant growth animation when watering (task completion)
-  - Level-up fanfare with room transformation
+  - Plant growth animation (when watering)
+  - Level-up fanfare with room transformation (one additional tile?)
   - Different sound effects for different achievement tiers
-- **Technical:** Use Android's Lottie for smooth animations
+  - ...
+- **Technical:** Use Android's Lottie for smooth animations?
 
 #### 7. Micro-Task Sizing
 - **Implementation:** Break tasks into smallest possible units
 - **Mechanics:**
-  - "Quick Tasks" (30-60 seconds) for small rewards
-  - "Focus Sessions" (5-25 minutes) for larger rewards
   - Allow users to chunk big tasks into micro-tasks
-- **Psychology:** Low friction to start, high completion rate
+- **Psychology:** Low friction to start
 
 #### 8. Points & XP System
-- **Implementation:** Comprehensive scoring:
-  - Base points for task completion
-  - Bonus points for on-time completion
-  - Multiplier for task difficulty
+- **Implementation:** 
   - Streak bonus (extra % based on current streak)
+  - "Certificate of Awesomeness" for completing streak milestones, that can be placed in the room.
+    - More fancy visuals for longer streaks
+    - If a streak is lost, the visuals become more bland, but you never lose it completely
 - **Visual:** XP bar at top of screen, level indicators in room
 
 ---
