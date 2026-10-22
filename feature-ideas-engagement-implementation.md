@@ -169,8 +169,8 @@ Our app will implement Nir Eyal's Hook Model cycle:
   - Urgent: "Your streak is about to expire!"
   - Curiosity: "Something new in your room..."
 
-#### ...
-- **Implementation:** Mascot character notifications / Reengagement ladder
+#### Reengagement ladder
+- **Implementation:** Mascot character notifications
 - **Mechanics:**
   - Room has a pet/character that reacts to user behavior
   - "I hope you are doing alright. If you have the energy, I have a small and easy task for you." with 2x reward
@@ -209,31 +209,11 @@ Our app will implement Nir Eyal's Hook Model cycle:
 
 ### 👥 E. Social Mechanics
 
-#### 29. Quantified Validation
-- **Implementation:** Achievement sharing
+#### 29. Photo mode
+- **Implementation:** Reduce UI to make nice screenshots
 - **Mechanics:**
-  - Share streak milestones to social media
-  - "Like" button on shared achievements
-  - Leaderboard for most-shared users
-- **Psychology:** Social validation loop
-
-#### 30. Leaderboards & Leagues
-- **Implementation:** Weekly competition
-- **Mechanics:**
-  - Bronze → Silver → Gold → Diamond leagues
-  - Compete against users with similar activity levels
-  - Promotion/demotion each week
-  - Special league-only decorations
-- **Psychology:** Social comparison + loss aversion
-
-#### 31. Friend Streaks
-- **Implementation:** Shared goals with friends
-- **Mechanics:**
-  - Connect with friends via Google Play Games
-  - "Friend Streak": Both must complete tasks daily
-  - Shared room upgrades (contribute to joint room)
-  - "Help a friend" - complete their task for them (limited)
-- **Psychology:** Mutual accountability
+  - Ability to share new amazing additions to the room
+- **Psychology:** Social validation
 
 #### 32. Reciprocity Pressure
 - **Implementation:** Gift system
@@ -241,24 +221,7 @@ Our app will implement Nir Eyal's Hook Model cycle:
   - Send decorations to friends
   - Receive gifts that must be "unwrapped" (opens after completing task)
   - "Gift back" encouragement
-- **Psychology:** Obligation to reciprocate
-
-#### 33. Social Proof Displays
-- **Implementation:** Activity feed
-- **Mechanics:**
-  - See friends' recent achievements
-  - "X just reached 100-day streak!"
-  - "Y unlocked the rare dragon statue!"
-- **Psychology:** Normalizes high engagement
-
-#### 34. Shareable Achievements
-- **Implementation:** Beautiful share cards
-- **Mechanics:**
-  - Auto-generated images for milestones
-  - Customizable with room screenshot
-  - "Year in Review" for TODO app
-  - Weekly recap: "You completed 47 tasks this week!"
-- **Psychology:** Viral potential + personal pride
+- **Psychology:** Obligation to reciprocate/complete task to open gift
 
 #### 35. Parasocial Presence
 - **Implementation:** Room character/mascot
@@ -267,6 +230,7 @@ Our app will implement Nir Eyal's Hook Model cycle:
   - Reacts to user actions (happy when tasks completed, sad when missed)
   - Can be customized (different pets/characters)
   - Has own "happiness" meter affected by user behavior
+  - Randomness: eg. a cat that sometimes visits and visits more likely if the user is doing well
 - **Psychology:** Emotional attachment to app
 
 ---
