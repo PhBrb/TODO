@@ -94,6 +94,10 @@ Our app will implement Nir Eyal's Hook Model cycle:
     - If a streak is lost, the visuals become more bland, but you never lose it completely
 - **Visual:** XP bar at top of screen, level indicators in room
 
+#### 8.5 Self evaluation
+- **Mechanics:**
+  - User specifies how difficult it was to complete the task. Could be used to suggest to make tasks less rewarding if it becomes too easy.
+
 ---
 
 ### 🔒 B. Loss Aversion, Commitment & Sunk Cost
@@ -319,173 +323,41 @@ Our app will implement Nir Eyal's Hook Model cycle:
 
 ---
 
-### 📊 J. Meta-Techniques
-
-#### 55. A/B Testing Framework
-- **Implementation:** Built-in experimentation
-- **Mechanics:**
-  - Test different reward schedules
-  - Test notification styles
-  - Test UI variations
-  - Track engagement metrics
-- **Technical:** Firebase Remote Config for A/B testing
-
-#### 56. Engagement Metrics
-- **Implementation:** Track key indicators
-- **Metrics:**
-  - DAU (Daily Active Users)
-  - Session length
-  - Tasks per session
-  - Streak retention
-  - Room customization frequency
-  - D1/D7/D30 retention
-- **Visual:** Analytics dashboard (for team, not users)
-
-#### 57. Freemium Flywheel
-- **Implementation:** Free distribution, paid upgrades
-- **Mechanics:**
-  - Free: All core features, ads optional
-  - Premium: Ad-free, exclusive decorations, extra energy
-  - One-time purchases: Special decoration packs
-- **Psychology:** Free users drive network effects
-
-#### 58. Attention-Economy Alignment
-- **Implementation:** Business model supports engagement
-- **Options:**
-  - Ad-supported (rewarded video for bonuses)
-  - Premium subscription (cosmetic-only benefits)
-  - One-time purchases (decoration packs)
-- **Principle:** Monetization should never reduce engagement
-
----
-
-## Room Visualization Features
-
-The 2.5D room is our unique differentiator. Here's how to maximize its engagement potential:
-
-### Core Room Mechanics
-
-#### 1. Room Layout System
-- **Grid-based placement** of decorations
-- **Multiple room types:** Bedroom, Office, Garden, Living Room
-- **Zoom and pan** to view details
-- **Day/night cycle** with different lighting
-
-#### 2. Decoration Categories
-- **Furniture:** Chairs, tables, shelves (functional, always visible)
-- **Plants:** Grow over time, need "watering" (task completion)
-- **Decorations:** Statues, posters, rugs (cosmetic)
-- **Lighting:** Lamps, windows, candles (affects room mood)
-- **Pets/Characters:** Interactive elements
-- **Special:** Seasonal, limited-edition, achievement-based
-
-#### 3. Room Progression
-- **Level 1-10:** Basic room, simple decorations
-- **Level 11-25:** Larger room, more decoration slots
-- **Level 26-50:** Multiple rooms, themes
-- **Level 50+:** Custom room shapes, special effects
-
-#### 4. Room Health System
-- **Cleanliness:** Degrades if tasks missed, improves with task completion
-- **Happiness:** Affected by user activity patterns
-- **Visual feedback:** Dust accumulates, plants wilt, lighting dims
-- **Recovery:** Complete tasks to restore health
-
-#### 5. Room Upgrades
-- **Construction system:** Buy upgrade, wait for completion
-- **Instant completion:** Use gems to finish immediately
-- **Visual:** Scaffolding/construction animation during upgrade
-
-#### 6. Room Themes
-- **Free themes:** Basic, Modern, Nature
-- **Premium themes:** Fantasy, Sci-fi, Retro, Seasonal
-- **Theme-specific decorations** only available within theme
-- **Theme switching:** Costs coins, cooldown period
-
-#### 7. Interactive Elements
-- **Animations:** Plants sway, clocks tick, pets move
-- **Sound effects:** Ambient room sounds (rain, birds, etc.)
-- **Touch interactions:** Tap decorations for reactions
-- **Easter eggs:** Hidden interactions and surprises
-
----
-
-## Task System Features
-
-### Core Task Mechanics
-
-#### 1. Task Types
-- **One-time tasks:** Standard checklist items
-- **Repetitive tasks:** Recurring with custom intervals (daily, weekly, custom)
-- **Habit tasks:** "Did you do X today?" with yes/no tracking
-- **Project tasks:** Multi-step tasks with subtasks
-
-#### 2. Task Properties
-- **Priority:** Low, Medium, High
-- **Category:** Work, Personal, Health, etc.
-- **Estimated time:** For smart scheduling
-- **Difficulty:** Affects XP reward
-- **Tags:** For organization and filtering
-
-#### 3. Smart Task Features
-- **Auto-scheduling:** Suggests optimal times based on habits
-- **Location-based:** Reminders when near specified location
-- **Time-based:** Reminders at optimal times
-- **Context-aware:** Suggests tasks based on time, location, day
-
-#### 4. Task Completion
-- **Quick complete:** Swipe to mark done
-- **Detailed tracking:** Time spent, notes, photos
-- **Partial completion:** For multi-step tasks
-- **Verification:** Optional photo proof for accountability
-
----
-
 ## Notification Strategy
+Ask user how many notifications they would want per day. Suggest to reduce if user ignores them.
 
 ### Notification Types
 
 #### 1. Routine Reminders
 - **Frequency:** 1-2 per day max
-- **Timing:** During user's habit window
-- **Content:** Encouraging, not shaming
+- **Timing:** When due, or if user hasnt done anything on that day
 
 #### 2. Streak Warnings
 - **Trigger:** Streak at risk (2-4 hours before reset)
 - **Content:** Urgent but positive
-- **Limit:** 1 per day
+- **Limit:** 1 per day, but can be more if it is a long streak
 
 #### 3. Reward Notifications
 - **Trigger:** New reward available
-- **Content:** "Your daily chest is ready!"
+- **Content:** "Your chest is ready!"
 - **Frequency:** As earned
-
-#### 4. Social Notifications
-- **Trigger:** Friend activity
-- **Content:** "X completed their streak!"
-- **Frequency:** Daily digest
 
 #### 5. Re-engagement
 - **Trigger:** User inactive
-- **Content:** Escalating emotional appeal
 - **Frequency:** Day 1, 3, 7, 14
-
-### Notification Personalization
-- **Learn user preferences** for timing and style
-- **Adapt based on response** rates
-- **Respect quiet hours** (user-configurable)
-- **Allow fine-grained control** in settings
 
 ---
 
 ## Onboarding Flow
 
 ### Phase 1: Immediate Value (Day 1)
-1. **Welcome screen** with beautiful room visualization
+1. **Welcome screen** with beautiful room visualization, to show a goal
 2. **Quick tutorial:** Add first task
 3. **Immediate reward:** Earn first decoration
 4. **Room customization:** Place first item
 5. **Streak started:** Day 1 complete
+6. Ask user if they want all options at once (skip Phase 2) or start slow
+   - "You did great! Come back tomorrow, to learn how to set up repeating task!"
 
 ### Phase 2: Habit Formation (Days 2-7)
 1. **Daily reminders** to return
@@ -504,49 +376,7 @@ The 2.5D room is our unique differentiator. Here's how to maximize its engagemen
    - Premium decorations
    - Advanced analytics
 2. **Introduce scarcity:** Limited-time items
-3. **Encourage social:** Friend connections
 4. **Celebrate 30-day** milestone with special reward
-
-### Phase 4: Long-term Retention (30+ days)
-1. **Seasonal events** and themes
-2. **Community features:** Sharing, competitions
-3. **Personalization:** AI-driven suggestions
-4. **Exclusive rewards:** For long-term users
-
----
-
-## Monetization Strategy
-
-### Free Tier
-- All core features
-- Basic decorations
-- Standard reward rates
-- Ads (optional, can be disabled)
-- Limited energy/stamina
-
-### Premium Subscription (Monthly/Yearly)
-- **Ad-free experience**
-- **Exclusive decorations** (monthly new items)
-- **Double XP** on all tasks
-- **Extra energy/stamina**
-- **Priority access** to new features
-- **Special badges** and room themes
-- **Advanced analytics** and insights
-
-### One-Time Purchases
-- **Decoration packs** (themed sets)
-- **Room expansion** (more space)
-- **Special pets/characters**
-- **Seasonal passes** (battle pass style)
-
-### Rewarded Ads (Optional)
-- **Watch ad for:**
-  - Extra coins
-  - Energy refill
-  - Special decoration
-  - Daily bonus
-- **Frequency limit:** 5 per day
-- **User control:** Can disable entirely
 
 ---
 
@@ -555,117 +385,19 @@ The 2.5D room is our unique differentiator. Here's how to maximize its engagemen
 ### Do's
 ✅ Use positive reinforcement primarily
 ✅ Make features optional where possible
-✅ Provide clear value for time spent
 ✅ Respect user boundaries (quiet hours, etc.)
 ✅ Be transparent about odds and mechanics
 ✅ Allow users to disable addictive features
+✅ Be transparent about psychological techniques, eg. why daily return is important for real life habit forming
 
 ### Don'ts
-❌ Don't use excessive guilt or shame
+❌ Don't use guilt or shame
 ❌ Don't hide important information
-❌ Don't make core functionality pay-to-win
 ❌ Don't spam notifications
-❌ Don't exploit users' vulnerabilities
-❌ Don't make quitting difficult
 
-### User Controls
-- **Notification settings:** Fine-grained control
-- **Feature toggles:** Disable specific mechanics
-- **Time limits:** Set app usage limits
-- **Data export:** Take your data with you
-- **Account deletion:** Easy and complete
 
 ---
 
-## Technical Implementation Notes
-
-### Android-Specific Features
-- **Widgets:** Task list and streak counter on home screen
-- **Live Activities:** Real-time streak countdown (Android 12+)
-- **App Shortcuts:** Quick access to common actions
-- **Notifications:** Rich notifications with images and actions
-- **Background sync:** Keep data up to date
-
-### Performance Considerations
-- **Room rendering:** Optimize for smooth 60fps
-- **Animation system:** Use Lottie for vector animations
-- **Data sync:** Efficient cloud sync for multi-device
-- **Offline support:** Full functionality without internet
-- **Battery optimization:** Minimal background usage
-
-### Analytics
-- **Firebase Analytics:** Track engagement metrics
-- **Crashlytics:** Monitor stability
-- **A/B Testing:** Experiment with features
-- **Custom events:** Track room interactions, task patterns
-
----
-
-## Roadmap
-
-### Version 1.0 (MVP)
-- Core task management
-- Basic room with simple decorations
-- Streak system
-- XP and leveling
-- Daily rewards
-- Basic notifications
-
-### Version 1.1
-- Repetitive tasks
-- Room customization
-- Achievements
-- Limited-time events
-- Social sharing
-
-### Version 1.2
-- Multiple rooms
-- Pet system
-- Leaderboards
-- Advanced analytics
-- Premium features
-
-### Version 1.3
-- AI assistant
-- Advanced personalization
-- Community features
-- Seasonal content
-- Full customization
-
-### Version 2.0
-- Multi-platform sync
-- AR room viewing
-- Voice interface
-- Advanced gamification
-- Full social features
-
----
-
-## Success Metrics
-
-### Engagement
-- **DAU/MAU ratio:** Target >50%
-- **Session length:** Target 5-10 minutes
-- **Tasks per session:** Target 3-5
-- **Streak retention:** Target 70% day-2, 40% day-7
-
-### Retention
-- **D1 retention:** Target 60%
-- **D7 retention:** Target 40%
-- **D30 retention:** Target 20%
-- **Churn rate:** Target <5% daily
-
-### Monetization
-- **Premium conversion:** Target 5-10%
-- **ARPU (Average Revenue Per User):** Target $0.50-1.00/month
-- **Ad revenue:** If applicable, target $0.10-0.30/DAU
-
-### Satisfaction
-- **App Store rating:** Target 4.5+
-- **NPS (Net Promoter Score):** Target 50+
-- **Support requests:** Target <1% of users
-
----
 
 ## Conclusion
 
@@ -673,16 +405,10 @@ This document provides a comprehensive roadmap for implementing engagement-maxim
 
 **Core Philosophy:** Make productivity enjoyable, not obligatory. The room visualization serves as both a reward and a motivation - users should look forward to returning to their beautiful, evolving space.
 
-**Next Steps:**
-1. Prioritize features based on development effort and impact
-2. Build MVP with core loop (tasks → rewards → room customization → streaks)
-3. Test engagement metrics with early users
-4. Iterate based on feedback and data
-5. Gradually add more sophisticated features
 
 ---
 
 *Document Status: Draft*
 *Last Updated: [Date]*
-*Author: Vibe Code Agent*
+*Author: Vibe Code Agent, refined by Human*
 *Based on: [Addiction Techniques Document](how-apps-engineer-addiction-techniques-science-books-&-the-duolingo-case.md)*
