@@ -300,40 +300,10 @@ Our app will implement Nir Eyal's Hook Model cycle:
 ### ⚙️ H. Friction & Ease Engineering
 
 #### 47. Radical Friction Reduction
-- **Implementation:** One-tap actions
 - **Mechanics:**
-  - Swipe to complete task
-  - Double-tap to quick-add task
-  - Voice input for task creation
-  - Smart defaults for repetitive tasks
+  - No complicated clicking to complete actions
+  - Automation of actions
 - **Psychology:** Make actions effortless
-
-#### 48. Zero-Commitment Entry
-- **Implementation:** Instant value
-- **Mechanics:**
-  - No login required for first 5 tasks
-  - Immediate room customization options
-  - "Try it now" with guest mode
-- **Psychology:** Lower barrier to entry
-
-#### 49. Default Settings
-- **Implementation:** Optimal defaults
-- **Mechanics:**
-  - Notifications: ON (but intelligent)
-  - Daily reminders: ON
-  - Smart sort: ON
-  - Sound effects: ON
-- **Psychology:** Users stick with defaults
-
-#### 50. Dark Patterns (Use Ethically)
-- **Implementation:** Gentle nudges only
-- **Acceptable:**
-  - Confirmation dialogs for important actions
-  - "Are you sure you want to quit your streak?"
-- **Avoid:**
-  - Hidden unsubscribe
-  - Confirm-shaming
-  - Roach motel patterns
 
 ---
 
