@@ -279,41 +279,20 @@ Our app will implement Nir Eyal's Hook Model cycle:
   - **Perfectionist:** 100% task completion rate for a week
   - **Collector:** Own X decorations
   - **Designer:** Customize room X times
-- **Visual:** Badge display case in room
-
-#### 43. Progress Bars
-- **Implementation:** Visual progress everywhere
-- **Mechanics:**
-  - XP bar for leveling
-  - Task completion progress for the day
-  - Room upgrade progress
-  - Achievement progress
-- **Psychology:** Goal gradient effect
-
-#### 44. Difficulty Tuning & Flow
-- **Implementation:** Adaptive task suggestions
-- **Mechanics:**
-  - App tracks user's task completion patterns
-  - Suggests tasks matched to user's current "flow state"
-  - "This task is perfect for your current focus level!"
-- **Psychology:** Maintains optimal challenge/reward balance
 
 #### 45. Avatar & Pet System
 - **Implementation:** Room companion
 - **Mechanics:**
   - Adopt a pet that lives in your room
-  - Pet needs "care" (feed, play) by completing tasks
+  - Pet needs "care" (feed, play) by completing tasks/spending coins from tasks. Eg "go for a walk" requires you to finish a task. "Feed" needs coins.
   - Pet grows and evolves with user's streak
-  - Different pets for different achievement levels
 - **Psychology:** Moral obligation to care for pet
 
 #### 46. Identity Investment
 - **Implementation:** Room as self-expression
 - **Mechanics:**
   - Room themes (modern, fantasy, nature, etc.)
-  - Custom room name
-  - Profile picture displayed in room
-  - "Room Tour" feature to show friends
+  - "Room Tour" feature to show friends. High resolution picture/video of room.
 - **Psychology:** Room becomes part of user's identity
 
 ---
