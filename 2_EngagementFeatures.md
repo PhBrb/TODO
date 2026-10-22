@@ -11,6 +11,17 @@ This document translates proven engagement techniques from the [addiction techni
 **Core Value Proposition:** Turn productivity into an enjoyable, visually rewarding experience that users return to daily.
 
 
+## Core techniques
+- Rewards (currency, satisfaction)
+- Randomization of rewards and positive events
+- Habit building through repetition
+- Put rewards in reach
+- Property (owning currency, items)
+- Cliffhangers
+- Attachement to the app (cute pets that can be cared for, customization)
+- Enjoyable environment (2.5D visualization, nearly no negative emotions)
+
+
 ## Feature Ideas by Category
 
 ---
@@ -32,7 +43,7 @@ This document translates proven engagement techniques from the [addiction techni
   - Chest opens after 12 hours (promotes twice a day usage)
   - Creates anticipation and reason to return later
 - **Visual:** Animated chest in the room that grows more ornate when closer to opening
-- **Psychology:** Randomness
+- **Psychology:** Randomness, habit building
 
 #### 3. Near-Miss Design
 - **Implementation:** "Almost perfect" feedback for tasks
@@ -211,6 +222,7 @@ This document translates proven engagement techniques from the [addiction techni
   - Send decorations to friends
   - Receive gifts that must be "unwrapped" (opens after completing task)
   - "Gift back" encouragement
+- **Implementation:** Difficult without a server but maybe possible with codes and hash verification
 - **Psychology:** Obligation to reciprocate/complete task to open gift
 
 #### 35. Parasocial Presence
