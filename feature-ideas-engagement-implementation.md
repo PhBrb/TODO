@@ -240,55 +240,29 @@ Our app will implement Nir Eyal's Hook Model cycle:
 #### 36. Ephemeral Content
 - **Implementation:** Limited-time decorations
 - **Mechanics:**
-  - Seasonal items (Halloween, Christmas, etc.)
-  - "Flash sale" decorations (48 hours only)
-  - Rotating shop inventory (changes weekly)
+  - Seasonal items (Halloween, Christmas, etc.), disappear after season as a currency sink
+  - Partially rotating shop inventory (changes weekly)
 - **Psychology:** Urgency to acquire before gone
 
-#### 37. Daily Login Rewards
-- **Implementation:** Login streak bonuses
+#### 37. Daily Task Rewards
+- **Implementation:** First task of the day
 - **Mechanics:**
   - Day 1: 10 coins
-  - Day 3: 25 coins + common decoration
-  - Day 7: 100 coins + rare decoration
-  - Day 30: Epic decoration
+  - Day 3: 25 coins + chance for gem
+  - Day 7: 30 coins + chance for gem
 - **Visual:** Calendar in room showing login streak
 
 #### 38. Timed Events
-- **Implementation:** Special challenge windows
+- **Implementation:** Allow user to set prefered times for tasks
 - **Mechanics:**
-  - "Power Hour": 2x XP for 1 hour daily (random time)
-  - "Weekend Warrior": Special tasks only available weekends
-  - "Happy Hour": 3x rewards for tasks completed 7-9 PM
-- **Psychology:** Reason to return at specific times
+  - Give small reward bonus if finished during this time
 
 #### 39. Countdown Timers
 - **Implementation:** Visual countdowns
 - **Mechanics:**
-  - Daily reset countdown
   - Event end countdown
   - Sale end countdown
   - Construction completion countdown
-- **Visual:** Integrated into room UI (clocks, hourglasses)
-
-#### 40. Artificial Scarcity
-- **Implementation:** Limited quantities
-- **Mechanics:**
-  - "Only 5 available!" for rare decorations
-  - "Selling fast!" messages
-  - Personal limit: "You can buy 1 per day"
-- **Psychology:** Perceived scarcity increases value
-
-#### 41. Daily Quests
-- **Implementation:** Resetting objectives
-- **Mechanics:**
-  - 3 new quests daily:
-    - "Complete 5 tasks"
-    - "Earn 100 XP"
-    - "Complete a repetitive task 3 times"
-  - Rewards: coins, gems, or decorations
-  - Reset at midnight
-- **Psychology:** Fresh goals every day
 
 ---
 
