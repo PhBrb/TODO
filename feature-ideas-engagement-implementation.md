@@ -164,29 +164,17 @@ Our app will implement Nir Eyal's Hook Model cycle:
 #### 21. Habit-Window Timing
 - **Implementation:** Smart notification scheduling
 - **Mechanics:**
-  - App learns user's typical usage patterns
-  - Sends reminders during user's personal "habit window"
-  - "Your focus time is usually 10-11 AM - complete a task now!"
-- **Technical:** Use Android's WorkManager for intelligent scheduling
+  - Sends reminders when tasks are soon due, but has to avoid pestering
+  - Encouraging: "You're doing great! 3 tasks left!"
+  - Urgent: "Your streak is about to expire!"
+  - Curiosity: "Something new in your room..."
 
-#### 22. Multi-Armed Bandit Notifications
-- **Implementation:** A/B test notification variants
-- **Mechanics:**
-  - Test different notification styles:
-    - Encouraging: "You're doing great! 3 tasks left!"
-    - Urgent: "Your streak is about to expire!"
-    - Guilt: "Your plants are getting sad..." (use sparingly)
-    - Curiosity: "Something new in your room..."
-  - Track which performs best for each user
-  - Adapt over time
-- **Psychology:** Personalized motivation
-
-#### 23. Guilt & Passive Aggression (Careful Use)
-- **Implementation:** Mascot character notifications
+#### ...
+- **Implementation:** Mascot character notifications / Reengagement ladder
 - **Mechanics:**
   - Room has a pet/character that reacts to user behavior
-  - If tasks missed: character looks sad, sends gentle reminder
-  - If long absence: "I miss you! The dust is piling up..."
+  - "I hope you are doing alright. If you have the energy, I have a small and easy task for you." with 2x reward
+  - If long absence: "I miss you! How are you doing?" The app has to care about the wellbeing of the user
   - **Important:** Keep it light and cute, not shaming
 - **Psychology:** Emotional connection drives return
 
@@ -201,36 +189,21 @@ Our app will implement Nir Eyal's Hook Model cycle:
 #### 25. Red Badges & Unread Counts
 - **Implementation:** Visual indicators
 - **Mechanics:**
-  - Red badge on app icon for new rewards
-  - Unread count for notifications
-  - "New items in shop!" indicator
-  - "Daily reward available!" badge
+  - Red badge on app icon for rare positive events
 - **Psychology:** Creates curiosity and urgency
 
-#### 26. FOMO Notifications
+#### 26. Boosts
 - **Implementation:** Time-limited opportunities
 - **Mechanics:**
-  - "Special decoration available for 24 hours only!"
-  - "Double XP weekend starts in 3 hours!"
-  - "Your friend just unlocked a rare item!"
-- **Psychology:** Fear of missing out
+  - User can use gems to buy XP boosts eg for the weekend, to motivate for a productive weekend.
 
 #### 27. Curiosity-Gap Messages
 - **Implementation:** Partial information notifications
 - **Mechanics:**
   - "You unlocked something special..."
   - "Your room has a surprise waiting!"
-  - "Check what you earned overnight!"
+  - "Check what you earned overnight!" -> Maybe user can buy a plant as a seed, without knowing what it will grow into?
 - **Psychology:** Need to open app to satisfy curiosity
-
-#### 28. Re-Engagement Ladders
-- **Implementation:** Escalating reminders for lapsed users
-- **Mechanics:**
-  - Day 1: "We miss you! Complete 1 task for a bonus!"
-  - Day 3: "Your plants are wilting... Return to save them!"
-  - Day 7: "Your room is getting dusty. Here's 50 bonus coins!"
-  - Day 14: "Last chance to save your streak history!"
-- **Psychology:** Gradual escalation of emotional appeal
 
 ---
 
