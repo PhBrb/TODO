@@ -146,27 +146,15 @@ Our app will implement Nir Eyal's Hook Model cycle:
 #### 18. Task Feed with Smart Ordering
 - **Implementation:** Intelligent task list ordering
 - **Mechanics:**
-  - "Smart Sort" mode: AI suggests most urgent/important tasks first
-  - "Quick Win" mode: Shows easiest tasks first for momentum
-  - "High Value" mode: Shows highest-reward tasks first
-  - Manual override always available
-- **Psychology:** Reduces decision fatigue, increases completion
-
-#### 19. Pull-to-Refresh Alternative
-- **Implementation:** "Shake to refresh" for task rewards
-- **Mechanics:**
-  - After completing tasks, user can shake phone for bonus
-  - Limited to 3 shakes per day
-  - Fun animation: room items wobble, then settle with bonus
-- **Psychology:** Physical interaction increases engagement
+  - "Smart Sort" mode: show a mix of easy and more difficult tasks. Prioritize tasks that are due soon
+  - Manual override by making a task sticky
+- **Psychology:** Reduces decision fatigue
 
 #### 20. Autoplay for Tasks
-- **Implementation:** "Chain Mode" for repetitive tasks
+- **Implementation:** "Chain Mode" for tasks
 - **Mechanics:**
-  - Enable "Chain Mode" for tasks with same tag
+  - Enable "Chain Mode" for tasks with same tag or by manual selection for repeating tasks
   - Completing one automatically loads next similar task
-  - Can be disabled at any time
-  - Bonus XP for completing chain without breaking
 - **Psychology:** Removes friction between tasks
 
 ---
