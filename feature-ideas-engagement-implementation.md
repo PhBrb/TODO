@@ -314,33 +314,8 @@ Our app will implement Nir Eyal's Hook Model cycle:
 - **Mechanics:**
   - "Feeling overwhelmed? Break tasks down!"
   - "Bored? Complete a quick task for a reward!"
-  - "Stressed? Organize your room for clarity!"
+  - ...
 - **Psychology:** App becomes coping mechanism
-
-#### 52. Mascot Personality
-- **Implementation:** Character with personality
-- **Mechanics:**
-  - Character has name, backstory
-  - Different moods based on user behavior
-  - Can be customized (outfits, accessories)
-  - Celebrates milestones with user
-- **Psychology:** Friendship with app
-
-#### 53. AI Companion with Memory
-- **Implementation:** Smart assistant
-- **Mechanics:**
-  - Remembers user's task patterns
-  - "You usually do laundry on Sundays - want to add it?"
-  - "Last week you earned 500 XP - can you beat that?"
-- **Psychology:** Personalized relationship
-
-#### 54. Mood Repair Loops
-- **Implementation:** Quick wins for bad moods
-- **Mechanics:**
-  - "Quick Mood Booster" tasks (30 seconds)
-  - Instant rewards for small actions
-  - Room has "happy place" area that cheers up when tasks done
-- **Psychology:** App as mood regulator
 
 ---
 
