@@ -10,20 +10,6 @@ This document translates proven engagement techniques from the [addiction techni
 
 **Core Value Proposition:** Turn productivity into an enjoyable, visually rewarding experience that users return to daily.
 
----
-
-## Implementation Framework
-
-### The Hook Model Applied
-
-Our app will implement Nir Eyal's Hook Model cycle:
-
-1. **Trigger** → User feels bored, overwhelmed, or sees a notification
-2. **Action** → Opens app, completes a task, or checks their room
-3. **Variable Reward** → Receives XP, unlocks an item, or discovers a surprise
-4. **Investment** → Customizes room, builds streak, or plans future tasks
-
----
 
 ## Feature Ideas by Category
 
@@ -43,7 +29,7 @@ Our app will implement Nir Eyal's Hook Model cycle:
 #### 2. Daily Chest / Mystery Box
 - **Implementation:** Users earn a "Daily Chest" after completing their first task of the day
 - **Mechanics:**
-  - Chest opens after 12 hours
+  - Chest opens after 12 hours (promotes twice a day usage)
   - Creates anticipation and reason to return later
 - **Visual:** Animated chest in the room that grows more ornate when closer to opening
 - **Psychology:** Randomness
@@ -396,12 +382,50 @@ Ask user how many notifications they would want per day. Suggest to reduce if us
 ❌ Don't spam notifications
 
 
+
+---
+
+## Rejected  Ideas
+### Paid features
+- Rejection reason: The app will be completely free
+
+### Demotion
+- Feature: Room degrades significantly if neglected, Character looks sad
+- Rejection reason: The app is for users that struggle with achieving their goals. Hard consequences can leave the user feel very unhappy with their life. Not completing tasks already has real life consequences and demotion techniques should be very limited in the app and should be easy to recover from.
+
+### Artifical Friction
+- Feature: Tasks cost energy/stamina, you get 1 energy/stamin per hour.
+- Rejection reason: Completing a task should be as easy as possible, as its already difficult to complete the real life task. Making it cost something is completely wrong.
+
+### User tracking
+- Feature: track habits of the user to eg. optimize notifications
+- Rejection reason: Too complicated and not worth it.
+
+### FOMO notifications
+- Feature: "Special decoration available for 24 hours only!", ...
+- Rejection reason: Too trashy, the app should feel like a positive place.
+
+### Social features
+- Feature: anything that connects users
+- Rejection reason: Too complicated. There will be no server for data exchange, the app is completely local. 
+
+### Artifical scarcity
+- Feature: Item x can only be owned 5 times
+- Rejection reason: One problem of the app will be inflation. Making items scarce does not help with that. Currency sinks are needed.
+
+### Login
+- Rejection reason: The app is completely local. There will be no login, user profile or data saved on a server.
+
+### AI integration
+- Rejection reason: too complicated
+
+
 ---
 
 
 ## Conclusion
 
-This document provides a comprehensive roadmap for implementing engagement-maximizing features in our TODO app. The key is to balance powerful psychological techniques with ethical considerations, ensuring that users feel motivated and rewarded without feeling manipulated.
+This document provides a brainstormed list of engagement-maximizing features which are candidates for our TODO app. The key is to create a happy place that the user likes and comes back to although it is a list of tasks that cost real life energy to complete. Beyond this the app has to motivate the user to complete tasks through the use of psychological techniques.
 
 **Core Philosophy:** Make productivity enjoyable, not obligatory. The room visualization serves as both a reward and a motivation - users should look forward to returning to their beautiful, evolving space.
 
