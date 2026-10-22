@@ -102,33 +102,23 @@ Our app will implement Nir Eyal's Hook Model cycle:
 - **Implementation:** Daily task completion streak
 - **Mechanics:**
   - Visual streak counter in room (e.g., calendar on wall)
-  - Streak length displayed prominently
-  - Streak milestones at 7, 30, 90, 365 days
-  - Special room decorations unlock at milestones
-- **Psychology:** Fear of losing streak drives daily engagement
+  - Streak length for repeating tasks, counted per task
+- **Psychology:** Fear of losing streak drives daily engagement, habit building in real life
 
 #### 10. Streak Freeze / Insurance
-- **Implementation:** Paid feature to protect streak
+- **Implementation:** Paid feature to protect streak (bought with gems)
 - **Mechanics:**
-  - Free: 1 "freeze" per month (earned at 30-day streak)
-  - Paid: Purchase additional freezes with gems
-  - Freeze activates automatically if user misses a day
-- **Monetization:** Premium feature, but give one free to hook users
-
-#### 11. Endowed Progress
-- **Implementation:** Onboarding with pre-filled progress
-- **Mechanics:**
-  - New users start with 3 tasks already "completed"
-  - Room has 2-3 basic decorations already placed
-  - "You're 20% to your first level!" message
-- **Psychology:** Goal gradient effect - users accelerate toward completion
+  - 1 freeze for 7 day rewards
+  - Purchase additional freezes with gems
+  - Option to automaticly use freeze if streak was lost
+  - 1 gem per streak, 10 gems to freeze all, 30 to freeze for a user specified time (eg. when the user is on vacation)
 
 #### 12. Zeigarnik Effect / Cliffhangers
 - **Implementation:** Incomplete states everywhere:
   - Room upgrades "under construction" (visual scaffolding)
   - Tasks marked "in progress" with visible progress
-  - "Coming soon" decorations in shop (teaser images)
-  - Partial room themes (e.g., "3/5 garden items collected")
+  - "Coming soon" decorations in shop (teaser images), unlocks with higher level
+  - Collections (eg. "3/5 garden items collected")
 - **Psychology:** Unfinished business creates mental itch
 
 #### 13. Investment & Stored Value
@@ -138,43 +128,16 @@ Our app will implement Nir Eyal's Hook Model cycle:
   - Room layout saved and evolved over time
   - "Room Value" metric showing total investment
   - Achievements for room customization level
+  - Fear of loss: eg. plants can reduce in size if not watered regularly (needs coins), but never disappear completely
 - **Psychology:** More customization = higher cost to leave
 
 #### 14. Sunk-Cost Framing
 - **Implementation:** Remind users of their investment
 - **Mechanics:**
-  - "You've spent 47 hours organizing your room!"
   - "You've completed 847 tasks!"
   - "Your room is worth 12,450 coins!"
-  - Year-in-review style recaps
+  - week-in-review style recaps, showing tasks and room evolution
 - **Psychology:** Quitting feels like wasting past effort
-
-#### 15. Demotion Zones
-- **Implementation:** Room "health" system
-- **Mechanics:**
-  - Room has a "cleanliness" or "happiness" meter
-  - Meter degrades if tasks are missed
-  - At low health, decorations start to visually deteriorate
-  - "Danger zone" warning when health drops below 30%
-- **Psychology:** Fear of losing visual quality
-
-#### 16. Artificial Friction with Paid Relief
-- **Implementation:** "Energy" system for repetitive tasks
-- **Mechanics:**
-  - Free users: 5 "focus energy" per day, regenerates 1 per hour
-  - Each repetitive task costs 1 energy
-  - Can purchase energy refills with gems
-  - OR: Watch ad for 1 energy (non-premium users)
-- **Note:** Use carefully - this is controversial but effective
-
-#### 17. Energy/Lives System (Alternative)
-- **Implementation:** Task "stamina" for power users
-- **Mechanics:**
-  - Users can complete unlimited regular tasks
-  - "Power tasks" (high-reward) cost stamina
-  - Stamina: 3 default, +1 per 4 hours, max 10
-  - Encourages strategic task planning
-- **Psychology:** Creates natural breaks, increases anticipation
 
 ---
 
