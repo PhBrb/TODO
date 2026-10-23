@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.3.0";
+  const VERSION = "0.4.0";
 
   const COIN_REWARD = { too_easy: 0, easy: 10, medium: 25, hard: 50 };
   const DAILY_GOALS = [5, 10, 15, 25];
@@ -157,28 +157,26 @@
     const lastGoal = DAILY_GOALS[DAILY_GOALS.length - 1];
     const reached = reachedGoalCount(state.dailyCompleted);
     const nextGoal = DAILY_GOALS[reached] || lastGoal;
+    const prevGoal = reached > 0 ? DAILY_GOALS[reached - 1] : 0;
     const label =
       reached >= DAILY_GOALS.length
         ? `${state.dailyCompleted} ✅ all goals done`
         : `${state.dailyCompleted}/${nextGoal}`;
     dailyProgressEl.textContent = label;
 
-    const pct = Math.max(
-      0,
-      Math.min(100, (state.dailyCompleted / lastGoal) * 100)
-    );
+    const pct =
+      reached >= DAILY_GOALS.length
+        ? 100
+        : Math.max(
+            0,
+            Math.min(100, ((state.dailyCompleted - prevGoal) / (nextGoal - prevGoal)) * 100)
+          );
 
     dailyBar.innerHTML = "";
     const fill = document.createElement("div");
     fill.className = "daily-bar-fill";
     fill.style.width = pct + "%";
     dailyBar.appendChild(fill);
-    for (const goal of DAILY_GOALS.slice(0, -1)) {
-      const seg = document.createElement("div");
-      seg.className = "daily-bar-segment";
-      seg.style.left = (goal / lastGoal) * 100 + "%";
-      dailyBar.appendChild(seg);
-    }
   }
 
   versionEl.textContent = "v" + VERSION;

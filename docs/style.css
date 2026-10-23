@@ -65,15 +65,6 @@ header h1 {
   transition: width 0.4s ease;
 }
 
-.daily-bar-segment {
-  position: absolute;
-  top: -2px;
-  height: 12px;
-  width: 2px;
-  background: var(--bg);
-  border: 1px solid var(--accent-soft);
-}
-
 .version {
   font-size: 0.7rem;
   color: var(--muted);
