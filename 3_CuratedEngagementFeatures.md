@@ -9,7 +9,7 @@ Curated from 2_EngagemetFeatures.md
   - can not be spend
   - unlocks new tiles and items in the shop (which are teased before)
 - ~~F2: Coins~~
-  - earned from completing task
+  - ~~earned from completing task~~
   - spent on new items and interaction with items
 - F3: Gems
   - randomly earned from completing tasks, can be bought with coins (but expensive)
