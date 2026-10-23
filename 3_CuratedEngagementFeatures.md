@@ -25,6 +25,7 @@ Curated from 2_EngagemetFeatures.md
 - User can select a deadline in hours or as a date
 - Option for sub-tasks to break down larger tasks (but not further nested)
 - Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.
+- Task can be chained, to promote real life habit building. If tasks in a streak are solved right after another, give x1.2 bonus per task
 - Option for repeating task: user can select when a task returns
   - Daily, weekly, monthly
   - Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition
