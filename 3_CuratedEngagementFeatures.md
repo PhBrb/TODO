@@ -8,7 +8,7 @@ Curated from 2_EngagemetFeatures.md
   - earned from completing task
   - can not be spend
   - unlocks new tiles and items in the shop (which are teased before)
-- F2: Coins
+- ~~F2: Coins~~
   - earned from completing task
   - spent on new items and interaction with items
 - F3: Gems
@@ -20,21 +20,21 @@ Curated from 2_EngagemetFeatures.md
   - opens after 12h
 
 #### Task 
-- F5: Can be created by user
-- F6: User can select difficulty too easy, easy, medium, hard
+- ~~F5: Can be created by user~~
+- ~~F6: User can select difficulty too easy, easy, medium, hard~~
 - F7: User can select a deadline in hours or as a date
 - F8: Option for sub-tasks to break down larger tasks (but not further nested)
 - F9: Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.
 - F10: Task can be chained, to promote real life habit building. If tasks in a streak are solved right after another, give x1.2 bonus per task
 - F11: Option for autoplay tasks, that enable a task after another task has been done. This is a convenience, eg. after "wash clothes" the user could set up the autoplay task "hang clothes".
 - F12: Option to set preferred times for task finish. Give small bonus if task was finished during this time.
-- F13: Option for repeating task: user can select when a task returns
+- ~~F13: Option for repeating task: user can select when a task returns~~
   - Daily, weekly, monthly
   - F14: Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition
   - F15: "Certificate of Awesomeness" for completing streak milestones, that can be placed in the room. Longer streaks update the one certificate belonging to the task.
     - More fancy visuals for longer streaks
     - If a streak is lost, the visuals become more bland, but you never lose it completely
-- F16: Tasks give a coin reward when completed. "Too easy" gives no reward, higher difficulty -> higher reward.
+- ~~F16: Tasks give a coin reward when completed. "Too easy" gives no reward, higher difficulty -> higher reward.~~
   - F17: Random multiplier 1x-1.3x
   - F18: Streak bonus: after day 3: 1.1x for every additional day until day 12 (1.9x)
   - F19: Random additional gems or item reward on medium and hard.
@@ -42,12 +42,12 @@ Curated from 2_EngagemetFeatures.md
   - F21: User has option to rate difficulty after completion
   - F22: Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
 - F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion
-- F24: Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon. Manual override with sticky pin.
+- ~~F24: Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon. Manual override with sticky pin.~~
 
 
 #### Milestones/Quests
-- F25: Daily task completions: give rewards after 5, 10, 15, 25 completed tasks. Indicate progress prominently
-  - 15 coins per reached daily goal
+- ~~F25: Daily task completions: give rewards after 5, 10, 15, 25 completed tasks. Indicate progress prominently~~
+  - ~~15 coins per reached daily goal~~
 - F26: Weekly task completion: give rewards after 50, 100, 150, 250 completed tasks
 - F27: Limited time boost: for 1h increase task completion rewards. Start randomly (consider asking user for times where they can not complete tasks and don't start it there).
 - F28: Could be implemented as clocks integrated into the room (clocks could be bought?)
