@@ -67,10 +67,17 @@ header h1 {
 
 .daily-bar-segment {
   position: absolute;
-  top: 0;
-  height: 100%;
+  top: -2px;
+  height: 12px;
   width: 2px;
   background: var(--bg);
+  border: 1px solid var(--accent-soft);
+}
+
+.version {
+  font-size: 0.7rem;
+  color: var(--muted);
+  align-self: flex-end;
 }
 
 .daily-goal-check {
