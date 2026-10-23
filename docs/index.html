@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#6c5ce7">
+  <title>TODO — MWE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>TODO</h1>
+    <div class="stats">
+      <span class="coins">🪙 <b id="coin-balance">0</b></span>
+      <span class="version" id="app-version"></span>
+    </div>
+  </header>
+
+  <div class="daily-progress">
+    <p class="daily-progress-label">Today: <b id="daily-progress">0/5</b></p>
+    <div class="daily-bar" id="daily-bar"></div>
+  </div>
+
+  <main>
+    <ul id="task-list"></ul>
+    <p id="empty-hint" class="empty-hint hidden">Nothing to do yet — add a task! 🎉</p>
+
+    <form id="task-form">
+      <input id="task-input" type="text" placeholder="New task..." autocomplete="off" maxlength="80" required>
+      <div class="form-row">
+        <select id="difficulty-select" aria-label="Difficulty">
+          <option value="too_easy">Too easy</option>
+          <option value="easy" selected>Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <select id="repeat-select" aria-label="Repeat">
+          <option value="none" selected>No repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+        <button type="submit" id="add-btn">Add</button>
+      </div>
+    </form>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
