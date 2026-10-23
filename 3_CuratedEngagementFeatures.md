@@ -26,6 +26,8 @@ Curated from 2_EngagemetFeatures.md
 - Option for sub-tasks to break down larger tasks (but not further nested)
 - Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.
 - Task can be chained, to promote real life habit building. If tasks in a streak are solved right after another, give x1.2 bonus per task
+- Option for autoplay tasks, that enable a task after another task has been done. This is a convenience, eg. after "wash clothes" the user could set up the autoplay task "hang clothes".
+- Option to set preferred times for task finish. Give small bonus if task was finished during this time.
 - Option for repeating task: user can select when a task returns
   - Daily, weekly, monthly
   - Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition
@@ -40,6 +42,7 @@ Curated from 2_EngagemetFeatures.md
   - User has option to rate difficulty after completion
   - Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
 - If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion
+- Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon. Manual override with sticky pin.
 
 
 #### Milestones/Quests
@@ -59,7 +62,7 @@ Curated from 2_EngagemetFeatures.md
 - Can be bought in the store for coins or gems
 - Some items take time to completely appear in the room, creating anticipation
 - Stay permanently (after app restart) expect for seasonal items
-  
+- Moving big things costs coins or needs a task to be completed
 
 #### Skills
 - Can be bought for gems
@@ -72,149 +75,57 @@ Curated from 2_EngagemetFeatures.md
   - Notification when multi day freeze is over
 - Option to automaticly freeze a streak if it would have been lost 
 
+#### Notifications
+- Ask user whats the maximum amount of notifications they want per day. Option for flexible limit for important streaks.
+- When tasks are due soon
+- When a streak is in danger (except for daily tasks)
+- When a special event started (but not always, sometimes just set the notification number on the app, be transparent about this, so the user checks the app on their own). Sometimes leave out what has happened to increase curiosity.
+- Encouragements "You are doing great", "Just 3 tasks left for ..."
+- When a delayed event has completed (eg. chest). Sometimes don't mention what has happened in the notification to increase curiosity.
+- Inactivity: Day 1, 3, 7, 14
+- Always have to be positive and welcoming. Completing tasks in real life is already overwhelming
+
+#### Companion
+- Eg. a cat
+- Very cute, can be pet/interacted
+- Can be customized, eg collar
+- Needs some care, can be completed by coins or completing tasks
+  - Eg "go for a walk" requires you to finish a task. "Feed" needs coins.
+- Gives 2x bonus for one task if the user hasn't done much recently
+- Gives supportive messages
+- Can cause cute trouble in the room that needs more care (eg knocking over plant)
+- Can help with things in the room that need care, but struggles with it
+
+#### Boost
+- User can buy reward boost for gems in the shop, to eg. motivate them for a productive weekend
+
+#### Photo mode
+- Photo/video mode, fullscreen and no UI, so that users can share nice pictures/videos of their room
+
+#### Gifts
+- Users can buy (random) gifts in the shop, that they send to friends (sender can select difficulty)
+- On receiver side it gets attached to a task and can only be opened after finishing the task
+- Implementation difficult without a server, could be done with code sharing, hash checking, keeping lists of what has been bought and received.
+
+#### Events
+- Eg neighbours cat could visit
+  - Just as cute as Companion
+  - Brings 1.5x reward bonus for 1h
+  - visits more likely after a task has been completed
+- Seasonal items
+  - disappear after season
+- Partially rotating items in shop? Increases engagement, but is annoying. 
+
+#### First task of the day
+- Streak:
+  - Day 1-2: coins
+  - Day 2: coin
+  - Day 3-6: 2.5x coins + chance for gem
+  - Day 7+: 3x coins + chance for gem
 
 
-
-
-
-
-
-
-
-
----
-
-### 📱 C. Feed & Attention Architecture
-
-#### 18. Task Feed with Smart Ordering
-- **Implementation:** Intelligent task list ordering
-- **Mechanics:**
-  - "Smart Sort" mode: show a mix of easy and more difficult tasks. Prioritize tasks that are due soon
-  - Manual override by making a task sticky
-- **Psychology:** Reduces decision fatigue
-
-#### 20. Autoplay for Tasks
-- **Implementation:** "Chain Mode" for tasks
-- **Mechanics:**
-  - Enable "Chain Mode" for tasks with same tag or by manual selection for repeating tasks
-  - Completing one automatically loads next similar task
-- **Psychology:** Removes friction between tasks
-
----
-
-### 🔔 D. Notifications & Re-Engagement
-
-#### 21. Habit-Window Timing
-- **Implementation:** Smart notification scheduling
-- **Mechanics:**
-  - Sends reminders when tasks are soon due, but has to avoid pestering
-  - Encouraging: "You're doing great! 3 tasks left!"
-  - Urgent: "Your streak is about to expire!"
-  - Curiosity: "Something new in your room..."
-
-#### Reengagement ladder
-- **Implementation:** Mascot character notifications
-- **Mechanics:**
-  - Room has a pet/character that reacts to user behavior
-  - "I hope you are doing alright. If you have the energy, I have a small and easy task for you." with 2x reward
-  - If long absence: "I miss you! How are you doing?" The app has to care about the wellbeing of the user
-  - **Important:** Keep it light and cute, not shaming
-- **Psychology:** Emotional connection drives return
-
-#### 24. Loss-Warning Pushes
-- **Implementation:** Urgent alerts for streak risk
-- **Mechanics:**
-  - "Your 15-day streak expires in 2 hours!"
-  - "Complete 1 task to save your streak!"
-  - Only send when streak is genuinely at risk
-  - Limit to 1 per day to avoid annoyance
-
-#### 25. Red Badges & Unread Counts
-- **Implementation:** Visual indicators
-- **Mechanics:**
-  - Red badge on app icon for rare positive events
-- **Psychology:** Creates curiosity and urgency
-
-#### 26. Boosts
-- **Implementation:** Time-limited opportunities
-- **Mechanics:**
-  - User can use gems to buy XP boosts eg for the weekend, to motivate for a productive weekend.
-
-#### 27. Curiosity-Gap Messages
-- **Implementation:** Partial information notifications
-- **Mechanics:**
-  - "You unlocked something special..."
-  - "Your room has a surprise waiting!"
-  - "Check what you earned overnight!" -> Maybe user can buy a plant as a seed, without knowing what it will grow into?
-- **Psychology:** Need to open app to satisfy curiosity
-
----
-
-### 👥 E. Social Mechanics
-
-#### 29. Photo mode
-- **Implementation:** Reduce UI to make nice screenshots
-- **Mechanics:**
-  - Ability to share new amazing additions to the room
-- **Psychology:** Social validation
-
-#### 32. Reciprocity Pressure
-- **Implementation:** Gift system
-- **Mechanics:**
-  - Send decorations to friends
-  - Receive gifts that must be "unwrapped" (opens after completing task)
-  - "Gift back" encouragement
-- **Implementation:** Difficult without a server but maybe possible with codes and hash verification
-- **Psychology:** Obligation to reciprocate/complete task to open gift
-
-#### 35. Parasocial Presence
-- **Implementation:** Room character/mascot
-- **Mechanics:**
-  - Character lives in the room
-  - Reacts to user actions (happy when tasks completed, sad when missed)
-  - Can be customized (different pets/characters)
-  - Has own "happiness" meter affected by user behavior
-  - Randomness: eg. a cat that sometimes visits and visits more likely if the user is doing well
-- **Psychology:** Emotional attachment to app
-
----
-
-### ⏰ F. Scarcity, Urgency & Appointment Mechanics
-
-#### 36. Ephemeral Content
-- **Implementation:** Limited-time decorations
-- **Mechanics:**
-  - Seasonal items (Halloween, Christmas, etc.), disappear after season as a currency sink
-  - Partially rotating shop inventory (changes weekly)
-- **Psychology:** Urgency to acquire before gone
-
-#### 37. Daily Task Rewards
-- **Implementation:** First task of the day
-- **Mechanics:**
-  - Day 1: 10 coins
-  - Day 3: 25 coins + chance for gem
-  - Day 7: 30 coins + chance for gem
-- **Visual:** Calendar in room showing login streak
-
-#### 38. Timed Events
-- **Implementation:** Allow user to set prefered times for tasks
-- **Mechanics:**
-  - Give small reward bonus if finished during this time
-
-#### 39. Countdown Timers
-- **Implementation:** Visual countdowns
-- **Mechanics:**
-  - Event end countdown
-  - Sale end countdown
-  - Construction completion countdown
-
----
-
-### 🎮 G. Gamification Layer
-
-#### 42. Badges & Achievements
-- **Implementation:** Comprehensive achievement system
-- **Categories:**
+#### Small achievements
+- Eg.:
   - **Task Master:** Complete X tasks
   - **Streak Champion:** Maintain X-day streak
   - **Early Bird:** Complete tasks before noon
@@ -222,171 +133,34 @@ Curated from 2_EngagemetFeatures.md
   - **Weekend Warrior:** Complete tasks on weekends
   - **Perfectionist:** 100% task completion rate for a week
   - **Collector:** Own X decorations
-  - **Designer:** Customize room X times
+  - **Redecorator:** Move items around X times
+- No reward, just shown somewhere
 
-#### 45. Avatar & Pet System
-- **Implementation:** Room companion
-- **Mechanics:**
-  - Adopt a pet that lives in your room
-  - Pet needs "care" (feed, play) by completing tasks/spending coins from tasks. Eg "go for a walk" requires you to finish a task. "Feed" needs coins.
-  - Pet grows and evolves with user's streak
-- **Psychology:** Moral obligation to care for pet
+#### Room
+- Items can be placed in a virtual room to decorate it
+- Has treasure room showing coins, gems, chest
+- Can be redecorated
+- Companion walks around
+- Needs (very little) care
 
-#### 46. Identity Investment
-- **Implementation:** Room as self-expression
-- **Mechanics:**
-  - Room themes (modern, fantasy, nature, etc.)
-  - "Room Tour" feature to show friends. High resolution picture/video of room.
-- **Psychology:** Room becomes part of user's identity
+#### Transparency
+- Psychological mechanics that can be used to improve real life task completion should be taught
+  - Eg. habit building or breaking down big tasks
 
----
+#### Design goals
+- Friction reduction: minimal clicking for actions and automation to avoid unnecessary clicking
 
-### ⚙️ H. Friction & Ease Engineering
 
-#### 47. Radical Friction Reduction
-- **Mechanics:**
-  - No complicated clicking to complete actions
-  - Automation of actions
-- **Psychology:** Make actions effortless
-
----
-
-### 💖 I. Emotional & Parasocial Hooks
-
-#### 51. Internal-Trigger Capture
-- **Implementation:** Attach to emotions
-- **Mechanics:**
-  - "Feeling overwhelmed? Break tasks down!"
-  - "Bored? Complete a quick task for a reward!"
-  - ...
-- **Psychology:** App becomes coping mechanism
-
----
-
-## Notification Strategy
-Ask user how many notifications they would want per day. Suggest to reduce if user ignores them.
-
-### Notification Types
-
-#### 1. Routine Reminders
-- **Frequency:** 1-2 per day max
-- **Timing:** When due, or if user hasnt done anything on that day
-
-#### 2. Streak Warnings
-- **Trigger:** Streak at risk (2-4 hours before reset)
-- **Content:** Urgent but positive
-- **Limit:** 1 per day, but can be more if it is a long streak
-
-#### 3. Reward Notifications
-- **Trigger:** New reward available
-- **Content:** "Your chest is ready!"
-- **Frequency:** As earned
-
-#### 5. Re-engagement
-- **Trigger:** User inactive
-- **Frequency:** Day 1, 3, 7, 14
-
----
-
-## Onboarding Flow
-
-### Phase 1: Immediate Value (Day 1)
-1. **Welcome screen** with beautiful room visualization, to show a goal
-2. **Quick tutorial:** Add first task
-3. **Immediate reward:** Earn first decoration
-4. **Room customization:** Place first item
-5. **Streak started:** Day 1 complete
-6. Ask user if they want all options at once (skip Phase 2) or start slow
-   - "You did great! Come back tomorrow, to learn how to set up repeating task!"
-
-### Phase 2: Habit Formation (Days 2-7)
-1. **Daily reminders** to return
-2. **Introduce new features** gradually:
-   - Day 2: Repetitive tasks
-   - Day 3: Room upgrades
-   - Day 4: Achievements
-   - Day 5: Social features (if enabled)
-   - Day 6: Limited-time event
-   - Day 7: Weekly review
-3. **Celebrate first streak** milestone
-
-### Phase 3: Deep Engagement (Days 8-30)
-1. **Unlock advanced features:**
-   - Multiple rooms
-   - Premium decorations
-   - Advanced analytics
-2. **Introduce scarcity:** Limited-time items
-4. **Celebrate 30-day** milestone with special reward
-
----
-
-## Ethical Considerations
-
-### Do's
-✅ Use positive reinforcement primarily
-✅ Make features optional where possible
-✅ Respect user boundaries (quiet hours, etc.)
-✅ Be transparent about odds and mechanics
-✅ Allow users to disable addictive features
-✅ Be transparent about psychological techniques, eg. why daily return is important for real life habit forming
-
-### Don'ts
-❌ Don't use guilt or shame
-❌ Don't hide important information
-❌ Don't spam notifications
+#### Onboarding
+- Short tutorial
+- Ask if all features should be shown right away or if tutorial should show one per day to avoid overwhelming
 
 
 
----
 
-## Rejected  Ideas
-### Paid features
-- Rejection reason: The app will be completely free
-
-### Demotion
-- Feature: Room degrades significantly if neglected, Character looks sad
-- Rejection reason: The app is for users that struggle with achieving their goals. Hard consequences can leave the user feel very unhappy with their life. Not completing tasks already has real life consequences and demotion techniques should be very limited in the app and should be easy to recover from.
-
-### Artifical Friction
-- Feature: Tasks cost energy/stamina, you get 1 energy/stamin per hour.
-- Rejection reason: Completing a task should be as easy as possible, as its already difficult to complete the real life task. Making it cost something is completely wrong.
-
-### User tracking
-- Feature: track habits of the user to eg. optimize notifications
-- Rejection reason: Too complicated and not worth it.
-
-### FOMO notifications
-- Feature: "Special decoration available for 24 hours only!", ...
-- Rejection reason: Too trashy, the app should feel like a positive place.
-
-### Social features
-- Feature: anything that connects users
-- Rejection reason: Too complicated. There will be no server for data exchange, the app is completely local. 
-
-### Artifical scarcity
-- Feature: Item x can only be owned 5 times
-- Rejection reason: One problem of the app will be inflation. Making items scarce does not help with that. Currency sinks are needed.
-
-### Login
-- Rejection reason: The app is completely local. There will be no login, user profile or data saved on a server.
-
-### AI integration
-- Rejection reason: too complicated
-
-
----
-
-
-## Conclusion
-
-This document provides a brainstormed list of engagement-maximizing features which are candidates for our TODO app. The key is to create a happy place that the user likes and comes back to although it is a list of tasks that cost real life energy to complete. Beyond this the app has to motivate the user to complete tasks through the use of psychological techniques.
-
-**Core Philosophy:** Make productivity enjoyable, not obligatory. The room visualization serves as both a reward and a motivation - users should look forward to returning to their beautiful, evolving space.
 
 
 ---
 
 *Document Status: Draft*
-*Last Updated: [Date]*
-*Author: Vibe Code Agent, refined by Human*
-*Based on: [Addiction Techniques Document](how-apps-engineer-addiction-techniques-science-books-&-the-duolingo-case.md)*
+*Author: Human*
