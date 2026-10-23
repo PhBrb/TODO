@@ -2,7 +2,8 @@
   "use strict";
 
   const COIN_REWARD = { too_easy: 0, easy: 10, medium: 25, hard: 50 };
-  const DAILY_GOAL = 5;
+  const DAILY_GOALS = [5, 10, 15, 25];
+  const GOAL_REWARD = 15;
 
   const state = {
     coins: 0,
@@ -15,7 +16,7 @@
   const emptyHint = document.getElementById("empty-hint");
   const coinBalanceEl = document.getElementById("coin-balance");
   const dailyProgressEl = document.getElementById("daily-progress");
-  const dailyBarFill = document.getElementById("daily-bar-fill");
+  const dailyBar = document.getElementById("daily-bar");
   const form = document.getElementById("task-form");
   const taskInput = document.getElementById("task-input");
   const difficultySelect = document.getElementById("difficulty-select");
@@ -44,13 +45,22 @@
     render();
   }
 
+  function reachedGoalCount(count) {
+    return DAILY_GOALS.filter((g) => g <= count).length;
+  }
+
   function completeTask(task) {
     task.done = true;
     task.completedAt = Date.now();
     const reward = COIN_REWARD[task.difficulty];
     state.coins += reward;
+    const goalsBefore = reachedGoalCount(state.dailyCompleted);
     state.dailyCompleted += 1;
-    if (reward > 0) {
+    const goalsAfter = reachedGoalCount(state.dailyCompleted);
+    if (goalsAfter > goalsBefore) {
+      state.coins += GOAL_REWARD;
+      showToast(`🎉 Daily goal reached! +${GOAL_REWARD} 🪙`);
+    } else if (reward > 0) {
       showToast(`+${reward} 🪙`);
     }
     render();
@@ -60,8 +70,13 @@
     task.done = false;
     task.completedAt = null;
     const reward = COIN_REWARD[task.difficulty];
-    state.coins = Math.max(0, state.coins - reward);
+    const goalsBefore = reachedGoalCount(state.dailyCompleted);
     state.dailyCompleted = Math.max(0, state.dailyCompleted - 1);
+    const goalsAfter = reachedGoalCount(state.dailyCompleted);
+    state.coins = Math.max(0, state.coins - reward);
+    if (goalsAfter < goalsBefore) {
+      state.coins = Math.max(0, state.coins - GOAL_REWARD);
+    }
     render();
   }
 
@@ -135,9 +150,33 @@
 
     emptyHint.classList.toggle("hidden", state.tasks.length > 0);
     coinBalanceEl.textContent = state.coins;
-    dailyProgressEl.textContent = `${Math.min(state.dailyCompleted, DAILY_GOAL)}/${DAILY_GOAL}`;
-    dailyBarFill.style.width =
-      Math.min(100, (state.dailyCompleted / DAILY_GOAL) * 100) + "%";
+
+    const lastGoal = DAILY_GOALS[DAILY_GOALS.length - 1];
+    const reached = reachedGoalCount(state.dailyCompleted);
+    const nextGoal = DAILY_GOALS[reached] || lastGoal;
+    const prevGoal = reached > 0 ? DAILY_GOALS[reached - 1] : 0;
+    const label =
+      reached >= DAILY_GOALS.length
+        ? `${state.dailyCompleted} ✅ all goals done`
+        : `${state.dailyCompleted}/${nextGoal}`;
+    dailyProgressEl.textContent = label;
+
+    const pct = Math.max(
+      0,
+      Math.min(100, ((state.dailyCompleted - prevGoal) / (nextGoal - prevGoal)) * 100)
+    );
+
+    dailyBar.innerHTML = "";
+    const fill = document.createElement("div");
+    fill.className = "daily-bar-fill";
+    fill.style.width = pct + "%";
+    dailyBar.appendChild(fill);
+    for (const goal of DAILY_GOALS.slice(1)) {
+      const seg = document.createElement("div");
+      seg.className = "daily-bar-segment";
+      seg.style.left = (goal / lastGoal) * 100 + "%";
+      dailyBar.appendChild(seg);
+    }
   }
 
   form.addEventListener("submit", (e) => {

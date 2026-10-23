@@ -42,12 +42,19 @@ header h1 {
 .stats { display: flex; gap: 12px; font-size: 0.9rem; }
 .stats b { color: var(--accent); }
 
+.daily-progress { margin-bottom: 16px; }
+
+.daily-progress-label {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .daily-bar {
+  position: relative;
   height: 8px;
   border-radius: 4px;
   background: #e6e2ff;
-  overflow: hidden;
-  margin-bottom: 16px;
 }
 
 .daily-bar-fill {
@@ -56,6 +63,19 @@ header h1 {
   border-radius: 4px;
   background: linear-gradient(90deg, var(--accent-soft), var(--accent));
   transition: width 0.4s ease;
+}
+
+.daily-bar-segment {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: var(--bg);
+}
+
+.daily-goal-check {
+  color: var(--done);
+  font-weight: 700;
 }
 
 #task-list {
