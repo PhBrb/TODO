@@ -30,15 +30,16 @@ Curated from 2_EngagemetFeatures.md
 - F12: Option to set preferred times for task finish. Give small bonus if task was finished during this time.
 - ~~F13: Option for repeating task: user can select when a task returns~~
   - Daily, weekly, monthly
-  - F14: Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition
+  - ~~F14: Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition~~
   - F15: "Certificate of Awesomeness" for completing streak milestones, that can be placed in the room. Longer streaks update the one certificate belonging to the task.
     - More fancy visuals for longer streaks
     - If a streak is lost, the visuals become more bland, but you never lose it completely
 - ~~F16: Tasks give a coin reward when completed. "Too easy" gives no reward, higher difficulty -> higher reward.~~
-  - F17: Random multiplier 1x-1.3x
-  - F18: Streak bonus: after day 3: 1.1x for every additional day until day 12 (1.9x)
+  - ~~F17: Random multiplier 1x-1.3x~~
+  - ~~F18: Streak bonus: after day 3: 1.1x for every additional day until day 12 (1.9x)~~
   - F19: Random additional gems or item reward on medium and hard.
-  - F20: Randomly declare in advance that a task will reward additional gems/item
+  - ~~F20: Randomly declare in advance that a task will reward additional gems/item~~
+  - 15% of new tasks are declared bonus tasks, giving 10 extra coins and 1 gem
   - F21: User has option to rate difficulty after completion
   - F22: Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
 - F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion
