@@ -29,6 +29,7 @@ Curated from 2_EngagemetFeatures.md
 - ~~F7: User can select a deadline in hours or as a date~~
 - ~~F8: Option for sub-tasks to break down larger tasks (but not further nested)~~
   - Parent and sub-tasks give the same reward: each finished sub-task pays out its coin/XP reward immediately; parent auto-completes (with its own reward) when all sub-tasks are done
+  - Unchecking claws back the exact rewarded amounts (coins, gems, XP, goal/weekly bonuses, earned chest); unchecking a sub-task of a completed parent also un-completes and claws back the parent
   - Sub-tasks are editable (title, difficulty)
   - Parent task gets the difficulty of its most difficult sub-task (not editable while sub-tasks exist)
 - F9: Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.

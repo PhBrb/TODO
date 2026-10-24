@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.11.4";
+  const VERSION = "0.12.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -84,6 +84,17 @@
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
+      reward: isRecord(raw.reward)
+        ? {
+            coins: num(raw.reward.coins, 0),
+            gems: num(raw.reward.gems, 0),
+            xp: num(raw.reward.xp, 0),
+            goalReward: num(raw.reward.goalReward, 0),
+            weeklyReward: num(raw.reward.weeklyReward, 0),
+            chestEarned: raw.reward.chestEarned === true,
+            firstTaskDay: num(raw.reward.firstTaskDay, 0),
+          }
+        : null,
       subtasks: Array.isArray(raw.subtasks)
         ? raw.subtasks
             .filter(isRecord)
@@ -92,6 +103,15 @@
               title: str(st.title, "Untitled"),
               difficulty: st.difficulty in COIN_REWARD ? st.difficulty : "easy",
               done: st.done === true,
+              reward: isRecord(st.reward)
+                ? {
+                    coins: num(st.reward.coins, 0),
+                    gems: num(st.reward.gems, 0),
+                    xp: num(st.reward.xp, 0),
+                    goalReward: 0,
+                    weeklyReward: 0,
+                  }
+                : null,
             }))
         : [],
     };
@@ -487,6 +507,12 @@
       if (parent.subtasks.every((st) => st.done) && !parent.done) {
         completeTask(parent);
       }
+    } else {
+      clawBackReward(subtask.reward);
+      subtask.reward = null;
+      if (parent.done) {
+        uncompleteTask(parent);
+      }
     }
     render();
   }
@@ -494,11 +520,13 @@
   function awardSubtask(subtask) {
     const base = COIN_REWARD[subtask.difficulty];
     const mult = randomMultiplier();
-    const coins = Math.round(base * mult);
+    let coins = Math.round(base * mult);
+    if (isBoostActive()) coins = Math.round(coins * BOOST_MULT);
     const xpGain = XP_REWARD[subtask.difficulty] || 0;
     state.coins += coins;
     const xpBefore = levelFromXp(state.xp);
     state.xp += xpGain;
+    subtask.reward = { coins, gems: 0, xp: xpGain, goalReward: 0, weeklyReward: 0 };
     if (levelFromXp(state.xp) > xpBefore) {
       showToast(`🎉 Level up! You are now level ${levelFromXp(state.xp)}`);
     } else if (coins > 0) {
@@ -555,6 +583,7 @@
     state.xp += xpGain;
     const leveledUp = levelFromXp(state.xp) > xpBefore;
 
+    let chestEarned = false;
     if (firstBonus) {
       state.chests.push({
         id: state.nextId++,
@@ -563,6 +592,7 @@
         openedAt: 0,
         contents: null,
       });
+      chestEarned = true;
     }
 
     state.coins += coins;
@@ -575,6 +605,27 @@
     const weekBefore = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
     state.weeklyCompleted += 1;
     const weekAfter = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
+
+    let goalReward = 0;
+    let weeklyReward = 0;
+    if (goalsAfter > goalsBefore) {
+      goalReward = GOAL_REWARD;
+      state.coins += goalReward;
+    }
+    if (weekAfter > weekBefore) {
+      weeklyReward = WEEKLY_GOAL_REWARD;
+      state.coins += weeklyReward;
+    }
+
+    task.reward = {
+      coins,
+      gems,
+      xp: xpGain,
+      goalReward,
+      weeklyReward,
+      chestEarned,
+      firstTaskDay: firstBonus ? firstBonus.streak : 0,
+    };
 
     let msg = "+";
     const parts = [];
@@ -592,14 +643,12 @@
 
     if (leveledUp) {
       showToast(`🎉 Level up! You are now level ${levelFromXp(state.xp)}`);
-    } else if (weekAfter > weekBefore) {
-      state.coins += WEEKLY_GOAL_REWARD;
+    } else if (weeklyReward > 0) {
       showToast(`🏆 Weekly goal reached! +${WEEKLY_GOAL_REWARD} 🪙`);
       promptDifficultyRating(task);
       render();
       return;
-    } else if (goalsAfter > goalsBefore) {
-      state.coins += GOAL_REWARD;
+    } else if (goalReward > 0) {
       showToast(`🎉 Daily goal reached! +${GOAL_REWARD} 🪙`);
     } else {
       showToast(msg);
@@ -612,6 +661,17 @@
     render();
   }
 
+  function clawBackReward(reward) {
+    if (!reward) return;
+    state.coins = Math.max(0, state.coins - reward.coins - reward.goalReward - reward.weeklyReward);
+    state.gems = Math.max(0, state.gems - reward.gems);
+    state.xp = Math.max(0, state.xp - reward.xp);
+    if (reward.chestEarned) {
+      const idx = state.chests.findIndex((c) => !c.opened);
+      if (idx >= 0) state.chests.splice(idx, 1);
+    }
+  }
+
   function uncompleteTask(task) {
     task.done = false;
     const key = task.completedAt ? repeatKey(task.repeat, task.completedAt) : null;
@@ -621,16 +681,14 @@
     }
     task.completedAt = null;
 
-    const base = COIN_REWARD[task.difficulty];
-    const goalsBefore = reachedGoalCount(state.dailyCompleted);
     state.dailyCompleted = Math.max(0, state.dailyCompleted - 1);
-    const goalsAfter = reachedGoalCount(state.dailyCompleted);
-
-    state.coins = Math.max(0, state.coins - base);
-    if (task.bonus) state.coins = Math.max(0, state.coins - BONUS_TASK_COINS);
-    if (goalsAfter < goalsBefore) {
-      state.coins = Math.max(0, state.coins - GOAL_REWARD);
+    state.weeklyCompleted = Math.max(0, state.weeklyCompleted - 1);
+    if (task.reward && task.reward.firstTaskDay > 0) {
+      state.firstTaskStreak = Math.max(0, task.reward.firstTaskDay - 1);
+      state.lastFirstTaskDayKey = null;
     }
+    clawBackReward(task.reward);
+    task.reward = null;
     render();
   }
 
