@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.11.1";
+  const VERSION = "0.11.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -849,6 +849,10 @@
     const dl = document.createElement("input");
     dl.type = "datetime-local";
     dl.value = deadlineInputValue(task);
+    const dlWrap = document.createElement("label");
+    dlWrap.className = "deadline-label edit-deadline";
+    dlWrap.textContent = "📅 Deadline ";
+    dlWrap.appendChild(dl);
 
     const save = document.createElement("button");
     save.type = "button";
@@ -870,7 +874,7 @@
     row.appendChild(input);
     row.appendChild(diff);
     row.appendChild(rep);
-    row.appendChild(dl);
+    row.appendChild(dlWrap);
     row.appendChild(save);
     row.appendChild(cancel);
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
