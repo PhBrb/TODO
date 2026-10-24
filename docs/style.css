@@ -195,6 +195,69 @@ header h1 {
 
 .task-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
+.subtask-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 0 0;
+  font-size: 0.85rem;
+}
+
+.subtask.done .subtask-title { text-decoration: line-through; opacity: 0.55; }
+
+.subtask input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--done);
+  flex-shrink: 0;
+}
+
+.subtask-title { flex: 1; overflow-wrap: break-word; }
+
+.subtask .badge { font-size: 0.6rem; padding: 1px 6px; }
+
+.subtask-delete { font-size: 0.75rem; padding: 2px 4px; }
+
+.subtask-add {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.subtask-add input[type="text"] {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: #fff;
+}
+
+.subtask-add select {
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.75rem;
+  padding: 4px;
+}
+
+.subtask-add button {
+  border: none;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: #fff;
+  font-weight: 700;
+  width: 30px;
+  cursor: pointer;
+}
+
 .task-edit {
   border: none;
   background: none;
