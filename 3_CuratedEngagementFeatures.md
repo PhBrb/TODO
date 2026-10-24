@@ -8,7 +8,7 @@ Curated from 2_EngagemetFeatures.md
   - ~~earned from completing task~~ (1/5/12/25 XP for too easy/easy/medium/hard)
   - ~~can not be spend~~
   - unlocks new tiles and items in the shop (which are teased before)
-  - Levels shown in header, level up requires cumulative XP (100 per level * (level+1)/2)
+  - ~~Levels shown in header, level up requires cumulative XP (100 per level * (level+1)/2)~~
 - ~~F2: Coins~~
   - ~~earned from completing task~~
   - spent on new items and interaction with items
@@ -20,7 +20,7 @@ Curated from 2_EngagemetFeatures.md
   - ~~earned as daily reward for first completed task~~
   - ~~contains random coins, gems, items~~ (20-40 coins, 1-2 gems, 10-20 XP; no items yet)
   - ~~opens after 12h~~
-  - Chests are opened manually by the user; a counter shows ready and locked chests
+  - ~~Chests are opened manually by the user; a counter shows ready and locked chests~~
 
 #### Task 
 - ~~F5: Can be created by user~~
@@ -64,7 +64,7 @@ Curated from 2_EngagemetFeatures.md
   - 25 coins per reached weekly goal
   - MWE test mode: goals divided by 5 (10, 20, 30, 50)
 - ~~F27: Limited time boost: for 1h increase task completion rewards. Start randomly (consider asking user for times where they can not complete tasks and don't start it there).~~
-  - 10% chance per completed task to start a 1h x1.5 coin boost, 2h cooldown, countdown banner shown
+  - ~~10% chance per completed task to start a 1h x1.5 coin boost, 2h cooldown, countdown banner shown~~
 - F28: Could be implemented as clocks integrated into the room (clocks could be bought?)
 - F29: Very satisfying animation on completion
 - Eg. "3/5 lamps collected"
