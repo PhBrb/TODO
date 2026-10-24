@@ -1,10 +1,10 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.7.0";
+  const VERSION = "0.8.0";
 
   const STORAGE_KEY = "todo-mwe-state";
-  const SCHEMA_VERSION = 1;
+  const SCHEMA_VERSION = 2;
 
   const COIN_REWARD = { too_easy: 0, easy: 10, medium: 25, hard: 50 };
   const DAILY_GOALS = [5, 10, 15, 25];
@@ -19,6 +19,12 @@
   const BONUS_TASK_RATE = 0.15;
   const BONUS_TASK_COINS = 10;
   const BONUS_TASK_GEMS = 1;
+  const WEEKLY_GOALS = [50, 100, 150, 250];
+  const WEEKLY_GOAL_REWARD = 25;
+  const FIRST_TASK_COINS_MULT = { day1_2: 1, day3_6: 2.5, day7: 3 };
+  const FIRST_TASK_GEM_CHANCE = { day1_2: 0, day3_6: 0.5, day7: 0.5 };
+  const RATE_PROMPT_TIMEOUT = 10000;
+  const DIFFICULTY_SUGGESTION_STREAK = 5;
 
   const state = {
     coins: 0,
@@ -26,6 +32,10 @@
     dailyCompleted: 0,
     tasks: [],
     nextId: 1,
+    firstTaskStreak: 0,
+    lastFirstTaskDayKey: null,
+    weeklyCompleted: 0,
+    weekKey: null,
   };
 
   function isRecord(v) {
@@ -58,6 +68,8 @@
         : [],
       bonus: raw.bonus === true,
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
+      ratedDifficulty: raw.ratedDifficulty ?? null,
+      difficultySuggested: raw.difficultySuggested === true,
     };
   }
 
@@ -72,6 +84,10 @@
       dailyCompleted: num(raw.dailyCompleted, 0),
       tasks,
       nextId: num(raw.nextId, tasks.length + 1),
+      firstTaskStreak: num(raw.firstTaskStreak, 0),
+      lastFirstTaskDayKey: str(raw.lastFirstTaskDayKey, null),
+      weeklyCompleted: num(raw.weeklyCompleted, 0),
+      weekKey: str(raw.weekKey, null),
     };
   }
 
@@ -107,6 +123,8 @@
   const gemBalanceEl = document.getElementById("gem-balance");
   const dailyProgressEl = document.getElementById("daily-progress");
   const dailyBar = document.getElementById("daily-bar");
+  const weeklyProgressEl = document.getElementById("weekly-progress");
+  const weeklyBar = document.getElementById("weekly-bar");
   const versionEl = document.getElementById("app-version");
   const form = document.getElementById("task-form");
   const taskInput = document.getElementById("task-input");
@@ -140,6 +158,55 @@
   function dayKey(ts) {
     const d = new Date(ts);
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+
+  function isoWeekKey(ts) {
+    const d = new Date(ts);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+    const week1 = new Date(d.getFullYear(), 0, 4);
+    return `${d.getFullYear()}-${1 + Math.round(
+      ((d - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7
+    )}`;
+  }
+
+  function firstTaskTier(streak) {
+    if (streak >= 7) return "day7";
+    if (streak >= 3) return "day3_6";
+    return "day1_2";
+  }
+
+  function rolloverCheckpoints() {
+    const now = Date.now();
+    const today = dayKey(now);
+    if (state.lastFirstTaskDayKey !== today && state.dailyCompleted > 0) {
+      state.dailyCompleted = 0;
+    }
+    const week = isoWeekKey(now);
+    if (state.weekKey !== week) {
+      state.weekKey = week;
+      state.weeklyCompleted = 0;
+    }
+  }
+
+  function applyFirstTaskBonus() {
+    const now = Date.now();
+    const today = dayKey(now);
+    if (state.lastFirstTaskDayKey === today) return null;
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    state.firstTaskStreak =
+      state.lastFirstTaskDayKey === dayKey(yesterday.getTime())
+        ? state.firstTaskStreak + 1
+        : 1;
+    state.lastFirstTaskDayKey = today;
+
+    const tier = firstTaskTier(state.firstTaskStreak);
+    const coins = Math.round(FIRST_TASK_COINS_MULT[tier] * 10);
+    const gems =
+      Math.random() < FIRST_TASK_GEM_CHANCE[tier] ? GEM_BONUS_AMOUNT : 0;
+    return { coins, gems, streak: state.firstTaskStreak };
   }
 
   function addTask(title, difficulty, repeat, deadlineInput) {
@@ -200,12 +267,22 @@
       gems += BONUS_TASK_GEMS;
     }
 
+    const firstBonus = applyFirstTaskBonus();
+    if (firstBonus) {
+      coins += firstBonus.coins;
+      gems += firstBonus.gems;
+    }
+
     state.coins += coins;
     state.gems += gems;
 
     const goalsBefore = reachedGoalCount(state.dailyCompleted);
     state.dailyCompleted += 1;
     const goalsAfter = reachedGoalCount(state.dailyCompleted);
+
+    const weekBefore = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
+    state.weeklyCompleted += 1;
+    const weekAfter = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
 
     let msg = "+";
     const parts = [];
@@ -215,13 +292,26 @@
     msg += parts.join(" + ");
     if (mult > 1.05) msg += ` (x${mult.toFixed(2)})`;
     if (task.streak > 1) msg += ` 🔥 ${task.streak}`;
+    if (firstBonus && firstBonus.streak >= 3) {
+      msg += ` 🌅 first task x${state.firstTaskStreak}`;
+    }
 
+    if (weekAfter > weekBefore) {
+      state.coins += WEEKLY_GOAL_REWARD;
+      showToast(`🏆 Weekly goal reached! +${WEEKLY_GOAL_REWARD} 🪙`);
+      promptDifficultyRating(task);
+      render();
+      return;
+    }
     if (goalsAfter > goalsBefore) {
       state.coins += GOAL_REWARD;
       showToast(`🎉 Daily goal reached! +${GOAL_REWARD} 🪙`);
     } else {
       showToast(msg);
     }
+
+    promptDifficultyRating(task);
+    maybeSuggestDifficultyReduction(task);
     render();
   }
 
@@ -250,6 +340,76 @@
   function deleteTask(id) {
     state.tasks = state.tasks.filter((t) => t.id !== id);
     render();
+  }
+
+  function editTask(id, updates) {
+    const task = state.tasks.find((t) => t.id === id);
+    if (!task) return;
+    if (updates.title !== undefined) {
+      const t = updates.title.trim();
+      if (t) task.title = t;
+    }
+    if (updates.difficulty !== undefined && updates.difficulty in COIN_REWARD) {
+      task.difficulty = updates.difficulty;
+    }
+    if (updates.repeat !== undefined &&
+        ["none", "daily", "weekly", "monthly"].includes(updates.repeat)) {
+      task.repeat = updates.repeat;
+      if (updates.repeat === "none") {
+        task.streak = 0;
+        task.streakDayKeys = [];
+      }
+    }
+    if (updates.deadline !== undefined) {
+      task.deadline = updates.deadline ? new Date(updates.deadline).getTime() : null;
+    }
+    render();
+  }
+
+  const RATING_OPTIONS = [
+    { label: "😫 Harder", value: "harder" },
+    { label: "👌 As expected", value: "ok" },
+    { label: "😊 Easier", value: "easier" },
+  ];
+
+  function promptDifficultyRating(task) {
+    if (task.ratedDifficulty !== null) return;
+    const panel = document.createElement("div");
+    panel.className = "rating-panel";
+    const q = document.createElement("span");
+    q.textContent = `"${task.title}" — how was it?`;
+    panel.appendChild(q);
+    for (const opt of RATING_OPTIONS) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = opt.label;
+      btn.addEventListener("click", () => {
+        task.ratedDifficulty = opt.value;
+        panel.remove();
+        if (opt.value === "easier") {
+          showToast("😄 Noted! You can edit the task's difficulty.");
+        } else {
+          showToast("Noted, thanks!");
+        }
+        render();
+      });
+      panel.appendChild(btn);
+    }
+    document.body.appendChild(panel);
+    setTimeout(() => panel.remove(), RATE_PROMPT_TIMEOUT);
+  }
+
+  function maybeSuggestDifficultyReduction(task) {
+    if (task.difficultySuggested) return;
+    if (task.streak < DIFFICULTY_SUGGESTION_STREAK) return;
+    if (task.ratedDifficulty === "harder") return;
+    task.difficultySuggested = true;
+    const order = Object.keys(COIN_REWARD);
+    const idx = order.indexOf(task.difficulty);
+    if (idx <= 0) return;
+    showToast(
+      `💡 "${task.title}" is going strong (🔥 ${task.streak}). Consider lowering its difficulty.`
+    );
   }
 
   function formatDeadline(ts) {
@@ -336,10 +496,95 @@
     del.textContent = "✕";
     del.addEventListener("click", () => deleteTask(task.id));
 
+    const edit = document.createElement("button");
+    edit.className = "task-edit";
+    edit.textContent = "✎";
+    edit.addEventListener("click", () => openEditRow(task));
+
+    const actions = document.createElement("div");
+    actions.className = "task-actions";
+    actions.appendChild(edit);
+    actions.appendChild(del);
+
     li.appendChild(cb);
     li.appendChild(body);
-    li.appendChild(del);
+    li.appendChild(actions);
     return li;
+  }
+
+  function deadlineInputValue(task) {
+    if (!task.deadline) return "";
+    const d = new Date(task.deadline);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function openEditRow(task) {
+    document.querySelectorAll(".edit-row").forEach((el) => el.remove());
+    const row = document.createElement("div");
+    row.className = "edit-row";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = task.title;
+    input.maxLength = 80;
+
+    const diff = document.createElement("select");
+    for (const [value, label] of [
+      ["too_easy", "Too easy"],
+      ["easy", "Easy"],
+      ["medium", "Medium"],
+      ["hard", "Hard"],
+    ]) {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      if (task.difficulty === value) o.selected = true;
+      diff.appendChild(o);
+    }
+
+    const rep = document.createElement("select");
+    for (const [value, label] of [
+      ["none", "No repeat"],
+      ["daily", "Daily"],
+      ["weekly", "Weekly"],
+      ["monthly", "Monthly"],
+    ]) {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      if (task.repeat === value) o.selected = true;
+      rep.appendChild(o);
+    }
+
+    const dl = document.createElement("input");
+    dl.type = "datetime-local";
+    dl.value = deadlineInputValue(task);
+
+    const save = document.createElement("button");
+    save.type = "button";
+    save.textContent = "Save";
+    save.addEventListener("click", () => {
+      editTask(task.id, {
+        title: input.value,
+        difficulty: diff.value,
+        repeat: rep.value,
+        deadline: dl.value,
+      });
+    });
+
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", () => row.remove());
+
+    row.appendChild(input);
+    row.appendChild(diff);
+    row.appendChild(rep);
+    row.appendChild(dl);
+    row.appendChild(save);
+    row.appendChild(cancel);
+    listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
   }
 
   let render = function () {
@@ -367,12 +612,26 @@
     fill.className = "daily-bar-fill";
     fill.style.width = pct + "%";
     dailyBar.appendChild(fill);
+
+    const lastWeekly = WEEKLY_GOALS[WEEKLY_GOALS.length - 1];
+    const weekReached = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
+    const nextWeekly = WEEKLY_GOALS[weekReached] || lastWeekly;
+    weeklyProgressEl.textContent =
+      weekReached >= WEEKLY_GOALS.length
+        ? `${state.weeklyCompleted} ✅`
+        : `${state.weeklyCompleted}/${nextWeekly}`;
+    weeklyBar.innerHTML = "";
+    const wFill = document.createElement("div");
+    wFill.className = "daily-bar-fill";
+    wFill.style.width = Math.min(100, (state.weeklyCompleted / nextWeekly) * 100) + "%";
+    weeklyBar.appendChild(wFill);
   }
 
   versionEl.textContent = "v" + VERSION;
 
   const saved = loadState();
   if (saved) Object.assign(state, saved);
+  rolloverCheckpoints();
 
   const baseRender = render;
   render = function () {

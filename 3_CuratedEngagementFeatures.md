@@ -22,6 +22,7 @@ Curated from 2_EngagemetFeatures.md
 
 #### Task 
 - ~~F5: Can be created by user~~
+- ~~F83: Tasks can be edited (title, difficulty, repeat, deadline)~~
 - ~~F6: User can select difficulty too easy, easy, medium, hard~~
 - ~~F7: User can select a deadline in hours or as a date~~
 - F8: Option for sub-tasks to break down larger tasks (but not further nested)
