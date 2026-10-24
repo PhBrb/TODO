@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.12.0";
+  const VERSION = "0.12.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -50,6 +50,8 @@
     chests: [],
     boostUntil: 0,
     boostCooldownUntil: 0,
+    lastDailyMilestone: 0,
+    lastWeeklyMilestone: 0,
   };
 
   function isRecord(v) {
@@ -89,8 +91,6 @@
             coins: num(raw.reward.coins, 0),
             gems: num(raw.reward.gems, 0),
             xp: num(raw.reward.xp, 0),
-            goalReward: num(raw.reward.goalReward, 0),
-            weeklyReward: num(raw.reward.weeklyReward, 0),
             chestEarned: raw.reward.chestEarned === true,
             firstTaskDay: num(raw.reward.firstTaskDay, 0),
           }
@@ -108,8 +108,6 @@
                     coins: num(st.reward.coins, 0),
                     gems: num(st.reward.gems, 0),
                     xp: num(st.reward.xp, 0),
-                    goalReward: 0,
-                    weeklyReward: 0,
                   }
                 : null,
             }))
@@ -146,6 +144,8 @@
         : [],
       boostUntil: num(raw.boostUntil, 0),
       boostCooldownUntil: num(raw.boostCooldownUntil, 0),
+      lastDailyMilestone: raw.lastDailyMilestone ?? 0,
+      lastWeeklyMilestone: raw.lastWeeklyMilestone ?? 0,
     };
   }
 
@@ -358,11 +358,13 @@
     const today = dayKey(now);
     if (state.lastFirstTaskDayKey !== today && state.dailyCompleted > 0) {
       state.dailyCompleted = 0;
+      state.lastDailyMilestone = 0;
     }
     const week = isoWeekKey(now);
     if (state.weekKey !== week) {
       state.weekKey = week;
       state.weeklyCompleted = 0;
+      state.lastWeeklyMilestone = 0;
     }
   }
 
@@ -526,7 +528,7 @@
     state.coins += coins;
     const xpBefore = levelFromXp(state.xp);
     state.xp += xpGain;
-    subtask.reward = { coins, gems: 0, xp: xpGain, goalReward: 0, weeklyReward: 0 };
+    subtask.reward = { coins, gems: 0, xp: xpGain };
     if (levelFromXp(state.xp) > xpBefore) {
       showToast(`🎉 Level up! You are now level ${levelFromXp(state.xp)}`);
     } else if (coins > 0) {
@@ -598,31 +600,32 @@
     state.coins += coins;
     state.gems += gems;
 
-    const goalsBefore = reachedGoalCount(state.dailyCompleted);
     state.dailyCompleted += 1;
-    const goalsAfter = reachedGoalCount(state.dailyCompleted);
-
-    const weekBefore = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
     state.weeklyCompleted += 1;
-    const weekAfter = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
 
     let goalReward = 0;
     let weeklyReward = 0;
-    if (goalsAfter > goalsBefore) {
-      goalReward = GOAL_REWARD;
-      state.coins += goalReward;
+    const dailyMilestone = reachedGoalCount(state.dailyCompleted);
+    if (state.lastDailyMilestone === undefined || dailyMilestone > state.lastDailyMilestone) {
+      if (dailyMilestone > (state.lastDailyMilestone ?? 0)) {
+        goalReward = GOAL_REWARD;
+        state.coins += goalReward;
+      }
+      state.lastDailyMilestone = dailyMilestone;
     }
-    if (weekAfter > weekBefore) {
-      weeklyReward = WEEKLY_GOAL_REWARD;
-      state.coins += weeklyReward;
+    const weeklyMilestone = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
+    if (state.lastWeeklyMilestone === undefined || weeklyMilestone > state.lastWeeklyMilestone) {
+      if (weeklyMilestone > (state.lastWeeklyMilestone ?? 0)) {
+        weeklyReward = WEEKLY_GOAL_REWARD;
+        state.coins += weeklyReward;
+      }
+      state.lastWeeklyMilestone = weeklyMilestone;
     }
 
     task.reward = {
       coins,
       gems,
       xp: xpGain,
-      goalReward,
-      weeklyReward,
       chestEarned,
       firstTaskDay: firstBonus ? firstBonus.streak : 0,
     };
@@ -663,7 +666,7 @@
 
   function clawBackReward(reward) {
     if (!reward) return;
-    state.coins = Math.max(0, state.coins - reward.coins - reward.goalReward - reward.weeklyReward);
+    state.coins = Math.max(0, state.coins - reward.coins);
     state.gems = Math.max(0, state.gems - reward.gems);
     state.xp = Math.max(0, state.xp - reward.xp);
     if (reward.chestEarned) {
@@ -688,6 +691,18 @@
       state.lastFirstTaskDayKey = null;
     }
     clawBackReward(task.reward);
+
+    const dailyMilestone = reachedGoalCount(state.dailyCompleted);
+    if (dailyMilestone < state.lastDailyMilestone) {
+      state.coins = Math.max(0, state.coins - GOAL_REWARD);
+      state.lastDailyMilestone = undefined;
+    }
+    const weeklyMilestone = WEEKLY_GOALS.filter((g) => g <= state.weeklyCompleted).length;
+    if (weeklyMilestone < state.lastWeeklyMilestone) {
+      state.coins = Math.max(0, state.coins - WEEKLY_GOAL_REWARD);
+      state.lastWeeklyMilestone = undefined;
+    }
+
     task.reward = null;
     render();
   }
@@ -1177,6 +1192,8 @@
     state.chests = [];
     state.boostUntil = 0;
     state.boostCooldownUntil = 0;
+    state.lastDailyMilestone = 0;
+    state.lastWeeklyMilestone = 0;
     render();
   });
 
