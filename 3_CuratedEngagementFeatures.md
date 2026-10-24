@@ -39,12 +39,11 @@ Curated from 2_EngagemetFeatures.md
   - ~~F17: Random multiplier 1x-1.3x~~
   - ~~F18: Streak bonus: after day 3: 1.1x for every additional day until day 12 (1.9x)~~
   - F19: Random additional gems or item reward on medium and hard.
-  - ~~F20: Randomly declare in advance that a task will reward additional gems/item~~
-  - 15% of new tasks are declared bonus tasks, giving 10 extra coins and 1 gem
+  - ~~F20: Randomly declare in advance that a task will reward additional gems~~/item
   - F21: User has option to rate difficulty after completion
   - F22: Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
 - F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion
-- ~~F24: Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon. Manual override with sticky pin.~~
+- ~~Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon.~~ Manual override with sticky pin.
 
 
 #### Milestones/Quests
