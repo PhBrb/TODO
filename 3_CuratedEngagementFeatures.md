@@ -42,6 +42,7 @@ Curated from 2_EngagemetFeatures.md
   - F19: Random additional gems or item reward on medium and hard.
   - ~~F20: Randomly declare in advance that a task will reward additional gems~~/item
   - ~~F21: User has option to rate difficulty after completion~~
+    - Only asked for repeating tasks
   - F22: Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
 - ~~F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion~~
   - Suggestion after a 5-day streak without a "harder" rating

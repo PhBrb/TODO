@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.9.0";
+  const VERSION = "0.9.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 2;
@@ -223,6 +223,8 @@
       streakDayKeys: [],
       bonus: isBonus,
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
+      ratedDifficulty: null,
+      difficultySuggested: false,
     };
     if (isBonus) showToast("⭐ New bonus task! Extra rewards");
     state.tasks.push(task);
@@ -373,7 +375,8 @@
   ];
 
   function promptDifficultyRating(task) {
-    if (task.ratedDifficulty !== null) return;
+    if (task.repeat === "none") return;
+    if (task.ratedDifficulty != null) return;
     const panel = document.createElement("div");
     panel.className = "rating-panel";
     const q = document.createElement("span");
