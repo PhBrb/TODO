@@ -193,7 +193,7 @@ header h1 {
 
 .rating-panel {
   position: fixed;
-  bottom: 24px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--card);

@@ -53,6 +53,7 @@ Curated from 2_EngagemetFeatures.md
   - ~~15 coins per reached daily goal~~
 - ~~F26: Weekly task completion: give rewards after 50, 100, 150, 250 completed tasks~~
   - 25 coins per reached weekly goal
+  - MWE test mode: goals divided by 5 (10, 20, 30, 50)
 - F27: Limited time boost: for 1h increase task completion rewards. Start randomly (consider asking user for times where they can not complete tasks and don't start it there).
 - F28: Could be implemented as clocks integrated into the room (clocks could be bought?)
 - F29: Very satisfying animation on completion

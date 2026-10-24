@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.8.0";
+  const VERSION = "0.9.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 2;
@@ -19,7 +19,7 @@
   const BONUS_TASK_RATE = 0.15;
   const BONUS_TASK_COINS = 10;
   const BONUS_TASK_GEMS = 1;
-  const WEEKLY_GOALS = [50, 100, 150, 250];
+  const WEEKLY_GOALS = [10, 20, 30, 50];
   const WEEKLY_GOAL_REWARD = 25;
   const FIRST_TASK_COINS_MULT = { day1_2: 1, day3_6: 2.5, day7: 3 };
   const FIRST_TASK_GEM_CHANCE = { day1_2: 0, day3_6: 0.5, day7: 0.5 };
