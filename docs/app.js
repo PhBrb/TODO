@@ -808,9 +808,9 @@
     chestAreaEl.innerHTML = "";
     const unopened = state.chests.filter((c) => !c.opened);
     if (unopened.length > 0) {
-      const counter = document.createElement("p");
+      const counter = document.createElement("span");
       counter.className = "chest-counter";
-      counter.textContent = `📦 ${unopened.length} unopened chest${unopened.length > 1 ? "s" : ""}`;
+      counter.textContent = `📦 ${unopened.length}`;
       chestAreaEl.appendChild(counter);
     }
     const grouped = new Map();
