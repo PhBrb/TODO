@@ -1,7 +1,10 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.6.0";
+  const VERSION = "0.7.0";
+
+  const STORAGE_KEY = "todo-mwe-state";
+  const SCHEMA_VERSION = 1;
 
   const COIN_REWARD = { too_easy: 0, easy: 10, medium: 25, hard: 50 };
   const DAILY_GOALS = [5, 10, 15, 25];
@@ -24,6 +27,79 @@
     tasks: [],
     nextId: 1,
   };
+
+  function isRecord(v) {
+    return v !== null && typeof v === "object" && !Array.isArray(v);
+  }
+
+  function num(v, fallback) {
+    return typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  }
+
+  function str(v, fallback) {
+    return typeof v === "string" ? v : fallback;
+  }
+
+  function migrateTask(raw, i) {
+    if (!isRecord(raw)) return null;
+    return {
+      id: num(raw.id, i + 1),
+      title: str(raw.title, "Untitled"),
+      difficulty: raw.difficulty in COIN_REWARD ? raw.difficulty : "easy",
+      repeat: ["none", "daily", "weekly", "monthly"].includes(raw.repeat)
+        ? raw.repeat
+        : "none",
+      done: raw.done === true,
+      createdAt: num(raw.createdAt, Date.now()),
+      completedAt: typeof raw.completedAt === "number" ? raw.completedAt : null,
+      streak: num(raw.streak, 0),
+      streakDayKeys: Array.isArray(raw.streakDayKeys)
+        ? raw.streakDayKeys.filter((k) => typeof k === "string")
+        : [],
+      bonus: raw.bonus === true,
+      deadline: typeof raw.deadline === "number" ? raw.deadline : null,
+    };
+  }
+
+  function migrateState(raw) {
+    if (!isRecord(raw)) return null;
+    const tasks = Array.isArray(raw.tasks)
+      ? raw.tasks.map(migrateTask).filter(Boolean)
+      : [];
+    return {
+      coins: num(raw.coins, 0),
+      gems: num(raw.gems, 0),
+      dailyCompleted: num(raw.dailyCompleted, 0),
+      tasks,
+      nextId: num(raw.nextId, tasks.length + 1),
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!isRecord(data)) return null;
+      if (data.schemaVersion !== undefined && data.schemaVersion > SCHEMA_VERSION) {
+        return null;
+      }
+      return migrateState(data.state);
+    } catch {
+      return null;
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ schemaVersion: SCHEMA_VERSION, state })
+      );
+    } catch {
+      // storage full or unavailable: keep running in-memory
+    }
+  }
 
   const listEl = document.getElementById("task-list");
   const emptyHint = document.getElementById("empty-hint");
@@ -266,7 +342,7 @@
     return li;
   }
 
-  function render() {
+  let render = function () {
     const sorted = sortTasks(state.tasks);
     listEl.innerHTML = "";
     for (const task of sorted) listEl.appendChild(taskNode(task));
@@ -294,6 +370,15 @@
   }
 
   versionEl.textContent = "v" + VERSION;
+
+  const saved = loadState();
+  if (saved) Object.assign(state, saved);
+
+  const baseRender = render;
+  render = function () {
+    baseRender();
+    saveState();
+  };
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();

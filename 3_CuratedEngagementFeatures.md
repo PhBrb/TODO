@@ -66,6 +66,10 @@ Curated from 2_EngagemetFeatures.md
 - F34: Stay permanently (after app restart) expect for seasonal items
 - F35: Moving big things costs coins or needs a task to be completed
 
+#### Persistent memory
+- All app state is saved locally in the browser and restored on load
+- Saved data carries a schema version; older data is migrated, corrupt or newer-schema data falls back to a fresh state
+
 
 #### Skills
 - F36: Can be bought for gems
