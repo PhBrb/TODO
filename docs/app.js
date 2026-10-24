@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.11.2";
+  const VERSION = "0.11.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -564,7 +564,11 @@
       const t = updates.title.trim();
       if (t) task.title = t;
     }
-    if (updates.difficulty !== undefined && updates.difficulty in COIN_REWARD) {
+    if (
+      updates.difficulty !== undefined &&
+      updates.difficulty in COIN_REWARD &&
+      task.subtasks.length === 0
+    ) {
       task.difficulty = updates.difficulty;
     }
     if (updates.repeat !== undefined &&
@@ -818,6 +822,10 @@
     input.maxLength = 80;
 
     const diff = document.createElement("select");
+    diff.disabled = task.subtasks.length > 0;
+    diff.title = task.subtasks.length > 0
+      ? "Difficulty is derived from the most difficult sub-task"
+      : "";
     for (const [value, label] of [
       ["too_easy", "Too easy"],
       ["easy", "Easy"],
