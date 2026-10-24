@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.9.2";
+  const VERSION = "0.9.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 2;
@@ -174,6 +174,41 @@
     const d = new Date(ts);
     d.setDate(d.getDate() - 1);
     return dayKey(d.getTime());
+  }
+
+  function nextOccurrence(repeat, completedAt) {
+    if (repeat === "every_5min") return completedAt + 300000;
+    const d = new Date(completedAt);
+    if (repeat === "daily") {
+      d.setDate(d.getDate() + 1);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    }
+    if (repeat === "weekly") {
+      const daysUntilMonday = (8 - d.getDay()) % 7 || 7;
+      d.setDate(d.getDate() + daysUntilMonday);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    }
+    if (repeat === "monthly") {
+      return new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime();
+    }
+    return Infinity;
+  }
+
+  function checkRecurringTasks() {
+    const now = Date.now();
+    let changed = false;
+    for (const task of state.tasks) {
+      if (task.done && task.repeat !== "none" && task.completedAt !== null) {
+        if (nextOccurrence(task.repeat, task.completedAt) <= now) {
+          task.done = false;
+          task.completedAt = null;
+          changed = true;
+        }
+      }
+    }
+    if (changed) render();
   }
 
   function isoWeekKey(ts) {
@@ -650,6 +685,9 @@
   const saved = loadState();
   if (saved) Object.assign(state, saved);
   rolloverCheckpoints();
+  checkRecurringTasks();
+  setInterval(checkRecurringTasks, 15000);
+  setInterval(rolloverCheckpoints, 60000);
 
   const baseRender = render;
   render = function () {
