@@ -27,7 +27,9 @@ Curated from 2_EngagemetFeatures.md
 - ~~F83: Tasks can be edited (title, difficulty, repeat, deadline)~~
 - ~~F6: User can select difficulty too easy, easy, medium, hard~~
 - ~~F7: User can select a deadline in hours or as a date~~
-- F8: Option for sub-tasks to break down larger tasks (but not further nested)
+- ~~F8: Option for sub-tasks to break down larger tasks (but not further nested)~~
+  - Parent and sub-tasks give the same reward; parent auto-completes (with reward) when all sub-tasks are done
+  - Parent task gets the difficulty of its most difficult sub-task
 - F9: Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.
 - F10: Task can be chained, to promote real life habit building. If tasks in a streak are solved right after another, give x1.2 bonus per task
 - F11: Option for autoplay tasks, that enable a task after another task has been done. This is a convenience, eg. after "wash clothes" the user could set up the autoplay task "hang clothes".

@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.10.3";
+  const VERSION = "0.11.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -84,6 +84,16 @@
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
+      subtasks: Array.isArray(raw.subtasks)
+        ? raw.subtasks
+            .filter(isRecord)
+            .map((st) => ({
+              id: num(st.id, 0),
+              title: str(st.title, "Untitled"),
+              difficulty: st.difficulty in COIN_REWARD ? st.difficulty : "easy",
+              done: st.done === true,
+            }))
+        : [],
     };
   }
 
@@ -372,10 +382,46 @@
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
       ratedDifficulty: null,
       difficultySuggested: false,
+      subtasks: [],
     };
     if (isBonus) showToast("⭐ New bonus task! Extra rewards");
     state.tasks.push(task);
     render();
+  }
+
+  const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
+
+  function deriveDifficulty(task) {
+    if (task.subtasks.length === 0) return task.difficulty;
+    let best = "too_easy";
+    for (const st of task.subtasks) {
+      if (DIFFICULTY_ORDER.indexOf(st.difficulty) > DIFFICULTY_ORDER.indexOf(best)) {
+        best = st.difficulty;
+      }
+    }
+    return best;
+  }
+
+  function addSubtask(parentId, title, difficulty) {
+    const parent = state.tasks.find((t) => t.id === parentId);
+    if (!parent || !title) return;
+    parent.subtasks.push({
+      id: state.nextId++,
+      title,
+      difficulty,
+      done: false,
+    });
+    parent.difficulty = deriveDifficulty(parent);
+    render();
+  }
+
+  function toggleSubtask(parent, subtask) {
+    subtask.done = !subtask.done;
+    if (subtask.done && parent.subtasks.every((st) => st.done) && !parent.done) {
+      completeTask(parent);
+    } else {
+      render();
+    }
   }
 
   function reachedGoalCount(count) {
@@ -661,6 +707,78 @@
     body.appendChild(title);
     body.appendChild(meta);
 
+    if (task.subtasks.length > 0 || !task.done) {
+      const sublist = document.createElement("div");
+      sublist.className = "subtask-list";
+      for (const st of task.subtasks) {
+        const row = document.createElement("div");
+        row.className = "subtask" + (st.done ? " done" : "");
+        const scb = document.createElement("input");
+        scb.type = "checkbox";
+        scb.checked = st.done;
+        scb.addEventListener("change", () => toggleSubtask(task, st));
+        const stTitle = document.createElement("span");
+        stTitle.className = "subtask-title";
+        stTitle.textContent = st.title;
+        const stBadge = document.createElement("span");
+        stBadge.className = "badge " + st.difficulty;
+        stBadge.textContent = st.difficulty.replace("_", " ");
+        const stDel = document.createElement("button");
+        stDel.className = "task-delete subtask-delete";
+        stDel.textContent = "✕";
+        stDel.addEventListener("click", () => {
+          task.subtasks = task.subtasks.filter((s) => s.id !== st.id);
+          task.difficulty = deriveDifficulty(task);
+          render();
+        });
+        row.appendChild(scb);
+        row.appendChild(stTitle);
+        row.appendChild(stBadge);
+        row.appendChild(stDel);
+        sublist.appendChild(row);
+      }
+      if (!task.done) {
+        const addRow = document.createElement("div");
+        addRow.className = "subtask-add";
+        const addInput = document.createElement("input");
+        addInput.type = "text";
+        addInput.placeholder = "Add subtask...";
+        addInput.maxLength = 80;
+        const addDiff = document.createElement("select");
+        for (const [value, label] of [
+          ["too_easy", "Too easy"],
+          ["easy", "Easy"],
+          ["medium", "Medium"],
+          ["hard", "Hard"],
+        ]) {
+          const o = document.createElement("option");
+          o.value = value;
+          o.textContent = label;
+          addDiff.appendChild(o);
+        }
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.textContent = "+";
+        addBtn.addEventListener("click", () => {
+          const v = addInput.value.trim();
+          if (!v) return;
+          addSubtask(task.id, v, addDiff.value);
+        });
+        addInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const v = addInput.value.trim();
+            if (v) addSubtask(task.id, v, addDiff.value);
+          }
+        });
+        addRow.appendChild(addInput);
+        addRow.appendChild(addDiff);
+        addRow.appendChild(addBtn);
+        sublist.appendChild(addRow);
+      }
+      body.appendChild(sublist);
+    }
+
     const del = document.createElement("button");
     del.className = "task-delete";
     del.textContent = "✕";
@@ -731,6 +849,10 @@
     const dl = document.createElement("input");
     dl.type = "datetime-local";
     dl.value = deadlineInputValue(task);
+    const dlWrap = document.createElement("label");
+    dlWrap.className = "deadline-label edit-deadline";
+    dlWrap.textContent = "📅 Deadline ";
+    dlWrap.appendChild(dl);
 
     const save = document.createElement("button");
     save.type = "button";
@@ -752,7 +874,7 @@
     row.appendChild(input);
     row.appendChild(diff);
     row.appendChild(rep);
-    row.appendChild(dl);
+    row.appendChild(dlWrap);
     row.appendChild(save);
     row.appendChild(cancel);
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
@@ -857,9 +979,34 @@
   checkRecurringTasks();
   setInterval(checkRecurringTasks, 15000);
   setInterval(rolloverCheckpoints, 60000);
-  setInterval(() => {
-    if (isBoostActive() || state.chests.some(chestReady)) render();
-  }, 1000);
+
+  function updateLiveClocks() {
+    const now = Date.now();
+    if (isBoostActive()) {
+      boostBannerEl.classList.remove("hidden");
+      const remaining = Math.max(0, state.boostUntil - now);
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      boostTimerEl.textContent = `${m}m ${s}s`;
+    } else {
+      boostBannerEl.classList.add("hidden");
+    }
+
+    const unopened = state.chests.filter((c) => !c.opened);
+    let idx = 0;
+    for (const node of chestAreaEl.querySelectorAll(".chest")) {
+      const chest = unopened[idx];
+      if (!chest) break;
+      const remaining = CHEST_OPEN_MS - (now - chest.earnedAt);
+      if (!chestReady(chest) && remaining > 0) {
+        const h = Math.floor(remaining / 3600000);
+        const m = Math.ceil((remaining % 3600000) / 60000);
+        node.textContent = `🔒 open in ${h}h ${m}m`;
+      }
+      idx++;
+    }
+  }
+  setInterval(updateLiveClocks, 1000);
 
   resetBtn.addEventListener("click", () => {
     if (!confirm("Reset ALL data? This can not be undone.")) return;
