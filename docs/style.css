@@ -241,12 +241,14 @@ header h1 {
 
 .subtask-add {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-top: 4px;
 }
 
 .subtask-add input[type="text"] {
-  flex: 1;
+  flex: 1 1 100%;
+  min-width: 0;
   padding: 6px 8px;
   border: 1px solid #ddd8f0;
   border-radius: 8px;
@@ -255,6 +257,8 @@ header h1 {
 }
 
 .subtask-add select {
+  flex: 1;
+  min-width: 0;
   border: 1px solid #ddd8f0;
   border-radius: 8px;
   background: #fff;
@@ -268,8 +272,13 @@ header h1 {
   background: var(--accent-soft);
   color: #fff;
   font-weight: 700;
-  width: 30px;
+  min-width: 44px;
+  padding: 4px 8px;
   cursor: pointer;
+}
+
+.subtask-edit-row {
+  margin: 4px 0 0 24px;
 }
 
 .task-edit {

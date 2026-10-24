@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.11.3";
+  const VERSION = "0.11.4";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -415,12 +415,94 @@
     render();
   }
 
+  function editSubtask(parent, subtask, title, difficulty) {
+    const t = (title || "").trim();
+    if (t) subtask.title = t;
+    if (difficulty in COIN_REWARD) subtask.difficulty = difficulty;
+    parent.difficulty = deriveDifficulty(parent);
+    render();
+  }
+
+  function openSubtaskEditRow(parent, subtask) {
+    document.querySelectorAll(".edit-row").forEach((el) => el.remove());
+    const row = document.createElement("div");
+    row.className = "edit-row subtask-edit-row";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = subtask.title;
+    input.maxLength = 80;
+
+    const diff = document.createElement("select");
+    for (const [value, label] of [
+      ["too_easy", "Too easy"],
+      ["easy", "Easy"],
+      ["medium", "Medium"],
+      ["hard", "Hard"],
+    ]) {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      if (subtask.difficulty === value) o.selected = true;
+      diff.appendChild(o);
+    }
+
+    const save = document.createElement("button");
+    save.type = "button";
+    save.textContent = "Save";
+    save.addEventListener("click", () =>
+      editSubtask(parent, subtask, input.value, diff.value));
+
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", () => row.remove());
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        editSubtask(parent, subtask, input.value, diff.value);
+      }
+    });
+
+    row.appendChild(input);
+    row.appendChild(diff);
+    row.appendChild(save);
+    row.appendChild(cancel);
+    const subRow = document.querySelector(`[data-id="${parent.id}"] .subtask-row-${subtask.id}`);
+    if (subRow && subRow.nextSibling) {
+      subRow.parentNode.insertBefore(row, subRow.nextSibling);
+    } else {
+      document
+        .querySelector(`[data-id="${parent.id}"] .subtask-list`)
+        .appendChild(row);
+    }
+    input.focus();
+  }
+
   function toggleSubtask(parent, subtask) {
     subtask.done = !subtask.done;
-    if (subtask.done && parent.subtasks.every((st) => st.done) && !parent.done) {
-      completeTask(parent);
-    } else {
-      render();
+    if (subtask.done) {
+      awardSubtask(subtask);
+      if (parent.subtasks.every((st) => st.done) && !parent.done) {
+        completeTask(parent);
+      }
+    }
+    render();
+  }
+
+  function awardSubtask(subtask) {
+    const base = COIN_REWARD[subtask.difficulty];
+    const mult = randomMultiplier();
+    const coins = Math.round(base * mult);
+    const xpGain = XP_REWARD[subtask.difficulty] || 0;
+    state.coins += coins;
+    const xpBefore = levelFromXp(state.xp);
+    state.xp += xpGain;
+    if (levelFromXp(state.xp) > xpBefore) {
+      showToast(`🎉 Level up! You are now level ${levelFromXp(state.xp)}`);
+    } else if (coins > 0) {
+      showToast(`+${coins} 🪙 +${xpGain} ✨`);
     }
   }
 
@@ -716,7 +798,7 @@
       sublist.className = "subtask-list";
       for (const st of task.subtasks) {
         const row = document.createElement("div");
-        row.className = "subtask" + (st.done ? " done" : "");
+        row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
         const scb = document.createElement("input");
         scb.type = "checkbox";
         scb.checked = st.done;
@@ -724,6 +806,10 @@
         const stTitle = document.createElement("span");
         stTitle.className = "subtask-title";
         stTitle.textContent = st.title;
+        const stEdit = document.createElement("button");
+        stEdit.className = "task-edit subtask-edit";
+        stEdit.textContent = "✎";
+        stEdit.addEventListener("click", () => openSubtaskEditRow(task, st));
         const stBadge = document.createElement("span");
         stBadge.className = "badge " + st.difficulty;
         stBadge.textContent = st.difficulty.replace("_", " ");
@@ -738,6 +824,7 @@
         row.appendChild(scb);
         row.appendChild(stTitle);
         row.appendChild(stBadge);
+        row.appendChild(stEdit);
         row.appendChild(stDel);
         sublist.appendChild(row);
       }
