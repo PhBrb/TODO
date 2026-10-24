@@ -22,6 +22,7 @@ Curated from 2_EngagemetFeatures.md
 
 #### Task 
 - ~~F5: Can be created by user~~
+- ~~F83: Tasks can be edited (title, difficulty, repeat, deadline)~~
 - ~~F6: User can select difficulty too easy, easy, medium, hard~~
 - ~~F7: User can select a deadline in hours or as a date~~
 - F8: Option for sub-tasks to break down larger tasks (but not further nested)
@@ -31,7 +32,10 @@ Curated from 2_EngagemetFeatures.md
 - F12: Option to set preferred times for task finish. Give small bonus if task was finished during this time.
 - ~~F13: Option for repeating task: user can select when a task returns~~
   - Daily, weekly, monthly
+  - MWE test mode: repeat every 5 minutes
+  - Completed repeating tasks become available again after their interval elapses
   - ~~F14: Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition~~
+  - Streaks get removed the moment they fail, not only when the task is completed again
   - F15: "Certificate of Awesomeness" for completing streak milestones, that can be placed in the room. Longer streaks update the one certificate belonging to the task.
     - More fancy visuals for longer streaks
     - If a streak is lost, the visuals become more bland, but you never lose it completely
@@ -40,16 +44,19 @@ Curated from 2_EngagemetFeatures.md
   - ~~F18: Streak bonus: after day 3: 1.1x for every additional day until day 12 (1.9x)~~
   - F19: Random additional gems or item reward on medium and hard.
   - ~~F20: Randomly declare in advance that a task will reward additional gems~~/item
-  - F21: User has option to rate difficulty after completion
+  - ~~F21: User has option to rate difficulty after completion~~
+    - Only asked for repeating tasks
   - F22: Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
-- F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion
+- ~~F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion (after a 5-streak, eg. 5 days for daily, 5 weeks for weekly, without a "harder" rating)~~
 - ~~Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon.~~ Manual override with sticky pin.
 
 
 #### Milestones/Quests
 - ~~F25: Daily task completions: give rewards after 5, 10, 15, 25 completed tasks. Indicate progress prominently~~
   - ~~15 coins per reached daily goal~~
-- F26: Weekly task completion: give rewards after 50, 100, 150, 250 completed tasks
+- ~~F26: Weekly task completion: give rewards after 50, 100, 150, 250 completed tasks~~
+  - 25 coins per reached weekly goal
+  - MWE test mode: goals divided by 5 (10, 20, 30, 50)
 - F27: Limited time boost: for 1h increase task completion rewards. Start randomly (consider asking user for times where they can not complete tasks and don't start it there).
 - F28: Could be implemented as clocks integrated into the room (clocks could be bought?)
 - F29: Very satisfying animation on completion
@@ -126,11 +133,11 @@ Curated from 2_EngagemetFeatures.md
 - F62: Partially rotating items in shop? Increases engagement, but is annoying. 
 
 #### First task of the day
-- F63: Streak:
-  - Day 1-2: coins
-  - Day 2: coin
-  - Day 3-6: 2.5x coins + chance for gem
-  - Day 7+: 3x coins + chance for gem
+- ~~F63: Streak:~~
+  - ~~Day 1-2: coins~~
+  - ~~Day 2: coin~~
+  - ~~Day 3-6: 2.5x coins + chance for gem~~
+  - ~~Day 7+: 3x coins + chance for gem~~
 
 
 #### Small achievements

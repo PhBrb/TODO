@@ -139,6 +139,88 @@ header h1 {
 
 .gems b { color: #00b894; }
 
+.task-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+.task-edit {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.edit-row {
+  list-style: none;
+  background: #f0edff;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-row input[type="text"] {
+  flex: 1 1 100%;
+  padding: 8px;
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.edit-row select,
+.edit-row input[type="datetime-local"] {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.75rem;
+}
+
+.edit-row button {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-row button:first-of-type { background: var(--accent); color: #fff; }
+.edit-row button:last-of-type { background: #fff; color: var(--muted); }
+
+.rating-panel {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 16px rgba(45, 42, 61, 0.25);
+  font-size: 0.85rem;
+  max-width: 92vw;
+  z-index: 20;
+  animation: pop 0.3s ease;
+}
+
+.rating-panel button {
+  border: 1px solid var(--accent-soft);
+  background: #fff;
+  color: var(--accent);
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
 .task-delete {
   border: none;
   background: none;
