@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.9.3";
+  const VERSION = "0.9.4";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 2;
@@ -196,16 +196,30 @@
     return Infinity;
   }
 
+  function streakHasFailed(task, now) {
+    if (task.streak === 0 || task.streakDayKeys.length === 0) return false;
+    const lastKey = task.streakDayKeys[task.streakDayKeys.length - 1];
+    const currentKey = repeatKey(task.repeat, now);
+    if (lastKey === currentKey) return false;
+    return lastKey !== prevRepeatKey(task.repeat, now);
+  }
+
   function checkRecurringTasks() {
     const now = Date.now();
     let changed = false;
     for (const task of state.tasks) {
-      if (task.done && task.repeat !== "none" && task.completedAt !== null) {
+      if (task.repeat === "none") continue;
+      if (task.done && task.completedAt !== null) {
         if (nextOccurrence(task.repeat, task.completedAt) <= now) {
           task.done = false;
           task.completedAt = null;
           changed = true;
         }
+      }
+      if (streakHasFailed(task, now)) {
+        task.streak = 0;
+        task.streakDayKeys = [];
+        changed = true;
       }
     }
     if (changed) render();

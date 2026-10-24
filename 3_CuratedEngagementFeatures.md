@@ -32,7 +32,10 @@ Curated from 2_EngagemetFeatures.md
 - F12: Option to set preferred times for task finish. Give small bonus if task was finished during this time.
 - ~~F13: Option for repeating task: user can select when a task returns~~
   - Daily, weekly, monthly
+  - MWE test mode: repeat every 5 minutes
+  - Completed repeating tasks become available again after their interval elapses
   - ~~F14: Repetitive tasks display a streak, how many times in a row the task was completed before deadline or repetition~~
+  - Streaks get removed the moment they fail, not only when the task is completed again
   - F15: "Certificate of Awesomeness" for completing streak milestones, that can be placed in the room. Longer streaks update the one certificate belonging to the task.
     - More fancy visuals for longer streaks
     - If a streak is lost, the visuals become more bland, but you never lose it completely
