@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.11.0";
+  const VERSION = "0.11.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -975,9 +975,34 @@
   checkRecurringTasks();
   setInterval(checkRecurringTasks, 15000);
   setInterval(rolloverCheckpoints, 60000);
-  setInterval(() => {
-    if (isBoostActive() || state.chests.some(chestReady)) render();
-  }, 1000);
+
+  function updateLiveClocks() {
+    const now = Date.now();
+    if (isBoostActive()) {
+      boostBannerEl.classList.remove("hidden");
+      const remaining = Math.max(0, state.boostUntil - now);
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      boostTimerEl.textContent = `${m}m ${s}s`;
+    } else {
+      boostBannerEl.classList.add("hidden");
+    }
+
+    const unopened = state.chests.filter((c) => !c.opened);
+    let idx = 0;
+    for (const node of chestAreaEl.querySelectorAll(".chest")) {
+      const chest = unopened[idx];
+      if (!chest) break;
+      const remaining = CHEST_OPEN_MS - (now - chest.earnedAt);
+      if (!chestReady(chest) && remaining > 0) {
+        const h = Math.floor(remaining / 3600000);
+        const m = Math.ceil((remaining % 3600000) / 60000);
+        node.textContent = `🔒 open in ${h}h ${m}m`;
+      }
+      idx++;
+    }
+  }
+  setInterval(updateLiveClocks, 1000);
 
   resetBtn.addEventListener("click", () => {
     if (!confirm("Reset ALL data? This can not be undone.")) return;
