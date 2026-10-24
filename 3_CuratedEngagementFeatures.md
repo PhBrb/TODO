@@ -11,9 +11,10 @@ Curated from 2_EngagemetFeatures.md
 - ~~F2: Coins~~
   - ~~earned from completing task~~
   - spent on new items and interaction with items
-- F3: Gems
-  - randomly earned from completing tasks, can be bought with coins (but expensive)
+- ~~F3: Gems~~
+  - ~~randomly earned from completing tasks~~, can be bought with coins (but expensive)
   - spent on special items, streak freeze, ...
+  - 25% chance for 2 gems on medium, 50% chance on hard
 - F4: Chests
   - earned as daily reward for first completed task
   - contains random coins, gems, items
@@ -22,7 +23,7 @@ Curated from 2_EngagemetFeatures.md
 #### Task 
 - ~~F5: Can be created by user~~
 - ~~F6: User can select difficulty too easy, easy, medium, hard~~
-- F7: User can select a deadline in hours or as a date
+- ~~F7: User can select a deadline in hours or as a date~~
 - F8: Option for sub-tasks to break down larger tasks (but not further nested)
 - F9: Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.
 - F10: Task can be chained, to promote real life habit building. If tasks in a streak are solved right after another, give x1.2 bonus per task
