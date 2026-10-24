@@ -48,7 +48,7 @@ Curated from 2_EngagemetFeatures.md
     - Only asked for repeating tasks
   - F22: Very satisfying animation and sound on completion, confetti, banner, fanfare, reward trickeling into coin/gem inventory. It should be fun but not startling.
 - ~~F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion~~
-  - Suggestion after a 5-day streak without a "harder" rating
+  - Suggestion after a 5-streak (5 consecutive completed repetitions, eg. 5 days for daily, 5 weeks for weekly) without a "harder" rating
 - ~~Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon.~~ Manual override with sticky pin.
 
 
