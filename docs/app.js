@@ -834,7 +834,7 @@
         const remaining = CHEST_OPEN_MS - (Date.now() - chest.earnedAt);
         const h = Math.floor(remaining / 3600000);
         const m = Math.ceil((remaining % 3600000) / 60000);
-        btn.textContent = `🔒 opens in ${h}h ${m}m`;
+        btn.textContent = `🔒 ready to open in ${h}h ${m}m`;
       }
       chestAreaEl.appendChild(btn);
     }

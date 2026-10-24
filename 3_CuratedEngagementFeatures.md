@@ -83,7 +83,7 @@ Curated from 2_EngagemetFeatures.md
 #### Persistent memory
 - ~~F81: All app state is saved locally in the browser and restored on load~~
 - ~~F82: Saved data carries a schema version; older data is migrated, corrupt or newer-schema data falls back to a fresh state~~
-- ~~F84: MWE test mode: button to reset all data (with confirmation prompt)~~
+- ~~F88: MWE test mode: button to reset all data (with confirmation prompt)~~
 
 
 #### Skills
