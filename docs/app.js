@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.9.1";
+  const VERSION = "0.9.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 2;
@@ -56,7 +56,7 @@
       id: num(raw.id, i + 1),
       title: str(raw.title, "Untitled"),
       difficulty: raw.difficulty in COIN_REWARD ? raw.difficulty : "easy",
-      repeat: ["none", "daily", "weekly", "monthly"].includes(raw.repeat)
+      repeat: ["none", "daily", "weekly", "monthly", "every_5min"].includes(raw.repeat)
         ? raw.repeat
         : "none",
       done: raw.done === true,
@@ -160,6 +160,22 @@
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
   }
 
+  function fiveMinKey(ts) {
+    return `${dayKey(ts)}-${Math.floor(ts / 300000)}`;
+  }
+
+  function repeatKey(repeat, ts) {
+    if (repeat === "every_5min") return fiveMinKey(ts);
+    return dayKey(ts);
+  }
+
+  function prevRepeatKey(repeat, ts) {
+    if (repeat === "every_5min") return fiveMinKey(ts - 300000);
+    const d = new Date(ts);
+    d.setDate(d.getDate() - 1);
+    return dayKey(d.getTime());
+  }
+
   function isoWeekKey(ts) {
     const d = new Date(ts);
     d.setHours(0, 0, 0, 0);
@@ -240,12 +256,10 @@
     task.completedAt = Date.now();
 
     if (task.repeat !== "none") {
-      const key = dayKey(task.completedAt);
+      const key = repeatKey(task.repeat, task.completedAt);
       if (!task.streakDayKeys.includes(key)) {
         const lastKey = task.streakDayKeys[task.streakDayKeys.length - 1];
-        const yesterday = new Date(task.completedAt);
-        yesterday.setDate(yesterday.getDate() - 1);
-        if (lastKey === dayKey(yesterday.getTime())) {
+        if (lastKey === prevRepeatKey(task.repeat, task.completedAt)) {
           task.streak += 1;
         } else {
           task.streak = 1;
@@ -319,7 +333,7 @@
 
   function uncompleteTask(task) {
     task.done = false;
-    const key = task.completedAt ? dayKey(task.completedAt) : null;
+    const key = task.completedAt ? repeatKey(task.repeat, task.completedAt) : null;
     if (key && task.streakDayKeys.includes(key)) {
       task.streakDayKeys.pop();
       task.streak = Math.max(0, task.streak - 1);
@@ -355,7 +369,7 @@
       task.difficulty = updates.difficulty;
     }
     if (updates.repeat !== undefined &&
-        ["none", "daily", "weekly", "monthly"].includes(updates.repeat)) {
+        ["none", "daily", "weekly", "monthly", "every_5min"].includes(updates.repeat)) {
       task.repeat = updates.repeat;
       if (updates.repeat === "none") {
         task.streak = 0;
@@ -469,7 +483,7 @@
     if (task.repeat !== "none") {
       const rep = document.createElement("span");
       rep.className = "badge repeat";
-      rep.textContent = "🔁 " + task.repeat;
+      rep.textContent = "🔁 " + (task.repeat === "every_5min" ? "5 min" : task.repeat);
       meta.appendChild(rep);
       if (task.streak > 0) {
         const st = document.createElement("span");
@@ -552,6 +566,7 @@
       ["daily", "Daily"],
       ["weekly", "Weekly"],
       ["monthly", "Monthly"],
+      ["every_5min", "Every 5 min (test)"],
     ]) {
       const o = document.createElement("option");
       o.value = value;
