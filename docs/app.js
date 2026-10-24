@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.10.1";
+  const VERSION = "0.10.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -807,6 +807,12 @@
 
     chestAreaEl.innerHTML = "";
     const unopened = state.chests.filter((c) => !c.opened);
+    if (unopened.length > 0) {
+      const counter = document.createElement("p");
+      counter.className = "chest-counter";
+      counter.textContent = `📦 ${unopened.length} unopened chest${unopened.length > 1 ? "s" : ""}`;
+      chestAreaEl.appendChild(counter);
+    }
     const grouped = new Map();
     for (const chest of unopened) {
       const ready = chestReady(chest);
@@ -827,7 +833,7 @@
         const remaining = CHEST_OPEN_MS - (Date.now() - chest.earnedAt);
         const h = Math.floor(remaining / 3600000);
         const m = Math.ceil((remaining % 3600000) / 60000);
-        btn.textContent = `🔒 opens in ${h}h ${m}m${count > 1 ? ` (x${count})` : ""}`;
+        btn.textContent = `🔒 open in ${h}h ${m}m${count > 1 ? ` (x${count})` : ""}`;
       }
       chestAreaEl.appendChild(btn);
     }
