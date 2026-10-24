@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.10.0";
+  const VERSION = "0.10.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -33,7 +33,7 @@
   const CHEST_XP = [10, 20];
   const BOOST_MULT = 1.5;
   const BOOST_DURATION_MS = 60 * 60 * 1000;
-  const BOOST_CHANCE_PER_COMPLETION = 0.03;
+  const BOOST_CHANCE_PER_COMPLETION = 0.1;
   const BOOST_COOLDOWN_MS = 2 * 60 * 60 * 1000;
 
   const state = {
@@ -282,6 +282,10 @@
     let level = 1;
     while (xp >= xpForLevel(level + 1)) level++;
     return level;
+  }
+
+  function levelStartXp(level) {
+    return level === 1 ? 0 : xpForLevel(level);
   }
 
   function chestReady(chest) {
@@ -796,12 +800,22 @@
     const level = levelFromXp(state.xp);
     levelDisplayEl.textContent = level;
     document.getElementById("level-display-inline").textContent = level;
-    const curLevelXp = xpForLevel(level);
+    const curLevelXp = levelStartXp(level);
     const nextLevelXp = xpForLevel(level + 1);
     document.getElementById("xp-progress").textContent =
       `${state.xp - curLevelXp}/${nextLevelXp - curLevelXp} XP`;
 
     chestAreaEl.innerHTML = "";
+    const readyCount = state.chests.filter((c) => !c.opened && chestReady(c)).length;
+    const waitingCount = state.chests.filter((c) => !c.opened && !chestReady(c)).length;
+    if (readyCount > 0 || waitingCount > 0) {
+      const counter = document.createElement("p");
+      counter.className = "chest-counter";
+      counter.textContent =
+        `📦 ${readyCount} ready to open` +
+        (waitingCount > 0 ? `, 🔒 ${waitingCount} still locked` : "");
+      chestAreaEl.appendChild(counter);
+    }
     for (const chest of state.chests) {
       const btn = document.createElement("button");
       btn.type = "button";
