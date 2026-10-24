@@ -122,6 +122,22 @@ header h1 {
 .badge.medium    { background: #fff3e0; color: #d35400; }
 .badge.hard      { background: #ffe3e3; color: #c0392b; }
 .badge.repeat    { background: #ece8ff; color: var(--accent); margin-left: 4px; }
+.badge.streak   { background: #fff0e0; color: #e17055; margin-left: 4px; }
+.badge.bonus    { background: #fffbe0; color: #b8860b; margin-left: 4px; }
+.badge.deadline { background: #e0f2f1; color: #00897b; margin-left: 4px; }
+.badge.deadline.overdue { background: #ffe3e3; color: #c0392b; }
+
+#deadline-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd8f0;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.gems b { color: #00b894; }
 
 .task-delete {
   border: none;
