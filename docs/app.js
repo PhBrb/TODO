@@ -806,27 +806,20 @@
       `${state.xp - curLevelXp}/${nextLevelXp - curLevelXp} XP`;
 
     chestAreaEl.innerHTML = "";
-    const readyCount = state.chests.filter((c) => !c.opened && chestReady(c)).length;
-    const waitingCount = state.chests.filter((c) => !c.opened && !chestReady(c)).length;
-    if (readyCount > 0 || waitingCount > 0) {
-      const counter = document.createElement("p");
-      counter.className = "chest-counter";
-      counter.textContent =
-        `📦 ${readyCount} ready to open` +
-        (waitingCount > 0 ? `, 🔒 ${waitingCount} still locked` : "");
-      chestAreaEl.appendChild(counter);
+    const unopened = state.chests.filter((c) => !c.opened);
+    const grouped = new Map();
+    for (const chest of unopened) {
+      const ready = chestReady(chest);
+      const key = ready ? "ready" : `locked:${CHEST_OPEN_MS - (Date.now() - chest.earnedAt)}`;
+      if (!grouped.has(key)) grouped.set(key, { chest, ready, count: 0 });
+      grouped.get(key).count++;
     }
-    for (const chest of state.chests) {
+    for (const { chest, ready, count } of grouped.values()) {
       const btn = document.createElement("button");
       btn.type = "button";
-      if (chest.opened) {
-        btn.className = "chest waiting";
-        btn.textContent = "📦 opened";
-        btn.disabled = true;
-      } else if (chestReady(chest)) {
+      if (ready) {
         btn.className = "chest ready";
-        const mins = Math.floor((Date.now() - chest.earnedAt) / 60000);
-        btn.textContent = `📦 Open me! (waited ${mins >= 60 ? Math.floor(mins / 60) + "h" : mins + "m"})`;
+        btn.textContent = `📦 Open me!${count > 1 ? ` (x${count})` : ""}`;
         btn.addEventListener("click", () => openChest(chest));
       } else {
         btn.className = "chest waiting";
@@ -834,7 +827,7 @@
         const remaining = CHEST_OPEN_MS - (Date.now() - chest.earnedAt);
         const h = Math.floor(remaining / 3600000);
         const m = Math.ceil((remaining % 3600000) / 60000);
-        btn.textContent = `🔒 ready to open in ${h}h ${m}m`;
+        btn.textContent = `🔒 opens in ${h}h ${m}m${count > 1 ? ` (x${count})` : ""}`;
       }
       chestAreaEl.appendChild(btn);
     }

@@ -152,13 +152,6 @@ header h1 {
   text-align: center;
 }
 
-.chest-counter {
-  width: 100%;
-  margin: 0 0 4px;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
 #chest-area {
   display: flex;
   flex-wrap: wrap;
