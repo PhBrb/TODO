@@ -6,13 +6,13 @@ Curated from 2_EngagemetFeatures.md
 #### Currency
 - ~~F1: XP~~
   - ~~earned from completing task~~ (1/5/12/25 XP for too easy/easy/medium/hard)
-  - ~~can not be spend~~
+  - ~~can not be spend~~ ~~(XP unlocks shop items at level thresholds)~~
   - unlocks new tiles and items in the shop (which are teased before)
   - ~~Levels shown in header, level up requires cumulative XP (100 per level * (level+1)/2)~~
   - Level progress below the daily/weekly goal is removed; the level indicator stays in the top right
 - ~~F2: Coins~~
   - ~~earned from completing task~~
-  - spent on new items and interaction with items
+  - ~~spent on new items~~ and interaction with items
 - ~~F3: Gems~~
   - ~~randomly earned from completing tasks~~, can be bought with coins (but expensive)
   - spent on special items, streak freeze, ...
@@ -82,7 +82,8 @@ Curated from 2_EngagemetFeatures.md
 - F31: Week/Month in review showing completed tasks and room evolution
 
 #### Items
-- F32: Can be bought in the store for coins or gems
+- ~~F32: Can be bought in the store for coins or gems~~
+  - 7 placeholder items (50-400 coins or 5-10 gems), purchasable once each, shown in an overlay with Shop/Owned tabs
 - F33: Some items take time to completely appear in the room, creating anticipation
 - F34: Stay permanently (after app restart) expect for seasonal items
 - F35: Moving big things costs coins or needs a task to be completed

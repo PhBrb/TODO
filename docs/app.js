@@ -523,4 +523,126 @@
   });
 
   render();
+
+  const shopBtn = document.getElementById("shop-btn");
+  const shopOverlay = document.getElementById("shop-overlay");
+  const shopClose = document.getElementById("shop-close");
+  const tabShop = document.getElementById("tab-shop");
+  const tabOwned = document.getElementById("tab-owned");
+  const shopContent = document.getElementById("shop-content");
+  let shopTab = "shop";
+
+  function itemCostLabel(item) {
+    if (item.costCoins > 0 && item.costGems > 0) {
+      return `${item.costCoins} 🪙 + ${item.costGems} 💎`;
+    }
+    return item.costCoins > 0 ? `${item.costCoins} 🪙` : `${item.costGems} 💎`;
+  }
+
+  function shopItemNode(item) {
+    const card = document.createElement("div");
+    card.className = "shop-item";
+    const owned = Game.itemIsOwned(item.id);
+    const unlockable = Game.itemIsUnlockable(item);
+    if (!unlockable) card.classList.add("locked");
+
+    const emoji = document.createElement("div");
+    emoji.className = "item-emoji";
+    emoji.textContent = item.emoji;
+
+    const name = document.createElement("div");
+    name.className = "item-name";
+    name.textContent = item.name;
+
+    const cost = document.createElement("div");
+    cost.className = "item-cost";
+    cost.textContent = itemCostLabel(item);
+
+    card.appendChild(emoji);
+    card.appendChild(name);
+    card.appendChild(cost);
+
+    if (owned) {
+      const tag = document.createElement("div");
+      tag.className = "item-lock";
+      tag.textContent = "✓ owned";
+      card.appendChild(tag);
+    } else if (!unlockable) {
+      const lock = document.createElement("div");
+      lock.className = "item-lock";
+      lock.textContent = `🔒 Level ${item.minLevel}`;
+      card.appendChild(lock);
+    } else {
+      const buy = document.createElement("button");
+      buy.type = "button";
+      buy.textContent = "Buy";
+      buy.addEventListener("click", () => {
+        const result = Game.purchaseItem(item.id);
+        if (result.ok) {
+          showToast(`🎉 ${item.emoji} ${item.name} purchased!`);
+          Game.saveState();
+        } else if (result.reason === "coins" || result.reason === "gems") {
+          showToast("Not enough coins/gems 💔");
+        }
+        renderShop();
+      });
+      card.appendChild(buy);
+    }
+    return card;
+  }
+
+  function renderShop() {
+    if (shopTab === "shop") {
+      shopContent.innerHTML = "";
+      for (const item of Game.SHOP_ITEMS) {
+        shopContent.appendChild(shopItemNode(item));
+      }
+    } else {
+      shopContent.innerHTML = "";
+      const owned = Game.SHOP_ITEMS.filter((it) => Game.itemIsOwned(it.id));
+      if (owned.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "shop-empty";
+        empty.textContent = "Nothing owned yet — complete tasks to earn rewards!";
+        shopContent.appendChild(empty);
+        return;
+      }
+      for (const item of owned) {
+        shopContent.appendChild(shopItemNode(item));
+      }
+    }
+    coinBalanceEl.textContent = Game.state.coins;
+    gemBalanceEl.textContent = Game.state.gems;
+  }
+
+  function openShop() {
+    shopTab = "shop";
+    tabShop.classList.add("active");
+    tabOwned.classList.remove("active");
+    renderShop();
+    shopOverlay.classList.remove("hidden");
+  }
+
+  function closeShop() {
+    shopOverlay.classList.add("hidden");
+    render();
+  }
+
+  shopBtn.addEventListener("click", openShop);
+  shopClose.addEventListener("click", closeShop);
+  shopOverlay.addEventListener("click", (e) => {
+    if (e.target === shopOverlay) closeShop();
+  });
+  tabShop.addEventListener("click", () => {
+    shopTab = "shop";
+    tabShop.classList.add("active");
+    tabOwned.classList.remove("active");
+    renderShop();
+  });
+  tabOwned.addEventListener("click", () => {
+    shopTab = "owned";
+    tabOwned.classList.add("active");
+    tabShop.classList.remove("active");
+    renderShop();
+  });
 })();

@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.16.2";
+  const VERSION = "0.17.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -36,6 +36,15 @@
   const BOOST_DURATION_MS = 60 * 60 * 1000;
   const BOOST_CHANCE_PER_COMPLETION = 0.1;
   const BOOST_COOLDOWN_MS = 2 * 60 * 60 * 1000;
+  const SHOP_ITEMS = [
+    { id: "plant",       name: "Plant",        emoji: "🪴", costCoins: 50,  costGems: 0, minLevel: 1 },
+    { id: "lamp",        name: "Lamp",         emoji: "💡", costCoins: 100, costGems: 0, minLevel: 2 },
+    { id: "poster",      name: "Poster",       emoji: "🖼️", costCoins: 150, costGems: 0, minLevel: 3 },
+    { id: "rug",         name: "Rug",          emoji: "🧶", costCoins: 250, costGems: 0, minLevel: 4 },
+    { id: "cat",         name: "Cat",          emoji: "🐱", costCoins: 400, costGems: 0, minLevel: 5 },
+    { id: "crystal",     name: "Crystal",      emoji: "🔮", costCoins: 0,   costGems: 5, minLevel: 3 },
+    { id: "trophy",      name: "Trophy",       emoji: "🏆", costCoins: 0,   costGems: 10, minLevel: 6 },
+  ];
 
   function defaultState() {
     return {
@@ -54,6 +63,7 @@
       boostCooldownUntil: 0,
       lastDailyMilestone: 0,
       lastWeeklyMilestone: 0,
+      ownedItems: [],
     };
   }
 
@@ -151,6 +161,9 @@
       boostCooldownUntil: num(raw.boostCooldownUntil, 0),
       lastDailyMilestone: raw.lastDailyMilestone ?? 0,
       lastWeeklyMilestone: raw.lastWeeklyMilestone ?? 0,
+      ownedItems: Array.isArray(raw.ownedItems)
+        ? raw.ownedItems.filter((id) => SHOP_ITEMS.some((it) => it.id === id))
+        : [],
     };
   }
 
@@ -710,6 +723,31 @@
   function showToast(message) { ui.showToast(message); }
   function promptDifficultyRating(task) { ui.promptDifficultyRating(task); }
 
+  function shopItemById(id) {
+    return SHOP_ITEMS.find((it) => it.id === id) || null;
+  }
+
+  function itemIsOwned(id) {
+    return state.ownedItems.includes(id);
+  }
+
+  function itemIsUnlockable(item) {
+    return levelFromXp(state.xp) >= item.minLevel;
+  }
+
+  function purchaseItem(id) {
+    const item = shopItemById(id);
+    if (!item) return { ok: false, reason: "unknown" };
+    if (itemIsOwned(id)) return { ok: false, reason: "owned" };
+    if (!itemIsUnlockable(item)) return { ok: false, reason: "level" };
+    if (state.coins < item.costCoins) return { ok: false, reason: "coins" };
+    if (state.gems < item.costGems) return { ok: false, reason: "gems" };
+    state.coins -= item.costCoins;
+    state.gems -= item.costGems;
+    state.ownedItems.push(id);
+    return { ok: true };
+  }
+
   window.Game = {
     ui,
     STORAGE_KEY,
@@ -800,6 +838,11 @@
     deleteTask,
     editTask,
     maybeSuggestDifficultyReduction,
+    SHOP_ITEMS,
+    shopItemById,
+    itemIsOwned,
+    itemIsUnlockable,
+    purchaseItem,
   };
 })();
 
