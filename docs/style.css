@@ -386,7 +386,7 @@ header h1 {
   margin-bottom: 16px;
 }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 #task-form {
   background: var(--card);
