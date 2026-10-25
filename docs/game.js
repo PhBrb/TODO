@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.20.5";
+  const VERSION = "0.21.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -127,6 +127,7 @@
               title: str(st.title, "Untitled"),
               difficulty: st.difficulty in COIN_REWARD ? st.difficulty : "easy",
               done: st.done === true,
+              chainedAfter: num(st.chainedAfter, 0),
               reward: isRecord(st.reward)
                 ? {
                     coins: num(st.reward.coins, 0),
@@ -489,6 +490,7 @@
       title,
       difficulty,
       done: false,
+      chainedAfter: 0,
     });
     parent.difficulty = deriveDifficulty(parent);
     saveState();
@@ -504,9 +506,77 @@
     render();
   }
 
+  function subtaskPredecessor(parent, subtask) {
+    if (!subtask.chainedAfter) return null;
+    return parent.subtasks.find((s) => s.id === subtask.chainedAfter) || null;
+  }
+
+  function subtaskChainSatisfies(parent, subtask) {
+    const predecessor = subtaskPredecessor(parent, subtask);
+    return !predecessor || predecessor.done;
+  }
+
+  function wouldCreateSubtaskCycle(parent, subtask, target) {
+    let current = target;
+    const guard = new Set();
+    while (current && current.chainedAfter && !guard.has(current.id)) {
+      guard.add(current.id);
+      if (current.chainedAfter === subtask.id) return true;
+      current = parent.subtasks.find((s) => s.id === current.chainedAfter);
+    }
+    return false;
+  }
+
+  function chainSubtask(parent, subtask, targetId) {
+    if (!parent || !subtask || subtask.done) return { ok: false, reason: "not chainable" };
+    const target = parent.subtasks.find((s) => s.id === targetId);
+    if (!target || target.id === subtask.id) return { ok: false, reason: "invalid target" };
+    if (target.chainedAfter === subtask.id) return { ok: false, reason: "would swap" };
+    if (wouldCreateSubtaskCycle(parent, subtask, target)) return { ok: false, reason: "cycle" };
+    for (const other of parent.subtasks) {
+      if (other.chainedAfter === subtask.id && other.id !== target.id) {
+        other.chainedAfter = target.id;
+      }
+    }
+    subtask.chainedAfter = target.id;
+    saveState();
+    render();
+    showToast(`\ud83d\udd17 "${subtask.title}" is now chained after "${target.title}"`);
+    return { ok: true };
+  }
+
+  function unchainSubtask(parent, subtask) {
+    if (!subtask.chainedAfter) return;
+    const oldId = subtask.chainedAfter;
+    subtask.chainedAfter = 0;
+    for (const other of parent.subtasks) {
+      if (other.chainedAfter === subtask.id) other.chainedAfter = oldId;
+    }
+    saveState();
+    render();
+  }
+
+  function deleteSubtask(parent, subtaskId) {
+    for (const other of parent.subtasks) {
+      if (other.chainedAfter === subtaskId) other.chainedAfter = 0;
+    }
+    parent.subtasks = parent.subtasks.filter((s) => s.id !== subtaskId);
+    parent.difficulty = deriveDifficulty(parent);
+    saveState();
+    render();
+  }
+
   function toggleSubtask(parent, subtask) {
     subtask.done = !subtask.done;
     if (subtask.done) {
+      if (!subtaskChainSatisfies(parent, subtask)) {
+        subtask.done = false;
+        const predecessor = subtaskPredecessor(parent, subtask);
+        showToast(`\ud83d\udd17 "${subtask.title}" is chained \u2014 complete "${predecessor.title}" first`);
+        saveState();
+        render();
+        return;
+      }
       awardSubtask(subtask);
       if (parent.subtasks.every((st) => st.done) && !parent.done) {
         completeTask(parent);
@@ -515,6 +585,9 @@
     } else {
       clawBackReward(subtask.reward);
       subtask.reward = null;
+      for (const other of parent.subtasks) {
+        if (other.chainedAfter === subtask.id && other.done) toggleSubtask(parent, other);
+      }
       if (parent.done && parent.completedViaSubtasks) {
         uncompleteTask(parent);
         parent.completedViaSubtasks = false;
@@ -987,6 +1060,11 @@
     chainSatisfiesDependency,
     chainTask,
     unchainTask,
+    subtaskPredecessor,
+    subtaskChainSatisfies,
+    chainSubtask,
+    unchainSubtask,
+    deleteSubtask,
     deriveDifficulty,
     addSubtask,
     editSubtask,
