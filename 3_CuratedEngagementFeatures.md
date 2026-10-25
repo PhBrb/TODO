@@ -58,9 +58,13 @@ Curated from 2_EngagemetFeatures.md
     - Confetti effect originates at the completed task; more difficult tasks produce more confetti
 - ~~F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion (after a 5-streak, eg. 5 days for daily, 5 weeks for weekly, without a "harder" rating)~~
 - F84: Backlog: user can create tasks with very low priority. They are not shown in the normal task list. When the normal task list is close to empty, suggest adding a task from the backlog.
-- F85: For repeating tasks with a bonus reward, the bonus is rerolled every time the task becomes available again.
-- F86: Option for a custom day start time: the new day starts at a user-chosen time (eg 4am) instead of midnight.
-- F87: Repeating tasks support different deadline types, eg a fixed time of day ("at 6pm") or X days after the task became active.
+- ~~F85: For repeating tasks with a bonus reward, the bonus is rerolled every time the task becomes available again.~~
+- ~~F86: Option for a custom day start time: the new day starts at a user-chosen time (eg 4am) instead of midnight.~~
+  - ~~Applies to daily reset, first task of the day and streak days; selectable under the daily progress (midnight to 6am)~~
+- ~~F87: Repeating tasks support a deadline type: a fixed time of day ("at 6pm").~~
+- ~~F89: Repeating tasks get an option "time after completion": the task becomes available again one interval after it was completed, instead of the next calendar interval (eg. next Monday).~~
+  - ~~When a task is set to repeating, the deadline selector changes to a time-of-day selector~~
+  - ~~When the task becomes available again, the new deadline is the next occurrence of that time of day~~
 - ~~Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon.~~ Manual override with sticky pin.
 
 

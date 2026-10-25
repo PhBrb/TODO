@@ -20,6 +20,9 @@
   const difficultySelect = document.getElementById("difficulty-select");
   const repeatSelect = document.getElementById("repeat-select");
   const deadlineInput = document.getElementById("deadline-input");
+  const deadlineWrap = document.getElementById("deadline-wrap");
+  const repeatTimeWrap = document.getElementById("repeat-time-wrap");
+  const repeatTimeInput = document.getElementById("repeat-time-input");
   const toastEl = document.getElementById("toast");
   const levelInlineEl = document.getElementById("level-display-inline");
   const xpProgressEl = document.getElementById("xp-progress");
@@ -371,17 +374,53 @@
     dlWrap.textContent = "📅 Deadline ";
     dlWrap.appendChild(dl);
 
+    const isRepeating = task.repeat !== "none" && task.repeat !== "every_5min";
+
+    const repTime = document.createElement("input");
+    repTime.type = "time";
+    if (Number.isFinite(task.repeatTime)) {
+      repTime.value = `${String(Math.floor(task.repeatTime / 60)).padStart(2, "0")}:${String(task.repeatTime % 60).padStart(2, "0")}`;
+    }
+    const repTimeWrap = document.createElement("label");
+    repTimeWrap.className = "deadline-label edit-deadline";
+    repTimeWrap.textContent = "🕐 Repeat due at ";
+    repTimeWrap.appendChild(repTime);
+
+    const afterComp = document.createElement("label");
+    afterComp.className = "after-completion-label";
+    const afterCompCb = document.createElement("input");
+    afterCompCb.type = "checkbox";
+    afterCompCb.checked = task.repeatAfterCompletion === true;
+    const afterCompText = document.createElement("span");
+    afterCompText.textContent = "Time after completion";
+    afterComp.appendChild(afterCompCb);
+    afterComp.appendChild(afterCompText);
+
+    const controls = isRepeating ? [diff, rep, repTimeWrap, afterComp] : [diff, rep, dlWrap];
+
     const row = buildEditRow(
       "edit-row",
       task.title,
-      [diff, rep, dlWrap],
-      (title) =>
-        Game.editTask(task.id, {
+      controls,
+      (title) => {
+        const updates = {
           title,
           difficulty: diff.value,
           repeat: rep.value,
-          deadline: dl.value,
-        })
+        };
+        if (isRepeating) {
+          if (repTime.value) {
+            const [h, m] = repTime.value.split(":").map(Number);
+            updates.repeatTime = (h || 0) * 60 + (m || 0);
+          } else {
+            updates.repeatTime = NaN;
+          }
+          updates.repeatAfterCompletion = afterCompCb.checked;
+        } else {
+          updates.deadline = dl.value;
+        }
+        Game.editTask(task.id, updates);
+      }
     );
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
   }
@@ -513,12 +552,28 @@
     render();
   });
 
+  function updateCreateFormMode() {
+    const isDaily = repeatSelect.value === "daily";
+    deadlineWrap.classList.toggle("hidden", isDaily);
+    repeatTimeWrap.classList.toggle("hidden", !isDaily);
+  }
+  repeatSelect.addEventListener("change", updateCreateFormMode);
+  updateCreateFormMode();
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const title = taskInput.value.trim();
     if (!title) return;
-    Game.addTask(title, difficultySelect.value, repeatSelect.value, deadlineInput.value);
+    if (repeatSelect.value === "daily" && repeatTimeInput.value) {
+      const [h, m] = repeatTimeInput.value.split(":").map(Number);
+      const t = Game.addTask(title, difficultySelect.value, repeatSelect.value, "");
+      Game.editTask(t, { repeatTime: (h || 0) * 60 + (m || 0) });
+    } else {
+      Game.addTask(title, difficultySelect.value, repeatSelect.value, deadlineInput.value);
+    }
     taskInput.value = "";
+    repeatTimeInput.value = "";
+    deadlineInput.value = "";
     taskInput.focus();
   });
 
@@ -644,5 +699,15 @@
     tabOwned.classList.add("active");
     tabShop.classList.remove("active");
     renderShop();
+  });
+
+  const dayStartSelect = document.getElementById("day-start-select");
+  dayStartSelect.value = String(Game.state.dayStartHour ?? 0);
+  if (![...dayStartSelect.options].some((o) => o.value === dayStartSelect.value)) {
+    dayStartSelect.value = "0";
+  }
+  dayStartSelect.addEventListener("change", () => {
+    Game.setDayStartHour(Number(dayStartSelect.value));
+    showToast(`🌅 Your day now starts at ${dayStartSelect.value.padStart(2, "0")}:00`);
   });
 })();

@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.17.2";
+  const VERSION = "0.18.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -64,6 +64,7 @@
       lastDailyMilestone: 0,
       lastWeeklyMilestone: 0,
       ownedItems: [],
+      dayStartHour: 0,
     };
   }
 
@@ -97,6 +98,8 @@
         : [],
       bonus: raw.bonus === true,
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
+      repeatTime: num(raw.repeatTime, NaN),
+      repeatAfterCompletion: raw.repeatAfterCompletion === true,
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
       completedViaSubtasks: raw.completedViaSubtasks === true,
@@ -164,6 +167,7 @@
       ownedItems: Array.isArray(raw.ownedItems)
         ? raw.ownedItems.filter((id) => SHOP_ITEMS.some((it) => it.id === id))
         : [],
+      dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
     };
   }
 
@@ -213,6 +217,7 @@
 
   function dayKey(ts) {
     const d = new Date(ts);
+    d.setHours(d.getHours() - (state.dayStartHour ?? 0));
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
   }
 
@@ -232,9 +237,43 @@
     return dayKey(d.getTime());
   }
 
-  function nextOccurrence(repeat, completedAt) {
+  function nextTimeOfDay(minutes) {
+    const next = new Date();
+    next.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
+    if (next.getTime() <= Date.now()) next.setDate(next.getDate() + 1);
+    return next.getTime();
+  }
+
+  function nextOccurrence(repeat, completedAt, repeatTime, repeatAfterCompletion) {
     if (repeat === "every_5min") return completedAt + 300000;
     const d = new Date(completedAt);
+    if (repeatAfterCompletion) {
+      if (repeat === "daily") {
+        d.setDate(d.getDate() + 1);
+        d.setHours(0, 0, 0, 0);
+        if (Number.isFinite(repeatTime)) {
+          d.setHours(Math.floor(repeatTime / 60), repeatTime % 60, 0, 0);
+        }
+        if (d.getTime() <= completedAt) d.setTime(d.getTime() + 86400000);
+        return d.getTime();
+      }
+      if (repeat === "weekly") {
+        d.setDate(d.getDate() + 7);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }
+      if (repeat === "monthly") {
+        d.setMonth(d.getMonth() + 1);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }
+    }
+    if (repeat === "daily" && Number.isFinite(repeatTime)) {
+      const next = new Date(d);
+      next.setHours(Math.floor(repeatTime / 60), repeatTime % 60, 0, 0);
+      if (next.getTime() <= completedAt) next.setDate(next.getDate() + 1);
+      return next.getTime();
+    }
     if (repeat === "daily") {
       d.setDate(d.getDate() + 1);
       d.setHours(0, 0, 0, 0);
@@ -266,9 +305,18 @@
     for (const task of state.tasks) {
       if (task.repeat === "none") continue;
       if (task.done && task.completedAt !== null) {
-        if (nextOccurrence(task.repeat, task.completedAt) <= now) {
+        if (nextOccurrence(task.repeat, task.completedAt, task.repeatTime, task.repeatAfterCompletion) <= now) {
           task.done = false;
           task.completedAt = null;
+          if (Number.isFinite(task.repeatTime)) {
+            task.deadline = nextTimeOfDay(task.repeatTime);
+          }
+          if (task.bonus) {
+            const wasBonus = task.bonus;
+            task.bonus = Math.random() < BONUS_TASK_RATE;
+            if (wasBonus && !task.bonus) changed = true;
+            if (task.bonus && !wasBonus) showToast(`⭐ "${task.title}" has a bonus reward this time!`);
+          }
           changed = true;
         }
       }
@@ -396,6 +444,8 @@
       streakDayKeys: [],
       bonus: isBonus,
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
+      repeatTime: NaN,
+      repeatAfterCompletion: false,
       ratedDifficulty: null,
       difficultySuggested: false,
       completedViaSubtasks: false,
@@ -405,6 +455,7 @@
     state.tasks.push(task);
     saveState();
     render();
+    return task.id;
   }
 
   const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
@@ -695,6 +746,23 @@
     if (updates.deadline !== undefined) {
       task.deadline = updates.deadline ? new Date(updates.deadline).getTime() : null;
     }
+    if (updates.repeatAfterCompletion !== undefined) {
+      task.repeatAfterCompletion = updates.repeatAfterCompletion === true;
+    }
+    if (updates.repeatTime !== undefined) {
+      task.repeatTime = Number.isFinite(updates.repeatTime)
+        ? Math.min(1439, Math.max(0, Math.floor(updates.repeatTime)))
+        : NaN;
+      if (Number.isFinite(task.repeatTime) && !task.done) {
+        task.deadline = nextTimeOfDay(task.repeatTime);
+      }
+    }
+    saveState();
+    render();
+  }
+
+  function setDayStartHour(hour) {
+    state.dayStartHour = Math.min(23, Math.max(0, Math.floor(hour)));
     saveState();
     render();
   }
@@ -843,6 +911,7 @@
     itemIsOwned,
     itemIsUnlockable,
     purchaseItem,
+    setDayStartHour,
   };
 })();
 
