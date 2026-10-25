@@ -131,8 +131,8 @@ header h1 {
 .badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
 .task-start { font-size: 0.75rem; padding: 2px 8px; margin-right: 4px; }
 .badge.chain { background: #f3e8ff; color: #8b5cf6; margin-left: 4px; cursor: pointer; }
+.task { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .task.drag-ready { outline: 2px dashed #8b5cf6; outline-offset: 2px; }
-.task.drag-ready, .task.dragging { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .task.dragging { opacity: 0.45; }
 .task.drop-target { outline: 2px solid #8b5cf6; outline-offset: 2px; }
 .task input[type="checkbox"]:disabled { cursor: not-allowed; }
