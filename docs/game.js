@@ -2,10 +2,13 @@
   "use strict";
 
 
-  const VERSION = "0.18.3";
+  const VERSION = "0.19.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
+
+  const TIME_LIMIT_MINUTES = [5, 15, 30, 60];
+  const TIME_BONUS_COINS = { too_easy: 0, easy: 5, medium: 10, hard: 20 };
 
   const COIN_REWARD = { too_easy: 0, easy: 10, medium: 25, hard: 50 };
   const DAILY_GOALS = [5, 10, 15, 25];
@@ -100,6 +103,8 @@
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       repeatTime: num(raw.repeatTime, NaN),
       repeatAfterCompletion: raw.repeatAfterCompletion === true,
+      timeLimit: num(raw.timeLimit, 0),
+      startedAt: num(raw.startedAt, 0),
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
       completedViaSubtasks: raw.completedViaSubtasks === true,
@@ -446,6 +451,8 @@
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
       repeatTime: NaN,
       repeatAfterCompletion: false,
+      timeLimit: 0,
+      startedAt: 0,
       ratedDifficulty: null,
       difficultySuggested: false,
       completedViaSubtasks: false,
@@ -561,6 +568,18 @@
     return { coins, xp: XP_REWARD[difficulty] || 0, mult };
   }
 
+  function timeBonusEarned(task) {
+    if (!task.timeLimit || !task.startedAt) return false;
+    return Date.now() - task.startedAt <= task.timeLimit * 60000;
+  }
+
+  function applyTimeBonus(task, reward) {
+    if (!timeBonusEarned(task)) return 0;
+    const bonus = TIME_BONUS_COINS[task.difficulty] || 0;
+    reward.coins += bonus;
+    return bonus;
+  }
+
   function computeReward(task) {
     const streakMult = task.streak > 0 ? streakBonus(task.streak) : 1;
     const reward = baseReward(task.difficulty, streakMult);
@@ -572,6 +591,7 @@
       reward.coins += BONUS_TASK_COINS;
       reward.gems += BONUS_TASK_GEMS;
     }
+    reward.timeBonus = applyTimeBonus(task, reward);
     return reward;
   }
 
@@ -621,6 +641,7 @@
     let msg = "+" + parts.join(" + ");
     if (reward.mult > 1.05) msg += ` (x${reward.mult.toFixed(2)})`;
     if (task.streak > 1) msg += ` 🔥 ${task.streak}`;
+    if (reward.timeBonus > 0) msg += ` ⏱️ +${reward.timeBonus} on time`;
     if (firstBonus && firstBonus.streak >= 3) {
       msg += ` 🌅 first task x${state.firstTaskStreak}`;
     }
@@ -628,12 +649,21 @@
     return msg;
   }
 
+  function startTask(task) {
+    if (task.done || !task.timeLimit) return;
+    if (task.startedAt && Date.now() - task.startedAt < task.timeLimit * 60000) return;
+    task.startedAt = Date.now();
+    saveState();
+    render();
+  }
+
   function completeTask(task) {
+    const reward = computeReward(task);
     task.done = true;
+    task.startedAt = 0;
     task.completedAt = Date.now();
     updateStreak(task, task.completedAt);
 
-    const reward = computeReward(task);
     const firstBonus = applyFirstTaskBonus();
     if (firstBonus) {
       reward.coins += firstBonus.coins;
@@ -655,6 +685,7 @@
       chestEarned,
       chestId,
       firstTaskDay: firstBonus ? firstBonus.streak : 0,
+      timeBonus: reward.timeBonus || 0,
     };
 
     if (leveledUp) announceLevelUp();
@@ -690,6 +721,7 @@
 
   function uncompleteTask(task) {
     task.done = false;
+    task.startedAt = 0;
     const key = task.completedAt ? repeatKey(task.repeat, task.completedAt) : null;
     if (key && task.streakDayKeys.includes(key)) {
       task.streakDayKeys.pop();
@@ -748,6 +780,12 @@
     }
     if (updates.repeatAfterCompletion !== undefined) {
       task.repeatAfterCompletion = updates.repeatAfterCompletion === true;
+    }
+    if (updates.timeLimit !== undefined) {
+      task.timeLimit = TIME_LIMIT_MINUTES.includes(updates.timeLimit)
+        ? updates.timeLimit
+        : 0;
+      if (!task.timeLimit) task.startedAt = 0;
     }
     if (updates.repeatTime !== undefined) {
       task.repeatTime = Number.isFinite(updates.repeatTime)
@@ -839,6 +877,8 @@
     FIRST_TASK_GEM_CHANCE,
     RATE_PROMPT_TIMEOUT,
     DIFFICULTY_SUGGESTION_STREAK,
+    TIME_LIMIT_MINUTES,
+    TIME_BONUS_COINS,
     XP_REWARD,
     XP_BASE_LEVEL,
     CHEST_OPEN_MS,
@@ -883,6 +923,8 @@
     rolloverCheckpoints,
     applyFirstTaskBonus,
     addTask,
+    startTask,
+    timeBonusEarned,
     deriveDifficulty,
     addSubtask,
     editSubtask,

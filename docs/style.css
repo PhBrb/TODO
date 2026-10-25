@@ -126,6 +126,10 @@ header h1 {
 .badge.bonus    { background: #fffbe0; color: #b8860b; margin-left: 4px; }
 .badge.deadline { background: #e0f2f1; color: #00897b; margin-left: 4px; }
 .badge.deadline.overdue { background: #ffe3e3; color: #c0392b; }
+.badge.timer { background: #e8f0ff; color: #3f6ab5; margin-left: 4px; }
+.badge.timer.running { background: #dcebff; color: #23509c; font-variant-numeric: tabular-nums; }
+.badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
+.task-start { font-size: 0.75rem; padding: 2px 8px; margin-right: 4px; }
 
 .deadline-label {
   display: flex;

@@ -64,6 +64,13 @@
     ["monthly", "Monthly"],
     ["every_5min", "Every 5 min (test)"],
   ];
+  const TIME_LIMIT_OPTIONS = [
+    [0, "No time limit"],
+    [5, "5 min"],
+    [15, "15 min"],
+    [30, "30 min"],
+    [60, "60 min"],
+  ];
 
   function buildSelect(options, selected) {
     const select = document.createElement("select");
@@ -87,6 +94,11 @@
     const m = Math.floor(remaining / 60000);
     const s = Math.floor((remaining % 60000) / 1000);
     return `${m}m ${s}s`;
+  }
+
+  function timeLimitRemaining(task, now) {
+    if (!task.timeLimit || !task.startedAt) return null;
+    return task.startedAt + task.timeLimit * 60000 - now;
   }
 
 
@@ -258,6 +270,20 @@
       dl.textContent = formatDeadline(task.deadline);
       meta.appendChild(dl);
     }
+    if (task.timeLimit && !task.done) {
+      if (task.startedAt) {
+        const tl = document.createElement("span");
+        tl.className = "badge timer running";
+        tl.dataset.taskId = task.id;
+        tl.textContent = `⏱️ ${formatMinutesSeconds(Math.max(0, timeLimitRemaining(task, Date.now())))}`;
+        meta.appendChild(tl);
+      } else {
+        const tl = document.createElement("span");
+        tl.className = "badge timer";
+        tl.textContent = `⏱️ ${task.timeLimit}m`;
+        meta.appendChild(tl);
+      }
+    }
 
     body.appendChild(title);
     body.appendChild(meta);
@@ -329,6 +355,16 @@
       body.appendChild(sublist);
     }
 
+    if (task.timeLimit && !task.done && timeLimitRemaining(task, Date.now()) <= 0) {
+      const start = document.createElement("button");
+      start.className = "task-start";
+      start.type = "button";
+      start.textContent = "▶ Start";
+      start.title = `Finish within ${task.timeLimit} min for a bonus`;
+      start.addEventListener("click", () => Game.startTask(task));
+      actions.appendChild(start);
+    }
+
     const del = document.createElement("button");
     del.className = "task-delete";
     del.textContent = "✕";
@@ -386,6 +422,12 @@
     repTimeWrap.textContent = "🕐 Repeat due at ";
     repTimeWrap.appendChild(repTime);
 
+    const timeLimit = buildSelect(TIME_LIMIT_OPTIONS, task.timeLimit || 0);
+    const timeLimitWrap = document.createElement("label");
+    timeLimitWrap.className = "deadline-label";
+    timeLimitWrap.textContent = "⏱️ Time limit ";
+    timeLimitWrap.appendChild(timeLimit);
+
     const afterComp = document.createElement("label");
     afterComp.className = "after-completion-label";
     const afterCompCb = document.createElement("input");
@@ -396,7 +438,9 @@
     afterComp.appendChild(afterCompCb);
     afterComp.appendChild(afterCompText);
 
-    const controls = isRepeating ? [diff, rep, repTimeWrap, afterComp] : [diff, rep, dlWrap];
+    const controls = isRepeating
+      ? [diff, rep, repTimeWrap, afterComp, timeLimitWrap]
+      : [diff, rep, dlWrap, timeLimitWrap];
 
     const row = buildEditRow(
       "edit-row",
@@ -409,6 +453,7 @@
           repeat: rep.value,
         };
         if (isRepeating) {
+          updates.timeLimit = Number(timeLimit.value);
           if (repTime.value) {
             const [h, m] = repTime.value.split(":").map(Number);
             updates.repeatTime = (h || 0) * 60 + (m || 0);
@@ -418,6 +463,7 @@
           updates.repeatAfterCompletion = afterCompCb.checked;
         } else {
           updates.deadline = dl.value;
+          updates.timeLimit = Number(timeLimit.value);
         }
         Game.editTask(task.id, updates);
       }
@@ -529,6 +575,14 @@
       boostTimerEl.textContent = formatMinutesSeconds(remaining);
     } else {
       boostBannerEl.classList.add("hidden");
+    }
+
+    for (const node of listEl.querySelectorAll(".badge.timer.running")) {
+      const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
+      if (!task) continue;
+      const remaining = timeLimitRemaining(task, now);
+      node.textContent = `⏱️ ${formatMinutesSeconds(Math.max(0, remaining))}`;
+      node.classList.toggle("overdue", remaining <= 0);
     }
 
     const unopened = Game.state.chests.filter((c) => !c.opened);
