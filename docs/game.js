@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.16.0";
+  const VERSION = "0.16.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -37,23 +37,27 @@
   const BOOST_CHANCE_PER_COMPLETION = 0.1;
   const BOOST_COOLDOWN_MS = 2 * 60 * 60 * 1000;
 
-  const state = {
-    coins: 0,
-    gems: 0,
-    dailyCompleted: 0,
-    tasks: [],
-    nextId: 1,
-    firstTaskStreak: 0,
-    lastFirstTaskDayKey: null,
-    weeklyCompleted: 0,
-    weekKey: null,
-    xp: 0,
-    chests: [],
-    boostUntil: 0,
-    boostCooldownUntil: 0,
-    lastDailyMilestone: 0,
-    lastWeeklyMilestone: 0,
-  };
+  function defaultState() {
+    return {
+      coins: 0,
+      gems: 0,
+      dailyCompleted: 0,
+      tasks: [],
+      nextId: 1,
+      firstTaskStreak: 0,
+      lastFirstTaskDayKey: null,
+      weeklyCompleted: 0,
+      weekKey: null,
+      xp: 0,
+      chests: [],
+      boostUntil: 0,
+      boostCooldownUntil: 0,
+      lastDailyMilestone: 0,
+      lastWeeklyMilestone: 0,
+    };
+  }
+
+  const state = defaultState();
 
   function isRecord(v) {
     return v !== null && typeof v === "object" && !Array.isArray(v);
@@ -73,9 +77,7 @@
       id: num(raw.id, i + 1),
       title: str(raw.title, "Untitled"),
       difficulty: raw.difficulty in COIN_REWARD ? raw.difficulty : "easy",
-      repeat: ["none", "daily", "weekly", "monthly", "every_5min"].includes(raw.repeat)
-        ? raw.repeat
-        : "none",
+      repeat: REPEAT_VALUES.includes(raw.repeat) ? raw.repeat : "none",
       done: raw.done === true,
       createdAt: num(raw.createdAt, Date.now()),
       completedAt: typeof raw.completedAt === "number" ? raw.completedAt : null,
@@ -165,6 +167,11 @@
     } catch {
       return null;
     }
+  }
+
+  function resetState() {
+    Object.assign(state, defaultState());
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }
 
   function saveState() {
@@ -388,6 +395,7 @@
   }
 
   const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
+  const REPEAT_VALUES = ["none", "daily", "weekly", "monthly", "every_5min"];
 
   function deriveDifficulty(task) {
     if (task.subtasks.length === 0) return task.difficulty;
@@ -673,7 +681,7 @@
       task.difficulty = updates.difficulty;
     }
     if (updates.repeat !== undefined &&
-        ["none", "daily", "weekly", "monthly", "every_5min"].includes(updates.repeat)) {
+        REPEAT_VALUES.includes(updates.repeat)) {
       task.repeat = updates.repeat;
       if (updates.repeat === "none") {
         task.streak = 0;
@@ -746,6 +754,9 @@
     BOOST_COOLDOWN_MS,
     VERSION,
     DIFFICULTY_ORDER,
+    REPEAT_VALUES,
+    defaultState,
+    resetState,
     state,
     isRecord,
     num,

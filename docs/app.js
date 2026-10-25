@@ -21,6 +21,8 @@
   const repeatSelect = document.getElementById("repeat-select");
   const deadlineInput = document.getElementById("deadline-input");
   const toastEl = document.getElementById("toast");
+  const levelInlineEl = document.getElementById("level-display-inline");
+  const xpProgressEl = document.getElementById("xp-progress");
 
   let toastTimer = null;
   const toastQueue = [];
@@ -425,10 +427,10 @@
 
     const level = Game.levelFromXp(Game.state.xp);
     levelDisplayEl.textContent = level;
-    document.getElementById("level-display-inline").textContent = level;
+    levelInlineEl.textContent = level;
     const curLevelXp = Game.levelStartXp(level);
     const nextLevelXp = Game.xpForLevel(level + 1);
-    document.getElementById("xp-progress").textContent =
+    xpProgressEl.textContent =
       `${Game.state.xp - curLevelXp}/${nextLevelXp - curLevelXp} XP`;
 
     chestAreaEl.innerHTML = "";
@@ -506,22 +508,7 @@
 
   resetBtn.addEventListener("click", () => {
     if (!confirm("Reset ALL data? This can not be undone.")) return;
-    try { localStorage.removeItem(Game.STORAGE_KEY); } catch {}
-    Game.state.coins = 0;
-    Game.state.gems = 0;
-    Game.state.dailyCompleted = 0;
-    Game.state.tasks = [];
-    Game.state.nextId = 1;
-    Game.state.firstTaskStreak = 0;
-    Game.state.lastFirstTaskDayKey = null;
-    Game.state.weeklyCompleted = 0;
-    Game.state.weekKey = null;
-    Game.state.xp = 0;
-    Game.state.chests = [];
-    Game.state.boostUntil = 0;
-    Game.state.boostCooldownUntil = 0;
-    Game.state.lastDailyMilestone = 0;
-    Game.state.lastWeeklyMilestone = 0;
+    Game.resetState();
     Game.saveState();
     render();
   });
