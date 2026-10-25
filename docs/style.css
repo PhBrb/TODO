@@ -136,6 +136,27 @@ header h1 {
 .task.dragging { opacity: 0.45; }
 .task.drop-target { outline: 2px solid #8b5cf6; outline-offset: 2px; }
 .task input[type="checkbox"]:disabled { cursor: not-allowed; }
+.chain-link-row {
+  display: flex;
+  align-items: center;
+  height: 14px;
+  margin: -2px 0 -2px 18px;
+}
+.chain-line {
+  flex: 1;
+  height: 2px;
+  background: #8b5cf6;
+  border-radius: 1px;
+}
+.chain-unlink {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.chain-unlink:hover { opacity: 1; }
 
 .deadline-label {
   display: flex;

@@ -303,6 +303,50 @@
     });
   }
 
+  function chainOrdered(tasks) {
+    const base = sortTasks(tasks);
+    const baseIndex = new Map(base.map((t, i) => [t.id, i]));
+    const byId = new Map(tasks.map((t) => [t.id, t]));
+    const emitted = new Set();
+    const result = [];
+    const emitFrom = (task) => {
+      if (emitted.has(task.id)) return;
+      emitted.add(task.id);
+      result.push(task);
+      const successors = tasks
+        .filter((t) => t.chainedAfter === task.id)
+        .sort((a, b) => baseIndex.get(a.id) - baseIndex.get(b.id));
+      for (const s of successors) emitFrom(s);
+    };
+    for (const task of base) {
+      if (emitted.has(task.id)) continue;
+      let head = task;
+      const guard = new Set();
+      while (head.chainedAfter && byId.has(head.chainedAfter) && !guard.has(head.id)) {
+        guard.add(head.id);
+        head = byId.get(head.chainedAfter);
+      }
+      emitFrom(head);
+    }
+    return result;
+  }
+
+  function chainLinkNode(task) {
+    const li = document.createElement("li");
+    li.className = "chain-link-row";
+    const line = document.createElement("span");
+    line.className = "chain-line";
+    const unlink = document.createElement("button");
+    unlink.type = "button";
+    unlink.className = "chain-unlink";
+    unlink.textContent = "🔗";
+    unlink.title = "Chained \u2014 click to remove the link";
+    unlink.addEventListener("click", () => Game.unchainTask(task));
+    li.appendChild(line);
+    li.appendChild(unlink);
+    return li;
+  }
+
   function taskNode(task) {
     const li = document.createElement("li");
     li.className = "task" + (task.done ? " done" : "");
@@ -343,14 +387,6 @@
         st.textContent = "🔥 " + task.streak;
         meta.appendChild(st);
       }
-    }
-    if (task.chainedAfter && !task.done) {
-      const chain = document.createElement("span");
-      chain.className = "badge chain";
-      chain.title = "Chained \u2014 click to remove the link";
-      chain.textContent = "🔗 chained";
-      chain.addEventListener("click", () => Game.unchainTask(task));
-      meta.appendChild(chain);
     }
     if (task.deadline && !task.done) {
       const dl = document.createElement("span");
@@ -562,9 +598,12 @@
   }
 
   let render = function () {
-    const sorted = sortTasks(Game.state.tasks);
+    const sorted = chainOrdered(Game.state.tasks);
     listEl.innerHTML = "";
-    for (const task of sorted) listEl.appendChild(taskNode(task));
+    for (const task of sorted) {
+      if (task.chainedAfter) listEl.appendChild(chainLinkNode(task));
+      listEl.appendChild(taskNode(task));
+    }
 
     emptyHint.classList.toggle("hidden", Game.state.tasks.length > 0);
     coinBalanceEl.textContent = Game.state.coins;
