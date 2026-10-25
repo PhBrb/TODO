@@ -36,6 +36,9 @@ Curated from 2_EngagemetFeatures.md
   - Parent task gets the difficulty of its most difficult sub-task (not editable while sub-tasks exist)
 - ~~F9: Option to set a time limit for task. If the user finishes the task within the time after marking it as "task started", the user gets more rewards.~~
 - ~~F10: Task can be chained, to promote real life habit building. If tasks in a streak are solved right after another, give x1.2 bonus per task~~
+  - ~~Tasks and subtasks can be chained via hold-and-drag; a chained item is locked until its predecessor is completed~~
+  - ~~Chained items stay together in link order, connected by a clickable link~~
+  - ~~The x1.2 bonus for consecutive chain completion is not implemented~~
 - ~~F13: Option for repeating task: user can select when a task returns~~
   - Daily, weekly, monthly
   - MWE test mode: repeat every 5 minutes
