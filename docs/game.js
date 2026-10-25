@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.21.0";
+  const VERSION = "0.21.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -506,54 +506,66 @@
     render();
   }
 
-  function subtaskPredecessor(parent, subtask) {
-    if (!subtask.chainedAfter) return null;
-    return parent.subtasks.find((s) => s.id === subtask.chainedAfter) || null;
+  function chainPredecessorIn(siblings, item) {
+    if (!item.chainedAfter) return null;
+    return siblings.find((s) => s.id === item.chainedAfter) || null;
   }
 
-  function subtaskChainSatisfies(parent, subtask) {
-    const predecessor = subtaskPredecessor(parent, subtask);
+  function chainSatisfiedIn(siblings, item) {
+    const predecessor = chainPredecessorIn(siblings, item);
     return !predecessor || predecessor.done;
   }
 
-  function wouldCreateSubtaskCycle(parent, subtask, target) {
-    let current = target;
-    const guard = new Set();
-    while (current && current.chainedAfter && !guard.has(current.id)) {
-      guard.add(current.id);
-      if (current.chainedAfter === subtask.id) return true;
-      current = parent.subtasks.find((s) => s.id === current.chainedAfter);
-    }
-    return false;
+  function chainWouldCycleIn(siblings, item, target) {
+    if (target.id === item.id) return true;
+    const predecessor = chainPredecessorIn(siblings, target);
+    if (!predecessor) return false;
+    return chainWouldCycleIn(siblings, item, predecessor);
   }
 
-  function chainSubtask(parent, subtask, targetId) {
-    if (!parent || !subtask || subtask.done) return { ok: false, reason: "not chainable" };
-    const target = parent.subtasks.find((s) => s.id === targetId);
-    if (!target || target.id === subtask.id) return { ok: false, reason: "invalid target" };
-    if (target.chainedAfter === subtask.id) return { ok: false, reason: "would swap" };
-    if (wouldCreateSubtaskCycle(parent, subtask, target)) return { ok: false, reason: "cycle" };
-    for (const other of parent.subtasks) {
-      if (other.chainedAfter === subtask.id && other.id !== target.id) {
+  function chainIn(siblings, item, targetId, linkEmoji) {
+    if (!item || item.done) return { ok: false, reason: "not chainable" };
+    const target = siblings.find((s) => s.id === targetId);
+    if (!target || target.id === item.id) return { ok: false, reason: "invalid target" };
+    if (target.chainedAfter === item.id) return { ok: false, reason: "would swap" };
+    if (chainWouldCycleIn(siblings, item, target)) return { ok: false, reason: "cycle" };
+    for (const other of siblings) {
+      if (other.chainedAfter === item.id && other.id !== target.id) {
         other.chainedAfter = target.id;
       }
     }
-    subtask.chainedAfter = target.id;
+    item.chainedAfter = target.id;
     saveState();
     render();
-    showToast(`\ud83d\udd17 "${subtask.title}" is now chained after "${target.title}"`);
+    showToast(`${linkEmoji} "${item.title}" is now chained after "${target.title}"`);
     return { ok: true };
   }
 
-  function unchainSubtask(parent, subtask) {
-    if (!subtask.chainedAfter) return;
-    const oldId = subtask.chainedAfter;
-    subtask.chainedAfter = 0;
-    for (const other of parent.subtasks) {
-      if (other.chainedAfter === subtask.id) other.chainedAfter = oldId;
+  function unchainIn(siblings, item) {
+    if (!item.chainedAfter) return;
+    const oldId = item.chainedAfter;
+    item.chainedAfter = 0;
+    for (const other of siblings) {
+      if (other.chainedAfter === item.id) other.chainedAfter = oldId;
     }
     saveState();
     render();
+  }
+
+  function subtaskPredecessor(parent, subtask) {
+    return chainPredecessorIn(parent.subtasks, subtask);
+  }
+
+  function subtaskChainSatisfies(parent, subtask) {
+    return chainSatisfiedIn(parent.subtasks, subtask);
+  }
+
+  function chainSubtask(parent, subtask, targetId) {
+    return chainIn(parent.subtasks, subtask, targetId, "\ud83d\udd17");
+  }
+
+  function unchainSubtask(parent, subtask) {
+    return unchainIn(parent.subtasks, subtask);
   }
 
   function deleteSubtask(parent, subtaskId) {
@@ -733,49 +745,19 @@
   }
 
   function chainPredecessor(task) {
-    if (!task.chainedAfter) return null;
-    return state.tasks.find((t) => t.id === task.chainedAfter) || null;
+    return chainPredecessorIn(state.tasks, task);
   }
 
   function chainSatisfiesDependency(task) {
-    const predecessor = chainPredecessor(task);
-    return !predecessor || predecessor.done;
-  }
-
-  function wouldCreateChainCycle(task, target) {
-    if (task.id === target.id) return true;
-    const predecessor = chainPredecessor(target);
-    if (!predecessor) return false;
-    return wouldCreateChainCycle(task, predecessor);
+    return chainSatisfiedIn(state.tasks, task);
   }
 
   function chainTask(task, targetId) {
-    if (!task || task.done) return { ok: false, reason: "not chainable" };
-    const target = state.tasks.find((t) => t.id === targetId);
-    if (!target || target.id === task.id) return { ok: false, reason: "invalid target" };
-    if (target.chainedAfter === task.id) return { ok: false, reason: "would swap" };
-    if (wouldCreateChainCycle(task, target)) return { ok: false, reason: "cycle" };
-    for (const other of state.tasks) {
-      if (other.chainedAfter === task.id && other.id !== target.id) {
-        other.chainedAfter = target.id;
-      }
-    }
-    task.chainedAfter = target.id;
-    saveState();
-    render();
-    showToast(`\ud83e\uddf1 "${task.title}" is now chained after "${target.title}"`);
-    return { ok: true };
+    return chainIn(state.tasks, task, targetId, "\ud83e\uddf1");
   }
 
   function unchainTask(task) {
-    if (!task.chainedAfter) return;
-    const oldId = task.chainedAfter;
-    task.chainedAfter = 0;
-    for (const other of state.tasks) {
-      if (other.chainedAfter === task.id) other.chainedAfter = oldId;
-    }
-    saveState();
-    render();
+    return unchainIn(state.tasks, task);
   }
 
   function completeTask(task) {

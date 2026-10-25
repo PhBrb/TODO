@@ -117,8 +117,7 @@
     document.querySelectorAll(".drop-target").forEach((el) => el.classList.remove("drop-target"));
   }
 
-  function dropTargetAt(x, y, drag) {
-    const dropEl = document.elementFromPoint(x, y);
+  function dropTargetAt(dropEl, drag) {
     if (!dropEl || !dropEl.closest) return null;
     if (drag.kind === "subtask") {
       const subRow = dropEl.closest(".subtask");
@@ -127,12 +126,9 @@
       }
       return null;
     }
-    if (dropEl.closest(".subtask")) return null;
     const taskRow = dropEl.closest(".task");
-    if (taskRow && taskRow !== drag.sourceNode) {
-      return { kind: "task", id: Number(taskRow.dataset.id) };
-    }
-    return null;
+    if (!taskRow || taskRow === drag.sourceNode) return null;
+    return { kind: "task", id: Number(taskRow.dataset.id) };
   }
 
   function finishDrag(ev) {
@@ -141,7 +137,7 @@
     drag.sourceNode.classList.remove("dragging");
     clearDropHighlights();
     if (!ev) return;
-    const target = dropTargetAt(ev.clientX, ev.clientY, drag);
+    const target = dropTargetAt(document.elementFromPoint(ev.clientX, ev.clientY), drag);
     if (!target) return;
     if (drag.kind === "subtask") {
       Game.chainSubtask(drag.parent, drag.subtask, target.id);
@@ -183,13 +179,12 @@
         clearDropHighlights();
         const dropEl = document.elementFromPoint(ev.clientX, ev.clientY);
         if (!dropEl) return;
-        const target = dropTargetAt(ev.clientX, ev.clientY, activeDrag);
-        let targetRow = null;
-        if (target && target.kind === "subtask") {
-          targetRow = dropEl.closest(".subtask");
-        } else if (target && target.kind === "task") {
-          targetRow = dropEl.closest(".task");
-        }
+        const target = dropTargetAt(dropEl, activeDrag);
+        const targetRow = target && target.kind === "subtask"
+          ? dropEl.closest(".subtask")
+          : target
+            ? dropEl.closest(".task")
+            : null;
         if (targetRow && targetRow !== li) targetRow.classList.add("drop-target");
       };
       const onUp = (ev) => {
@@ -347,24 +342,24 @@
     });
   }
 
-  function chainOrdered(tasks) {
-    const base = sortTasks(tasks);
-    const baseIndex = new Map(base.map((t, i) => [t.id, i]));
-    const byId = new Map(tasks.map((t) => [t.id, t]));
+  function chainOrdered(items, base) {
+    const ordered = base || items;
+    const baseIndex = new Map(ordered.map((it, i) => [it.id, i]));
+    const byId = new Map(items.map((it) => [it.id, it]));
     const emitted = new Set();
     const result = [];
-    const emitFrom = (task) => {
-      if (emitted.has(task.id)) return;
-      emitted.add(task.id);
-      result.push(task);
-      const successors = tasks
-        .filter((t) => t.chainedAfter === task.id)
+    const emitFrom = (item) => {
+      if (emitted.has(item.id)) return;
+      emitted.add(item.id);
+      result.push(item);
+      const successors = items
+        .filter((it) => it.chainedAfter === item.id)
         .sort((a, b) => baseIndex.get(a.id) - baseIndex.get(b.id));
       for (const s of successors) emitFrom(s);
     };
-    for (const task of base) {
-      if (emitted.has(task.id)) continue;
-      let head = task;
+    for (const item of ordered) {
+      if (emitted.has(item.id)) continue;
+      let head = item;
       const guard = new Set();
       while (head.chainedAfter && byId.has(head.chainedAfter) && !guard.has(head.id)) {
         guard.add(head.id);
@@ -375,9 +370,9 @@
     return result;
   }
 
-  function chainLinkNode(task) {
-    const li = document.createElement("li");
-    li.className = "chain-link-row";
+  function chainLinkNode(className, onUnlink) {
+    const row = document.createElement(className === "chain-link-row" ? "li" : "div");
+    row.className = className;
     const line = document.createElement("span");
     line.className = "chain-line";
     const unlink = document.createElement("button");
@@ -385,49 +380,7 @@
     unlink.className = "chain-unlink";
     unlink.textContent = "🔗";
     unlink.title = "Chained \u2014 click to remove the link";
-    unlink.addEventListener("click", () => Game.unchainTask(task));
-    li.appendChild(line);
-    li.appendChild(unlink);
-    return li;
-  }
-
-  function subtaskChainOrdered(parent) {
-    const subtasks = parent.subtasks;
-    const byId = new Map(subtasks.map((s) => [s.id, s]));
-    const emitted = new Set();
-    const result = [];
-    const emitFrom = (sub) => {
-      if (emitted.has(sub.id)) return;
-      emitted.add(sub.id);
-      result.push(sub);
-      for (const s of subtasks) {
-        if (s.chainedAfter === sub.id) emitFrom(s);
-      }
-    };
-    for (const sub of subtasks) {
-      if (emitted.has(sub.id)) continue;
-      let head = sub;
-      const guard = new Set();
-      while (head.chainedAfter && byId.has(head.chainedAfter) && !guard.has(head.id)) {
-        guard.add(head.id);
-        head = byId.get(head.chainedAfter);
-      }
-      emitFrom(head);
-    }
-    return result;
-  }
-
-  function subtaskLinkNode(parent, subtask) {
-    const row = document.createElement("div");
-    row.className = "subtask-link-row";
-    const line = document.createElement("span");
-    line.className = "chain-line";
-    const unlink = document.createElement("button");
-    unlink.type = "button";
-    unlink.className = "chain-unlink";
-    unlink.textContent = "\ud83d\udd17";
-    unlink.title = "Chained \u2014 click to remove the link";
-    unlink.addEventListener("click", () => Game.unchainSubtask(parent, subtask));
+    unlink.addEventListener("click", onUnlink);
     row.appendChild(line);
     row.appendChild(unlink);
     return row;
@@ -501,8 +454,10 @@
     if (task.subtasks.length > 0 || !task.done) {
       const sublist = document.createElement("div");
       sublist.className = "subtask-list";
-      for (const st of subtaskChainOrdered(task)) {
-        if (st.chainedAfter) sublist.appendChild(subtaskLinkNode(task, st));
+      for (const st of chainOrdered(task.subtasks)) {
+        if (st.chainedAfter) {
+          sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
+        }
         const row = document.createElement("div");
         row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
         row.dataset.parentId = task.id;
@@ -686,10 +641,12 @@
   }
 
   let render = function () {
-    const sorted = chainOrdered(Game.state.tasks);
+    const sorted = chainOrdered(Game.state.tasks, sortTasks(Game.state.tasks));
     listEl.innerHTML = "";
     for (const task of sorted) {
-      if (task.chainedAfter) listEl.appendChild(chainLinkNode(task));
+      if (task.chainedAfter) {
+        listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
+      }
       listEl.appendChild(taskNode(task));
     }
 
