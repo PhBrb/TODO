@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.17.2";
+  const VERSION = "0.18.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -64,6 +64,7 @@
       lastDailyMilestone: 0,
       lastWeeklyMilestone: 0,
       ownedItems: [],
+      dayStartHour: 0,
     };
   }
 
@@ -97,6 +98,11 @@
         : [],
       bonus: raw.bonus === true,
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
+      deadlineType: ["none", "time_of_day", "days_after"].includes(raw.deadlineType)
+        ? raw.deadlineType
+        : "none",
+      deadlineTimeOfDay: num(raw.deadlineTimeOfDay, 0),
+      deadlineDays: num(raw.deadlineDays, 1),
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
       completedViaSubtasks: raw.completedViaSubtasks === true,
@@ -164,6 +170,7 @@
       ownedItems: Array.isArray(raw.ownedItems)
         ? raw.ownedItems.filter((id) => SHOP_ITEMS.some((it) => it.id === id))
         : [],
+      dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
     };
   }
 
@@ -213,6 +220,7 @@
 
   function dayKey(ts) {
     const d = new Date(ts);
+    d.setHours(d.getHours() - (state.dayStartHour ?? 0));
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
   }
 
@@ -232,9 +240,21 @@
     return dayKey(d.getTime());
   }
 
-  function nextOccurrence(repeat, completedAt) {
+  function nextOccurrence(repeat, completedAt, deadlineType, deadlineTimeOfDay, deadlineDays) {
     if (repeat === "every_5min") return completedAt + 300000;
     const d = new Date(completedAt);
+    if (repeat === "daily" && deadlineType === "time_of_day") {
+      const next = new Date(d);
+      next.setHours(Math.floor(deadlineTimeOfDay / 60), deadlineTimeOfDay % 60, 0, 0);
+      if (next.getTime() <= completedAt) next.setDate(next.getDate() + 1);
+      return next.getTime();
+    }
+    if (repeat !== "none" && repeat !== "every_5min" && deadlineType === "days_after") {
+      const next = new Date(d);
+      next.setDate(next.getDate() + deadlineDays);
+      next.setHours(0, 0, 0, 0);
+      return next.getTime();
+    }
     if (repeat === "daily") {
       d.setDate(d.getDate() + 1);
       d.setHours(0, 0, 0, 0);
@@ -266,9 +286,15 @@
     for (const task of state.tasks) {
       if (task.repeat === "none") continue;
       if (task.done && task.completedAt !== null) {
-        if (nextOccurrence(task.repeat, task.completedAt) <= now) {
+        if (nextOccurrence(task.repeat, task.completedAt, task.deadlineType, task.deadlineTimeOfDay, task.deadlineDays) <= now) {
           task.done = false;
           task.completedAt = null;
+          if (task.bonus) {
+            const wasBonus = task.bonus;
+            task.bonus = Math.random() < BONUS_TASK_RATE;
+            if (wasBonus && !task.bonus) changed = true;
+            if (task.bonus && !wasBonus) showToast(`⭐ "${task.title}" has a bonus reward this time!`);
+          }
           changed = true;
         }
       }
@@ -396,6 +422,9 @@
       streakDayKeys: [],
       bonus: isBonus,
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
+      deadlineType: "none",
+      deadlineTimeOfDay: 0,
+      deadlineDays: 1,
       ratedDifficulty: null,
       difficultySuggested: false,
       completedViaSubtasks: false,
@@ -695,6 +724,22 @@
     if (updates.deadline !== undefined) {
       task.deadline = updates.deadline ? new Date(updates.deadline).getTime() : null;
     }
+    if (updates.deadlineType !== undefined &&
+        ["none", "time_of_day", "days_after"].includes(updates.deadlineType)) {
+      task.deadlineType = updates.deadlineType;
+    }
+    if (updates.deadlineTimeOfDay !== undefined) {
+      task.deadlineTimeOfDay = Math.min(1439, Math.max(0, Math.floor(updates.deadlineTimeOfDay)));
+    }
+    if (updates.deadlineDays !== undefined) {
+      task.deadlineDays = Math.min(30, Math.max(1, Math.floor(updates.deadlineDays)));
+    }
+    saveState();
+    render();
+  }
+
+  function setDayStartHour(hour) {
+    state.dayStartHour = Math.min(23, Math.max(0, Math.floor(hour)));
     saveState();
     render();
   }
@@ -843,6 +888,7 @@
     itemIsOwned,
     itemIsUnlockable,
     purchaseItem,
+    setDayStartHour,
   };
 })();
 

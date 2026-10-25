@@ -371,17 +371,39 @@
     dlWrap.textContent = "📅 Deadline ";
     dlWrap.appendChild(dl);
 
+    const dlType = buildSelect(
+      [
+        ["none", "Default rhythm"],
+        ["time_of_day", "At a fixed time"],
+        ["days_after", "X days later"],
+      ],
+      task.deadlineType
+    );
+    const dlTime = document.createElement("input");
+    dlTime.type = "time";
+    dlTime.value = `${String(Math.floor(task.deadlineTimeOfDay / 60)).padStart(2, "0")}:${String(task.deadlineTimeOfDay % 60).padStart(2, "0")}`;
+    const dlDays = document.createElement("input");
+    dlDays.type = "number";
+    dlDays.min = 1;
+    dlDays.max = 30;
+    dlDays.value = task.deadlineDays;
+
     const row = buildEditRow(
       "edit-row",
       task.title,
-      [diff, rep, dlWrap],
-      (title) =>
+      [diff, rep, dlWrap, dlType, dlTime, dlDays],
+      (title) => {
+        const [h, m] = (dlTime.value || "0:0").split(":").map(Number);
         Game.editTask(task.id, {
           title,
           difficulty: diff.value,
           repeat: rep.value,
           deadline: dl.value,
-        })
+          deadlineType: dlType.value,
+          deadlineTimeOfDay: (h || 0) * 60 + (m || 0),
+          deadlineDays: Number(dlDays.value) || 1,
+        });
+      }
     );
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
   }
@@ -644,5 +666,15 @@
     tabOwned.classList.add("active");
     tabShop.classList.remove("active");
     renderShop();
+  });
+
+  const dayStartSelect = document.getElementById("day-start-select");
+  dayStartSelect.value = String(Game.state.dayStartHour ?? 0);
+  if (![...dayStartSelect.options].some((o) => o.value === dayStartSelect.value)) {
+    dayStartSelect.value = "0";
+  }
+  dayStartSelect.addEventListener("change", () => {
+    Game.setDayStartHour(Number(dayStartSelect.value));
+    showToast(`🌅 Your day now starts at ${dayStartSelect.value.padStart(2, "0")}:00`);
   });
 })();
