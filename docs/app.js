@@ -197,12 +197,23 @@
   const toastEl = document.getElementById("toast");
 
   let toastTimer = null;
+  const toastQueue = [];
+
+  function displayNextToast() {
+    const next = toastQueue.shift();
+    if (next === undefined) {
+      toastEl.classList.add("hidden");
+      toastTimer = null;
+      return;
+    }
+    toastEl.textContent = next;
+    toastEl.classList.remove("hidden");
+    toastTimer = setTimeout(displayNextToast, 2000);
+  }
 
   function showToast(message) {
-    toastEl.textContent = message;
-    toastEl.classList.remove("hidden");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.add("hidden"), 2000);
+    toastQueue.push(message);
+    if (toastTimer === null) displayNextToast();
   }
 
   function randomMultiplier() {
@@ -661,9 +672,8 @@
       showToast(`🏆 Weekly goal reached! +${WEEKLY_GOAL_REWARD} 🪙`);
     } else if (milestones.dailyReward > 0) {
       showToast(`🎉 Daily goal reached! +${GOAL_REWARD} 🪙`);
-    } else if (!leveledUp) {
-      showToast(buildRewardMessage(task, reward, firstBonus));
     }
+    showToast(buildRewardMessage(task, reward, firstBonus));
 
     if (firstBonus) showToast("📦 Chest earned! Opens in 12h");
     maybeStartBoost();
