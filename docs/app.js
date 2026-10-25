@@ -46,7 +46,6 @@
   Game.ui.showToast = (message) => showToast(message);
   Game.ui.promptDifficultyRating = (task) => promptDifficultyRating(task);
 
-  const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
 
   function openSubtaskEditRow(parent, subtask) {
     document.querySelectorAll(".edit-row").forEach((el) => el.remove());
