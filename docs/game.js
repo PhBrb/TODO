@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.15.0";
+  const VERSION = "0.15.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -87,12 +87,14 @@
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
+      completedViaSubtasks: raw.completedViaSubtasks === true,
       reward: isRecord(raw.reward)
         ? {
             coins: num(raw.reward.coins, 0),
             gems: num(raw.reward.gems, 0),
             xp: num(raw.reward.xp, 0),
             chestEarned: raw.reward.chestEarned === true,
+            chestId: num(raw.reward.chestId, null),
             firstTaskDay: num(raw.reward.firstTaskDay, 0),
           }
         : null,
@@ -376,6 +378,7 @@
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
       ratedDifficulty: null,
       difficultySuggested: false,
+      completedViaSubtasks: false,
       subtasks: [],
     };
     if (isBonus) showToast("⭐ New bonus task! Extra rewards");
@@ -383,6 +386,8 @@
     saveState();
     render();
   }
+
+  const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
 
   function deriveDifficulty(task) {
     if (task.subtasks.length === 0) return task.difficulty;
@@ -424,12 +429,14 @@
       awardSubtask(subtask);
       if (parent.subtasks.every((st) => st.done) && !parent.done) {
         completeTask(parent);
+        parent.completedViaSubtasks = true;
       }
     } else {
       clawBackReward(subtask.reward);
       subtask.reward = null;
-      if (parent.done) {
+      if (parent.done && parent.completedViaSubtasks) {
         uncompleteTask(parent);
+        parent.completedViaSubtasks = false;
       }
     }
     saveState();
@@ -497,13 +504,15 @@
   }
 
   function earnChest() {
-    state.chests.push({
+    const chest = {
       id: state.nextId++,
       earnedAt: Date.now(),
       opened: false,
       openedAt: 0,
       contents: null,
-    });
+    };
+    state.chests.push(chest);
+    return chest.id;
   }
 
   function reachedWeeklyGoalCount(count) {
@@ -560,7 +569,7 @@
     }
 
     const chestEarned = Boolean(firstBonus);
-    if (chestEarned) earnChest();
+    const chestId = chestEarned ? earnChest() : null;
 
     const leveledUp = grantXpAndCoins(reward.coins, reward.gems, reward.xp);
     state.dailyCompleted += 1;
@@ -572,6 +581,7 @@
       gems: reward.gems,
       xp: reward.xp,
       chestEarned,
+      chestId,
       firstTaskDay: firstBonus ? firstBonus.streak : 0,
     };
 
@@ -597,7 +607,11 @@
     state.gems = Math.max(0, state.gems - reward.gems);
     state.xp = Math.max(0, state.xp - reward.xp);
     if (reward.chestEarned) {
-      const idx = state.chests.findIndex((c) => !c.opened);
+      let idx = -1;
+      if (reward.chestId !== undefined && reward.chestId !== null) {
+        idx = state.chests.findIndex((c) => c.id === reward.chestId);
+      }
+      if (idx < 0) idx = state.chests.findIndex((c) => !c.opened);
       if (idx >= 0) state.chests.splice(idx, 1);
     }
   }
@@ -630,6 +644,15 @@
   }
 
   function deleteTask(id) {
+    const task = state.tasks.find((t) => t.id === id);
+    if (!task) return;
+    if (task.done) uncompleteTask(task);
+    for (const st of task.subtasks) {
+      if (st.done) {
+        clawBackReward(st.reward);
+        st.reward = null;
+      }
+    }
     state.tasks = state.tasks.filter((t) => t.id !== id);
     saveState();
     render();
@@ -722,6 +745,7 @@
     BOOST_CHANCE_PER_COMPLETION,
     BOOST_COOLDOWN_MS,
     VERSION,
+    DIFFICULTY_ORDER,
     state,
     isRecord,
     num,
