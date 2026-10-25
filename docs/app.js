@@ -103,6 +103,15 @@
 
   const DRAG_HOLD_MS = 1000;
   let activeDrag = null;
+  let armedHoldNode = null;
+
+  document.addEventListener(
+    "touchmove",
+    (ev) => {
+      if (armedHoldNode || activeDrag) ev.preventDefault();
+    },
+    { passive: false }
+  );
 
   function clearDropHighlights() {
     document.querySelectorAll(".drop-target").forEach((el) => el.classList.remove("drop-target"));
@@ -129,13 +138,10 @@
       let armed = false;
       const holdTimer = setTimeout(() => {
         armed = true;
+        armedHoldNode = li;
         li.classList.add("drag-ready");
       }, DRAG_HOLD_MS);
 
-      const onTouchMove = (ev) => {
-        if (armed) ev.preventDefault();
-      };
-      li.addEventListener("touchmove", onTouchMove, { passive: false });
       const onContextMenu = (ev) => {
         if (armed) ev.preventDefault();
       };
@@ -164,8 +170,8 @@
       const cleanup = () => {
         clearTimeout(holdTimer);
         armed = false;
+        if (armedHoldNode === li) armedHoldNode = null;
         li.classList.remove("drag-ready");
-        li.removeEventListener("touchmove", onTouchMove);
         li.removeEventListener("contextmenu", onContextMenu);
         document.removeEventListener("pointermove", onMove);
         document.removeEventListener("pointerup", onUp);
