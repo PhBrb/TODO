@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.18.2";
+  const VERSION = "0.18.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -99,6 +99,7 @@
       bonus: raw.bonus === true,
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       repeatTime: num(raw.repeatTime, NaN),
+      repeatAfterCompletion: raw.repeatAfterCompletion === true,
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
       completedViaSubtasks: raw.completedViaSubtasks === true,
@@ -243,9 +244,30 @@
     return next.getTime();
   }
 
-  function nextOccurrence(repeat, completedAt, repeatTime) {
+  function nextOccurrence(repeat, completedAt, repeatTime, repeatAfterCompletion) {
     if (repeat === "every_5min") return completedAt + 300000;
     const d = new Date(completedAt);
+    if (repeatAfterCompletion) {
+      if (repeat === "daily") {
+        d.setDate(d.getDate() + 1);
+        d.setHours(0, 0, 0, 0);
+        if (Number.isFinite(repeatTime)) {
+          d.setHours(Math.floor(repeatTime / 60), repeatTime % 60, 0, 0);
+        }
+        if (d.getTime() <= completedAt) d.setTime(d.getTime() + 86400000);
+        return d.getTime();
+      }
+      if (repeat === "weekly") {
+        d.setDate(d.getDate() + 7);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }
+      if (repeat === "monthly") {
+        d.setMonth(d.getMonth() + 1);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }
+    }
     if (repeat === "daily" && Number.isFinite(repeatTime)) {
       const next = new Date(d);
       next.setHours(Math.floor(repeatTime / 60), repeatTime % 60, 0, 0);
@@ -283,7 +305,7 @@
     for (const task of state.tasks) {
       if (task.repeat === "none") continue;
       if (task.done && task.completedAt !== null) {
-        if (nextOccurrence(task.repeat, task.completedAt, task.repeatTime) <= now) {
+        if (nextOccurrence(task.repeat, task.completedAt, task.repeatTime, task.repeatAfterCompletion) <= now) {
           task.done = false;
           task.completedAt = null;
           if (Number.isFinite(task.repeatTime)) {
@@ -423,6 +445,7 @@
       bonus: isBonus,
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
       repeatTime: NaN,
+      repeatAfterCompletion: false,
       ratedDifficulty: null,
       difficultySuggested: false,
       completedViaSubtasks: false,
@@ -722,6 +745,9 @@
     }
     if (updates.deadline !== undefined) {
       task.deadline = updates.deadline ? new Date(updates.deadline).getTime() : null;
+    }
+    if (updates.repeatAfterCompletion !== undefined) {
+      task.repeatAfterCompletion = updates.repeatAfterCompletion === true;
     }
     if (updates.repeatTime !== undefined) {
       task.repeatTime = Number.isFinite(updates.repeatTime)

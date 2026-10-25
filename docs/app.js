@@ -386,7 +386,17 @@
     repTimeWrap.textContent = "🕐 Repeat due at ";
     repTimeWrap.appendChild(repTime);
 
-    const controls = isRepeating ? [diff, rep, repTimeWrap] : [diff, rep, dlWrap];
+    const afterComp = document.createElement("label");
+    afterComp.className = "after-completion-label";
+    const afterCompCb = document.createElement("input");
+    afterCompCb.type = "checkbox";
+    afterCompCb.checked = task.repeatAfterCompletion === true;
+    const afterCompText = document.createElement("span");
+    afterCompText.textContent = "Time after completion";
+    afterComp.appendChild(afterCompCb);
+    afterComp.appendChild(afterCompText);
+
+    const controls = isRepeating ? [diff, rep, repTimeWrap, afterComp] : [diff, rep, dlWrap];
 
     const row = buildEditRow(
       "edit-row",
@@ -405,6 +415,7 @@
           } else {
             updates.repeatTime = NaN;
           }
+          updates.repeatAfterCompletion = afterCompCb.checked;
         } else {
           updates.deadline = dl.value;
         }
