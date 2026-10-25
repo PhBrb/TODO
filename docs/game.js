@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.19.1";
+  const VERSION = "0.20.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -103,6 +103,7 @@
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       repeatTime: num(raw.repeatTime, NaN),
       repeatAfterCompletion: raw.repeatAfterCompletion === true,
+      chainedAfter: num(raw.chainedAfter, 0),
       timeLimit: num(raw.timeLimit, 0),
       startedAt: num(raw.startedAt, 0),
       ratedDifficulty: raw.ratedDifficulty ?? null,
@@ -451,6 +452,7 @@
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
       repeatTime: NaN,
       repeatAfterCompletion: false,
+      chainedAfter: 0,
       timeLimit: 0,
       startedAt: 0,
       ratedDifficulty: null,
@@ -657,7 +659,57 @@
     render();
   }
 
+  function chainPredecessor(task) {
+    if (!task.chainedAfter) return null;
+    return state.tasks.find((t) => t.id === task.chainedAfter) || null;
+  }
+
+  function chainSatisfiesDependency(task) {
+    const predecessor = chainPredecessor(task);
+    return !predecessor || predecessor.done;
+  }
+
+  function wouldCreateChainCycle(task, target) {
+    if (task.id === target.id) return true;
+    const predecessor = chainPredecessor(target);
+    if (!predecessor) return false;
+    return wouldCreateChainCycle(task, predecessor);
+  }
+
+  function chainTask(task, targetId) {
+    if (!task || task.done) return { ok: false, reason: "not chainable" };
+    const target = state.tasks.find((t) => t.id === targetId);
+    if (!target || target.id === task.id) return { ok: false, reason: "invalid target" };
+    if (target.chainedAfter === task.id) return { ok: false, reason: "would swap" };
+    if (wouldCreateChainCycle(task, target)) return { ok: false, reason: "cycle" };
+    for (const other of state.tasks) {
+      if (other.chainedAfter === task.id && other.id !== target.id) {
+        other.chainedAfter = target.id;
+      }
+    }
+    task.chainedAfter = target.id;
+    saveState();
+    render();
+    showToast(`\ud83e\uddf1 "${task.title}" is now chained after "${target.title}"`);
+    return { ok: true };
+  }
+
+  function unchainTask(task) {
+    if (!task.chainedAfter) return;
+    const oldId = task.chainedAfter;
+    task.chainedAfter = 0;
+    for (const other of state.tasks) {
+      if (other.chainedAfter === task.id) other.chainedAfter = oldId;
+    }
+    saveState();
+    render();
+  }
+
   function completeTask(task) {
+    if (!chainSatisfiesDependency(task)) {
+      showToast(`\ud83e\uddf1 "${task.title}" is chained \u2014 complete "${chainPredecessor(task).title}" first`);
+      return;
+    }
     const reward = computeReward(task);
     task.done = true;
     task.startedAt = 0;
@@ -722,6 +774,9 @@
   function uncompleteTask(task) {
     task.done = false;
     task.startedAt = 0;
+    for (const other of state.tasks) {
+      if (other.chainedAfter === task.id && other.done) uncompleteTask(other);
+    }
     const key = task.completedAt ? repeatKey(task.repeat, task.completedAt) : null;
     if (key && task.streakDayKeys.includes(key)) {
       task.streakDayKeys.pop();
@@ -748,6 +803,9 @@
   }
 
   function deleteTask(id) {
+    for (const other of state.tasks) {
+      if (other.chainedAfter === id) other.chainedAfter = 0;
+    }
     state.tasks = state.tasks.filter((t) => t.id !== id);
     saveState();
     render();
@@ -925,6 +983,10 @@
     addTask,
     startTask,
     timeBonusEarned,
+    chainPredecessor,
+    chainSatisfiesDependency,
+    chainTask,
+    unchainTask,
     deriveDifficulty,
     addSubtask,
     editSubtask,

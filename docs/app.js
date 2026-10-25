@@ -101,6 +101,74 @@
     return task.startedAt + task.timeLimit * 60000 - now;
   }
 
+  const DRAG_HOLD_MS = 1000;
+  let activeDrag = null;
+
+  function clearDropHighlights() {
+    document.querySelectorAll(".drop-target").forEach((el) => el.classList.remove("drop-target"));
+  }
+
+  function finishDrag(ev) {
+    const drag = activeDrag;
+    activeDrag = null;
+    drag.sourceNode.classList.remove("dragging");
+    clearDropHighlights();
+    if (!ev) return;
+    const dropEl = document.elementFromPoint(ev.clientX, ev.clientY);
+    const targetLi = dropEl && dropEl.closest ? dropEl.closest(".task") : null;
+    if (!targetLi || targetLi === drag.sourceNode) return;
+    Game.chainTask(drag.task, Number(targetLi.dataset.id));
+  }
+
+  function taskDraggable(li, task) {
+    li.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || task.done) return;
+      if (e.target.closest("button, input, select, a, .edit-row")) return;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      let armed = false;
+      const holdTimer = setTimeout(() => {
+        armed = true;
+        li.classList.add("drag-ready");
+      }, DRAG_HOLD_MS);
+
+      const onMove = (ev) => {
+        if (!armed) {
+          if (Math.abs(ev.clientX - startX) > 8 || Math.abs(ev.clientY - startY) > 8) cleanup();
+          return;
+        }
+        if (!activeDrag) {
+          activeDrag = { task, sourceNode: li };
+          li.classList.add("dragging");
+        }
+        ev.preventDefault();
+        clearDropHighlights();
+        const overEl = document.elementFromPoint(ev.clientX, ev.clientY);
+        const overLi = overEl && overEl.closest ? overEl.closest(".task") : null;
+        if (overLi && overLi !== li) overLi.classList.add("drop-target");
+      };
+      const onUp = (ev) => {
+        if (activeDrag && activeDrag.task === task) {
+          finishDrag(ev);
+        } else {
+          cleanup();
+        }
+      };
+      const cleanup = () => {
+        clearTimeout(holdTimer);
+        armed = false;
+        li.classList.remove("drag-ready");
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", onUp);
+        document.removeEventListener("pointercancel", cleanup);
+        if (activeDrag && activeDrag.task === task) finishDrag();
+      };
+      document.addEventListener("pointermove", onMove, { passive: false });
+      document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", cleanup);
+    });
+  }
+
 
 
   function closeExistingEditRows() {
@@ -225,9 +293,12 @@
     li.className = "task" + (task.done ? " done" : "");
     li.dataset.id = task.id;
 
+    const locked = !Game.chainSatisfiesDependency(task) && !task.done;
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = task.done;
+    cb.disabled = locked;
+    if (locked) cb.title = "Complete the chained predecessor first";
     cb.addEventListener("change", () => {
       if (cb.checked) Game.completeTask(task);
       else Game.uncompleteTask(task);
@@ -258,11 +329,13 @@
         meta.appendChild(st);
       }
     }
-    if (task.bonus) {
-      const b = document.createElement("span");
-      b.className = "badge bonus";
-      b.textContent = "⭐ bonus";
-      meta.appendChild(b);
+    if (task.chainedAfter && !task.done) {
+      const chain = document.createElement("span");
+      chain.className = "badge chain";
+      chain.title = "Chained \u2014 click to remove the link";
+      chain.textContent = "🔗 chained";
+      chain.addEventListener("click", () => Game.unchainTask(task));
+      meta.appendChild(chain);
     }
     if (task.deadline && !task.done) {
       const dl = document.createElement("span");
@@ -379,6 +452,8 @@
       start.addEventListener("click", () => Game.startTask(task));
       actions.appendChild(start);
     }
+
+    taskDraggable(li, task);
 
     li.appendChild(cb);
     li.appendChild(body);
