@@ -132,6 +132,15 @@
         li.classList.add("drag-ready");
       }, DRAG_HOLD_MS);
 
+      const onTouchMove = (ev) => {
+        if (armed) ev.preventDefault();
+      };
+      li.addEventListener("touchmove", onTouchMove, { passive: false });
+      const onContextMenu = (ev) => {
+        if (armed) ev.preventDefault();
+      };
+      li.addEventListener("contextmenu", onContextMenu);
+
       const onMove = (ev) => {
         if (!armed) {
           if (Math.abs(ev.clientX - startX) > 8 || Math.abs(ev.clientY - startY) > 8) cleanup();
@@ -148,16 +157,16 @@
         if (overLi && overLi !== li) overLi.classList.add("drop-target");
       };
       const onUp = (ev) => {
-        if (activeDrag && activeDrag.task === task) {
-          finishDrag(ev);
-        } else {
-          cleanup();
-        }
+        const wasDragging = Boolean(activeDrag && activeDrag.task === task);
+        if (wasDragging) finishDrag(ev);
+        cleanup();
       };
       const cleanup = () => {
         clearTimeout(holdTimer);
         armed = false;
         li.classList.remove("drag-ready");
+        li.removeEventListener("touchmove", onTouchMove);
+        li.removeEventListener("contextmenu", onContextMenu);
         document.removeEventListener("pointermove", onMove);
         document.removeEventListener("pointerup", onUp);
         document.removeEventListener("pointercancel", cleanup);
