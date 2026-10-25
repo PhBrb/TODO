@@ -20,6 +20,9 @@
   const difficultySelect = document.getElementById("difficulty-select");
   const repeatSelect = document.getElementById("repeat-select");
   const deadlineInput = document.getElementById("deadline-input");
+  const deadlineWrap = document.getElementById("deadline-wrap");
+  const repeatTimeWrap = document.getElementById("repeat-time-wrap");
+  const repeatTimeInput = document.getElementById("repeat-time-input");
   const toastEl = document.getElementById("toast");
   const levelInlineEl = document.getElementById("level-display-inline");
   const xpProgressEl = document.getElementById("xp-progress");
@@ -371,45 +374,41 @@
     dlWrap.textContent = "📅 Deadline ";
     dlWrap.appendChild(dl);
 
-    const dlType = buildSelect(
-      [
-        ["time_of_day", "At a fixed time"],
-        ["days_after", "X days later"],
-      ],
-      task.deadlineType === "time_of_day" ? "time_of_day" : "days_after"
-    );
-    const dlTime = document.createElement("input");
-    dlTime.type = "time";
-    dlTime.value = `${String(Math.floor(task.deadlineTimeOfDay / 60)).padStart(2, "0")}:${String(task.deadlineTimeOfDay % 60).padStart(2, "0")}`;
-    const dlDays = document.createElement("input");
-    dlDays.type = "number";
-    dlDays.min = 1;
-    dlDays.max = 30;
-    dlDays.value = task.deadlineDays;
-
     const isRepeating = task.repeat !== "none" && task.repeat !== "every_5min";
-    const controls = [diff, rep, dlWrap];
-    if (isRepeating) controls.push(dlType, dlTime, dlDays);
+
+    const repTime = document.createElement("input");
+    repTime.type = "time";
+    if (Number.isFinite(task.repeatTime)) {
+      repTime.value = `${String(Math.floor(task.repeatTime / 60)).padStart(2, "0")}:${String(task.repeatTime % 60).padStart(2, "0")}`;
+    }
+    const repTimeWrap = document.createElement("label");
+    repTimeWrap.className = "deadline-label edit-deadline";
+    repTimeWrap.textContent = "🕐 Repeat due at ";
+    repTimeWrap.appendChild(repTime);
+
+    const controls = isRepeating ? [diff, rep, repTimeWrap] : [diff, rep, dlWrap];
 
     const row = buildEditRow(
       "edit-row",
       task.title,
       controls,
       (title) => {
-        const [h, m] = (dlTime.value || "0:0").split(":").map(Number);
-        Game.editTask(task.id, {
+        const updates = {
           title,
           difficulty: diff.value,
           repeat: rep.value,
-          deadline: dl.value,
-          ...(isRepeating
-            ? {
-                deadlineType: dlType.value,
-                deadlineTimeOfDay: (h || 0) * 60 + (m || 0),
-                deadlineDays: Number(dlDays.value) || 1,
-              }
-            : {}),
-        });
+        };
+        if (isRepeating) {
+          if (repTime.value) {
+            const [h, m] = repTime.value.split(":").map(Number);
+            updates.repeatTime = (h || 0) * 60 + (m || 0);
+          } else {
+            updates.repeatTime = NaN;
+          }
+        } else {
+          updates.deadline = dl.value;
+        }
+        Game.editTask(task.id, updates);
       }
     );
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
@@ -542,12 +541,28 @@
     render();
   });
 
+  function updateCreateFormMode() {
+    const isDaily = repeatSelect.value === "daily";
+    deadlineWrap.classList.toggle("hidden", isDaily);
+    repeatTimeWrap.classList.toggle("hidden", !isDaily);
+  }
+  repeatSelect.addEventListener("change", updateCreateFormMode);
+  updateCreateFormMode();
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const title = taskInput.value.trim();
     if (!title) return;
-    Game.addTask(title, difficultySelect.value, repeatSelect.value, deadlineInput.value);
+    if (repeatSelect.value === "daily" && repeatTimeInput.value) {
+      const [h, m] = repeatTimeInput.value.split(":").map(Number);
+      const t = Game.addTask(title, difficultySelect.value, repeatSelect.value, "");
+      Game.editTask(t, { repeatTime: (h || 0) * 60 + (m || 0) });
+    } else {
+      Game.addTask(title, difficultySelect.value, repeatSelect.value, deadlineInput.value);
+    }
     taskInput.value = "";
+    repeatTimeInput.value = "";
+    deadlineInput.value = "";
     taskInput.focus();
   });
 

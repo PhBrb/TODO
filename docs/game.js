@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.18.1";
+  const VERSION = "0.18.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -98,11 +98,7 @@
         : [],
       bonus: raw.bonus === true,
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
-      deadlineType: ["none", "time_of_day", "days_after"].includes(raw.deadlineType)
-        ? raw.deadlineType
-        : "none",
-      deadlineTimeOfDay: num(raw.deadlineTimeOfDay, 0),
-      deadlineDays: num(raw.deadlineDays, 1),
+      repeatTime: num(raw.repeatTime, NaN),
       ratedDifficulty: raw.ratedDifficulty ?? null,
       difficultySuggested: raw.difficultySuggested === true,
       completedViaSubtasks: raw.completedViaSubtasks === true,
@@ -240,19 +236,20 @@
     return dayKey(d.getTime());
   }
 
-  function nextOccurrence(repeat, completedAt, deadlineType, deadlineTimeOfDay, deadlineDays) {
+  function nextTimeOfDay(minutes) {
+    const next = new Date();
+    next.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
+    if (next.getTime() <= Date.now()) next.setDate(next.getDate() + 1);
+    return next.getTime();
+  }
+
+  function nextOccurrence(repeat, completedAt, repeatTime) {
     if (repeat === "every_5min") return completedAt + 300000;
     const d = new Date(completedAt);
-    if (repeat === "daily" && deadlineType === "time_of_day") {
+    if (repeat === "daily" && Number.isFinite(repeatTime)) {
       const next = new Date(d);
-      next.setHours(Math.floor(deadlineTimeOfDay / 60), deadlineTimeOfDay % 60, 0, 0);
+      next.setHours(Math.floor(repeatTime / 60), repeatTime % 60, 0, 0);
       if (next.getTime() <= completedAt) next.setDate(next.getDate() + 1);
-      return next.getTime();
-    }
-    if (repeat !== "none" && repeat !== "every_5min" && deadlineType === "days_after") {
-      const next = new Date(d);
-      next.setDate(next.getDate() + deadlineDays);
-      next.setHours(0, 0, 0, 0);
       return next.getTime();
     }
     if (repeat === "daily") {
@@ -286,9 +283,12 @@
     for (const task of state.tasks) {
       if (task.repeat === "none") continue;
       if (task.done && task.completedAt !== null) {
-        if (nextOccurrence(task.repeat, task.completedAt, task.deadlineType, task.deadlineTimeOfDay, task.deadlineDays) <= now) {
+        if (nextOccurrence(task.repeat, task.completedAt, task.repeatTime) <= now) {
           task.done = false;
           task.completedAt = null;
+          if (Number.isFinite(task.repeatTime)) {
+            task.deadline = nextTimeOfDay(task.repeatTime);
+          }
           if (task.bonus) {
             const wasBonus = task.bonus;
             task.bonus = Math.random() < BONUS_TASK_RATE;
@@ -422,9 +422,7 @@
       streakDayKeys: [],
       bonus: isBonus,
       deadline: deadlineInput ? new Date(deadlineInput).getTime() : null,
-      deadlineType: "none",
-      deadlineTimeOfDay: 0,
-      deadlineDays: 1,
+      repeatTime: NaN,
       ratedDifficulty: null,
       difficultySuggested: false,
       completedViaSubtasks: false,
@@ -434,6 +432,7 @@
     state.tasks.push(task);
     saveState();
     render();
+    return task.id;
   }
 
   const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
@@ -724,15 +723,13 @@
     if (updates.deadline !== undefined) {
       task.deadline = updates.deadline ? new Date(updates.deadline).getTime() : null;
     }
-    if (updates.deadlineType !== undefined &&
-        ["none", "time_of_day", "days_after"].includes(updates.deadlineType)) {
-      task.deadlineType = updates.deadlineType;
-    }
-    if (updates.deadlineTimeOfDay !== undefined) {
-      task.deadlineTimeOfDay = Math.min(1439, Math.max(0, Math.floor(updates.deadlineTimeOfDay)));
-    }
-    if (updates.deadlineDays !== undefined) {
-      task.deadlineDays = Math.min(30, Math.max(1, Math.floor(updates.deadlineDays)));
+    if (updates.repeatTime !== undefined) {
+      task.repeatTime = Number.isFinite(updates.repeatTime)
+        ? Math.min(1439, Math.max(0, Math.floor(updates.repeatTime)))
+        : NaN;
+      if (Number.isFinite(task.repeatTime) && !task.done) {
+        task.deadline = nextTimeOfDay(task.repeatTime);
+      }
     }
     saveState();
     render();

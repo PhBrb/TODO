@@ -61,8 +61,9 @@ Curated from 2_EngagemetFeatures.md
 - ~~F85: For repeating tasks with a bonus reward, the bonus is rerolled every time the task becomes available again.~~
 - ~~F86: Option for a custom day start time: the new day starts at a user-chosen time (eg 4am) instead of midnight.~~
   - Applies to daily reset, first task of the day and streak days; selectable under the daily progress (midnight to 6am)
-- ~~F87: Repeating tasks support different deadline types, eg a fixed time of day ("at 6pm") or X days after the task became active.~~
-  - Editable per task in the edit row: "At a fixed time" (daily) or "X days later" (weekly/monthly); tasks saved before this feature keep their previous default rhythm until edited
+- ~~F87: Repeating tasks support a deadline type: a fixed time of day ("at 6pm").~~
+  - When a task is set to repeating, the deadline selector changes to a time-of-day selector
+  - When the task becomes available again, the new deadline is the next occurrence of that time of day
 - ~~Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon.~~ Manual override with sticky pin.
 
 
