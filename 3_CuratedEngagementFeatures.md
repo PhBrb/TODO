@@ -6,7 +6,7 @@ Curated from 2_EngagemetFeatures.md
 #### Currency
 - ~~F1: XP~~
   - ~~earned from completing task~~ (1/5/12/25 XP for too easy/easy/medium/hard)
-  - ~~can not be spend~~ (XP unlocks shop items at level thresholds)
+  - ~~can not be spend~~ ~~(XP unlocks shop items at level thresholds)~~
   - unlocks new tiles and items in the shop (which are teased before)
   - ~~Levels shown in header, level up requires cumulative XP (100 per level * (level+1)/2)~~
   - Level progress below the daily/weekly goal is removed; the level indicator stays in the top right
