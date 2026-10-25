@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.13.0";
+  const VERSION = "0.13.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
