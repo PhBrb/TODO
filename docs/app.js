@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.12.1";
+  const VERSION = "0.12.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -692,6 +692,9 @@
     }
     clawBackReward(task.reward);
 
+    // Clawback is intentionally approximate: a drop across multiple milestone
+    // boundaries at once is rare, so we deduct only one reward and reset the
+    // tracker so it can be re-granted. Do not "fix" without a per-boundary policy.
     const dailyMilestone = reachedGoalCount(state.dailyCompleted);
     if (dailyMilestone < state.lastDailyMilestone) {
       state.coins = Math.max(0, state.coins - GOAL_REWARD);
