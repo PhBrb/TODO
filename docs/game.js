@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.16.1";
+  const VERSION = "0.16.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -652,15 +652,6 @@
   }
 
   function deleteTask(id) {
-    const task = state.tasks.find((t) => t.id === id);
-    if (!task) return;
-    if (task.done) uncompleteTask(task);
-    for (const st of task.subtasks) {
-      if (st.done) {
-        clawBackReward(st.reward);
-        st.reward = null;
-      }
-    }
     state.tasks = state.tasks.filter((t) => t.id !== id);
     saveState();
     render();
