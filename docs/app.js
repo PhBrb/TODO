@@ -355,16 +355,6 @@
       body.appendChild(sublist);
     }
 
-    if (task.timeLimit && !task.done && timeLimitRemaining(task, Date.now()) <= 0) {
-      const start = document.createElement("button");
-      start.className = "task-start";
-      start.type = "button";
-      start.textContent = "▶ Start";
-      start.title = `Finish within ${task.timeLimit} min for a bonus`;
-      start.addEventListener("click", () => Game.startTask(task));
-      actions.appendChild(start);
-    }
-
     const del = document.createElement("button");
     del.className = "task-delete";
     del.textContent = "✕";
@@ -379,6 +369,16 @@
     actions.className = "task-actions";
     actions.appendChild(edit);
     actions.appendChild(del);
+
+    if (task.timeLimit && !task.done && timeLimitRemaining(task, Date.now()) <= 0) {
+      const start = document.createElement("button");
+      start.className = "task-start";
+      start.type = "button";
+      start.textContent = "▶ Start";
+      start.title = `Finish within ${task.timeLimit} min for a bonus`;
+      start.addEventListener("click", () => Game.startTask(task));
+      actions.appendChild(start);
+    }
 
     li.appendChild(cb);
     li.appendChild(body);
