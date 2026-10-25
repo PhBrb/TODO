@@ -46,53 +46,92 @@
   Game.ui.showToast = (message) => showToast(message);
   Game.ui.promptDifficultyRating = (task) => promptDifficultyRating(task);
 
+  const DIFFICULTY_OPTIONS = [
+    ["too_easy", "Too easy"],
+    ["easy", "Easy"],
+    ["medium", "Medium"],
+    ["hard", "Hard"],
+  ];
+  const REPEAT_OPTIONS = [
+    ["none", "No repeat"],
+    ["daily", "Daily"],
+    ["weekly", "Weekly"],
+    ["monthly", "Monthly"],
+    ["every_5min", "Every 5 min (test)"],
+  ];
 
-  function openSubtaskEditRow(parent, subtask) {
-    document.querySelectorAll(".edit-row").forEach((el) => el.remove());
-    const row = document.createElement("div");
-    row.className = "edit-row subtask-edit-row";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = subtask.title;
-    input.maxLength = 80;
-
-    const diff = document.createElement("select");
-    for (const [value, label] of [
-      ["too_easy", "Too easy"],
-      ["easy", "Easy"],
-      ["medium", "Medium"],
-      ["hard", "Hard"],
-    ]) {
+  function buildSelect(options, selected) {
+    const select = document.createElement("select");
+    for (const [value, label] of options) {
       const o = document.createElement("option");
       o.value = value;
       o.textContent = label;
-      if (subtask.difficulty === value) o.selected = true;
-      diff.appendChild(o);
+      if (selected === value) o.selected = true;
+      select.appendChild(o);
     }
+    return select;
+  }
+
+  function formatHoursMinutes(remaining) {
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.ceil((remaining % 3600000) / 60000);
+    return `${h}h ${m}m`;
+  }
+
+  function formatMinutesSeconds(remaining) {
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    return `${m}m ${s}s`;
+  }
+
+
+
+  function closeExistingEditRows() {
+    document.querySelectorAll(".edit-row").forEach((el) => el.remove());
+  }
+
+  function buildEditRow(className, title, controls, onSave) {
+    closeExistingEditRows();
+    const row = document.createElement("div");
+    row.className = className;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = title;
+    input.maxLength = 80;
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onSave(input.value);
+      }
+    });
 
     const save = document.createElement("button");
     save.type = "button";
     save.textContent = "Save";
-    save.addEventListener("click", () =>
-      Game.editSubtask(parent, subtask, input.value, diff.value));
+    save.addEventListener("click", () => onSave(input.value));
 
     const cancel = document.createElement("button");
     cancel.type = "button";
     cancel.textContent = "Cancel";
     cancel.addEventListener("click", () => row.remove());
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        Game.editSubtask(parent, subtask, input.value, diff.value);
-      }
-    });
-
     row.appendChild(input);
-    row.appendChild(diff);
+    for (const control of controls) row.appendChild(control);
     row.appendChild(save);
     row.appendChild(cancel);
+    input.focus();
+    return row;
+  }
+
+  function openSubtaskEditRow(parent, subtask) {
+    const diff = buildSelect(DIFFICULTY_OPTIONS, subtask.difficulty);
+    const row = buildEditRow(
+      "edit-row subtask-edit-row",
+      subtask.title,
+      [diff],
+      (title) => Game.editSubtask(parent, subtask, title, diff.value)
+    );
     const subRow = document.querySelector(`[data-id="${parent.id}"] .subtask-row-${subtask.id}`);
     if (subRow && subRow.nextSibling) {
       subRow.parentNode.insertBefore(row, subRow.nextSibling);
@@ -261,18 +300,7 @@
         addInput.type = "text";
         addInput.placeholder = "Add subtask...";
         addInput.maxLength = 80;
-        const addDiff = document.createElement("select");
-        for (const [value, label] of [
-          ["too_easy", "Too easy"],
-          ["easy", "Easy"],
-          ["medium", "Medium"],
-          ["hard", "Hard"],
-        ]) {
-          const o = document.createElement("option");
-          o.value = value;
-          o.textContent = label;
-          addDiff.appendChild(o);
-        }
+        const addDiff = buildSelect(DIFFICULTY_OPTIONS);
         const addBtn = document.createElement("button");
         addBtn.type = "button";
         addBtn.textContent = "+";
@@ -325,47 +353,13 @@
   }
 
   function openEditRow(task) {
-    document.querySelectorAll(".edit-row").forEach((el) => el.remove());
-    const row = document.createElement("div");
-    row.className = "edit-row";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = task.title;
-    input.maxLength = 80;
-
-    const diff = document.createElement("select");
+    const diff = buildSelect(DIFFICULTY_OPTIONS, task.difficulty);
     diff.disabled = task.subtasks.length > 0;
     diff.title = task.subtasks.length > 0
       ? "Difficulty is derived from the most difficult sub-task"
       : "";
-    for (const [value, label] of [
-      ["too_easy", "Too easy"],
-      ["easy", "Easy"],
-      ["medium", "Medium"],
-      ["hard", "Hard"],
-    ]) {
-      const o = document.createElement("option");
-      o.value = value;
-      o.textContent = label;
-      if (task.difficulty === value) o.selected = true;
-      diff.appendChild(o);
-    }
 
-    const rep = document.createElement("select");
-    for (const [value, label] of [
-      ["none", "No repeat"],
-      ["daily", "Daily"],
-      ["weekly", "Weekly"],
-      ["monthly", "Monthly"],
-      ["every_5min", "Every 5 min (test)"],
-    ]) {
-      const o = document.createElement("option");
-      o.value = value;
-      o.textContent = label;
-      if (task.repeat === value) o.selected = true;
-      rep.appendChild(o);
-    }
+    const rep = buildSelect(REPEAT_OPTIONS, task.repeat);
 
     const dl = document.createElement("input");
     dl.type = "datetime-local";
@@ -375,29 +369,18 @@
     dlWrap.textContent = "📅 Deadline ";
     dlWrap.appendChild(dl);
 
-    const save = document.createElement("button");
-    save.type = "button";
-    save.textContent = "Save";
-    save.addEventListener("click", () => {
-      Game.editTask(task.id, {
-        title: input.value,
-        difficulty: diff.value,
-        repeat: rep.value,
-        deadline: dl.value,
-      });
-    });
-
-    const cancel = document.createElement("button");
-    cancel.type = "button";
-    cancel.textContent = "Cancel";
-    cancel.addEventListener("click", () => row.remove());
-
-    row.appendChild(input);
-    row.appendChild(diff);
-    row.appendChild(rep);
-    row.appendChild(dlWrap);
-    row.appendChild(save);
-    row.appendChild(cancel);
+    const row = buildEditRow(
+      "edit-row",
+      task.title,
+      [diff, rep, dlWrap],
+      (title) =>
+        Game.editTask(task.id, {
+          title,
+          difficulty: diff.value,
+          repeat: rep.value,
+          deadline: dl.value,
+        })
+    );
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
   }
 
@@ -474,9 +457,7 @@
         btn.className = "chest waiting";
         btn.disabled = true;
         const remaining = Game.CHEST_OPEN_MS - (Date.now() - chest.earnedAt);
-        const h = Math.floor(remaining / 3600000);
-        const m = Math.ceil((remaining % 3600000) / 60000);
-        btn.textContent = `🔒 open in ${h}h ${m}m${count > 1 ? ` (x${count})` : ""}`;
+        btn.textContent = `🔒 open in ${formatHoursMinutes(remaining)}${count > 1 ? ` (x${count})` : ""}`;
       }
       chestAreaEl.appendChild(btn);
     }
@@ -484,9 +465,7 @@
     if (Game.isBoostActive()) {
       boostBannerEl.classList.remove("hidden");
       const remaining = Math.max(0, Game.state.boostUntil - Date.now());
-      const m = Math.floor(remaining / 60000);
-      const s = Math.floor((remaining % 60000) / 1000);
-      boostTimerEl.textContent = `${m}m ${s}s`;
+      boostTimerEl.textContent = formatMinutesSeconds(remaining);
     } else {
       boostBannerEl.classList.add("hidden");
     }
@@ -506,9 +485,7 @@
     if (Game.isBoostActive()) {
       boostBannerEl.classList.remove("hidden");
       const remaining = Math.max(0, Game.state.boostUntil - now);
-      const m = Math.floor(remaining / 60000);
-      const s = Math.floor((remaining % 60000) / 1000);
-      boostTimerEl.textContent = `${m}m ${s}s`;
+      boostTimerEl.textContent = formatMinutesSeconds(remaining);
     } else {
       boostBannerEl.classList.add("hidden");
     }
@@ -520,9 +497,7 @@
       if (!chest) break;
       const remaining = Game.CHEST_OPEN_MS - (now - chest.earnedAt);
       if (!Game.chestReady(chest) && remaining > 0) {
-        const h = Math.floor(remaining / 3600000);
-        const m = Math.ceil((remaining % 3600000) / 60000);
-        node.textContent = `🔒 open in ${h}h ${m}m`;
+        node.textContent = `🔒 open in ${formatHoursMinutes(remaining)}`;
       }
       idx++;
     }
