@@ -62,7 +62,7 @@ Curated from 2_EngagemetFeatures.md
 - ~~F86: Option for a custom day start time: the new day starts at a user-chosen time (eg 4am) instead of midnight.~~
   - Applies to daily reset, first task of the day and streak days; selectable under the daily progress (midnight to 6am)
 - ~~F87: Repeating tasks support different deadline types, eg a fixed time of day ("at 6pm") or X days after the task became active.~~
-  - Editable per task in the edit row: "Default rhythm", "At a fixed time" (daily) or "X days later" (weekly/monthly)
+  - Editable per task in the edit row: "At a fixed time" (daily) or "X days later" (weekly/monthly); tasks saved before this feature keep their previous default rhythm until edited
 - ~~Sort tasks, always show some easy medium and hard tasks, so the user can easly select one fitting their current energy level. Prioritize tasks that are due soon.~~ Manual override with sticky pin.
 
 

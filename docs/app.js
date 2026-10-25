@@ -373,11 +373,10 @@
 
     const dlType = buildSelect(
       [
-        ["none", "Default rhythm"],
         ["time_of_day", "At a fixed time"],
         ["days_after", "X days later"],
       ],
-      task.deadlineType
+      task.deadlineType === "time_of_day" ? "time_of_day" : "days_after"
     );
     const dlTime = document.createElement("input");
     dlTime.type = "time";
@@ -388,10 +387,14 @@
     dlDays.max = 30;
     dlDays.value = task.deadlineDays;
 
+    const isRepeating = task.repeat !== "none" && task.repeat !== "every_5min";
+    const controls = [diff, rep, dlWrap];
+    if (isRepeating) controls.push(dlType, dlTime, dlDays);
+
     const row = buildEditRow(
       "edit-row",
       task.title,
-      [diff, rep, dlWrap, dlType, dlTime, dlDays],
+      controls,
       (title) => {
         const [h, m] = (dlTime.value || "0:0").split(":").map(Number);
         Game.editTask(task.id, {
@@ -399,9 +402,13 @@
           difficulty: diff.value,
           repeat: rep.value,
           deadline: dl.value,
-          deadlineType: dlType.value,
-          deadlineTimeOfDay: (h || 0) * 60 + (m || 0),
-          deadlineDays: Number(dlDays.value) || 1,
+          ...(isRepeating
+            ? {
+                deadlineType: dlType.value,
+                deadlineTimeOfDay: (h || 0) * 60 + (m || 0),
+                deadlineDays: Number(dlDays.value) || 1,
+              }
+            : {}),
         });
       }
     );
