@@ -19,7 +19,8 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     const grid = new THREE.Group();
     loader.load(
       SLAB_MODEL_URL,
-      (slab) => {
+      (gltf) => {
+        const slab = gltf.scene;
         for (let x = 0; x < GRID_SIZE; x++) {
           for (let z = 0; z < GRID_SIZE; z++) {
             const cell = slab.clone();
