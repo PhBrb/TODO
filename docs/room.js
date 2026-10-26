@@ -7,10 +7,14 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
   const ROOM_BG_COLOR = 0xd8e2f0;
   const SLAB_MODEL_URL = "./models/slab.glb";
+  const TABLE_MODEL_URL = "./models/table.glb";
   const DRACO_DECODER_PATH = "./vendor/addons/libs/draco/gltf/";
   const GRID_SIZE = 3;
   const CELL_SPACING = 2;
   const GRID_SCALE = 1 / 6;
+  const SLAB_TOP_Y = 0.115;
+  const TABLE_SCALE = 2;
+  const TABLE_BASE_Y = -0.279;
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
@@ -34,7 +38,18 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
             grid.add(cell);
           }
         }
-        onComplete(grid);
+        loader.load(
+          TABLE_MODEL_URL,
+          (gltf) => {
+            const table = gltf.scene;
+            table.scale.setScalar(TABLE_SCALE);
+            table.position.y = SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE;
+            grid.add(table);
+            onComplete(grid);
+          },
+          undefined,
+          () => console.error("Failed to load room model:", TABLE_MODEL_URL)
+        );
       },
       undefined,
       () => console.error("Failed to load room model:", SLAB_MODEL_URL)
