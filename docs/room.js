@@ -16,6 +16,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const KEY_LIGHT_INTENSITY = 1.6;
   const SLAB_MODEL_URL = "./models/slab.glb";
   const TABLE_MODEL_URL = "./models/table.glb";
+  const PLANT_MODEL_URL = "./models/plant.glb";
   const DRACO_DECODER_PATH = "./vendor/addons/libs/draco/gltf/";
   const GRID_SIZE = 3;
   const CELL_SPACING = 2;
@@ -23,6 +24,9 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const SLAB_TOP_Y = 0.115;
   const TABLE_SCALE = 2;
   const TABLE_BASE_Y = -0.279;
+  const TABLE_TOP_Y = 0.275;
+  const PLANT_SCALE = 0.5;
+  const PLANT_BASE_Y = -0.952;
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
@@ -58,7 +62,8 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     Promise.allSettled([
       loadModel(loader, SLAB_MODEL_URL),
       loadModel(loader, TABLE_MODEL_URL),
-    ]).then(([slab, table]) => {
+      loadModel(loader, PLANT_MODEL_URL),
+    ]).then(([slab, table, plant]) => {
       if (slab.status === "fulfilled") {
         applyShadows(slab.value, true, true);
         for (let x = 0; x < GRID_SIZE; x++) {
@@ -73,11 +78,18 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
           }
         }
       }
+      const tableY = SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE;
       if (table.status === "fulfilled") {
         applyShadows(table.value, true, true);
         table.value.scale.setScalar(TABLE_SCALE);
-        table.value.position.y = SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE;
+        table.value.position.y = tableY;
         grid.add(table.value);
+      }
+      if (plant.status === "fulfilled" && table.status === "fulfilled") {
+        applyShadows(plant.value, true, true);
+        plant.value.scale.setScalar(PLANT_SCALE);
+        plant.value.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - PLANT_BASE_Y * PLANT_SCALE;
+        grid.add(plant.value);
       }
       onReady();
     });
