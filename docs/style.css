@@ -52,7 +52,7 @@ body {
 
 .sheet-handle {
   flex: none;
-  padding: 10px 0 6px;
+  padding: 16px 0 12px;
   cursor: grab;
   touch-action: none;
 }
@@ -61,11 +61,11 @@ body {
 
 .sheet-handle-bar {
   display: block;
-  width: 44px;
-  height: 5px;
+  width: 72px;
+  height: 6px;
   margin: 0 auto;
   border-radius: 3px;
-  background: #c9c3e8;
+  background: #a29bfe;
 }
 
 .sheet-content {

@@ -70,4 +70,9 @@ import * as THREE from "three";
   }
 
   window.Room = { create: createRoom };
+
+  const container = document.getElementById("room-view");
+  if (container) {
+    createRoom(container);
+  }
 })();
