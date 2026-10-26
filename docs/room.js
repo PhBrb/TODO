@@ -10,6 +10,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const DRACO_DECODER_PATH = "./vendor/addons/libs/draco/gltf/";
   const GRID_SIZE = 3;
   const CELL_SPACING = 2;
+  const GRID_SCALE = 1 / 6;
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
@@ -17,6 +18,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
   function slabGrid(loader, onComplete) {
     const grid = new THREE.Group();
+    grid.scale.setScalar(GRID_SCALE);
     loader.load(
       SLAB_MODEL_URL,
       (gltf) => {
