@@ -1,16 +1,43 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 (() => {
   "use strict";
 
   const ROOM_BG_COLOR = 0xd8e2f0;
-  const CUBE_COLOR = 0x8b5cf6;
-  const CUBE_SIZE = 1;
+  const SLAB_MODEL_URL = "./models/slab.glb";
+  const DRACO_DECODER_PATH = "./vendor/addons/libs/draco/gltf/";
+  const GRID_SIZE = 3;
+  const CELL_SPACING = 2;
   const CAMERA_FOV = 40;
-  const CAMERA_POSITION = [3, 2.6, 4];
+  const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
-  const CUBE_ROTATION_PER_FRAME = { x: 0.004, y: 0.01 };
   const LIGHT_POSITION = [4, 6, 3];
+
+  function slabGrid(loader, onComplete) {
+    const grid = new THREE.Group();
+    loader.load(
+      SLAB_MODEL_URL,
+      (slab) => {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          for (let z = 0; z < GRID_SIZE; z++) {
+            const cell = slab.clone();
+            cell.position.set(
+              (x - (GRID_SIZE - 1) / 2) * CELL_SPACING,
+              0,
+              (z - (GRID_SIZE - 1) / 2) * CELL_SPACING
+            );
+            grid.add(cell);
+          }
+        }
+        onComplete(grid);
+      },
+      undefined,
+      () => console.error("Failed to load room model:", SLAB_MODEL_URL)
+    );
+    return grid;
+  }
 
   function createRoom(container) {
     const scene = new THREE.Scene();
@@ -33,16 +60,14 @@ import * as THREE from "three";
     dirLight.position.set(...LIGHT_POSITION);
     scene.add(dirLight);
 
-    const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE),
-      new THREE.MeshStandardMaterial({ color: CUBE_COLOR })
-    );
-    scene.add(cube);
+    const draco = new DRACOLoader();
+    draco.setDecoderPath(DRACO_DECODER_PATH);
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(draco);
+    scene.add(slabGrid(loader, () => render()));
 
     camera.position.set(...CAMERA_POSITION);
     camera.lookAt(...CAMERA_TARGET);
-
-    let running = true;
 
     function onResize() {
       const width = container.clientWidth;
@@ -53,14 +78,23 @@ import * as THREE from "three";
     }
     window.addEventListener("resize", onResize);
 
-    function animate() {
-      if (!running) return;
-      cube.rotation.y += CUBE_ROTATION_PER_FRAME.y;
-      cube.rotation.x += CUBE_ROTATION_PER_FRAME.x;
+    function render() {
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
     }
-    requestAnimationFrame(animate);
+    render();
+
+    return {
+      render,
+      dispose() {
+        window.removeEventListener("resize", onResize);
+        disposeSceneResources();
+        draco.dispose();
+        renderer.dispose();
+        if (renderer.domElement.parentNode) {
+          renderer.domElement.parentNode.removeChild(renderer.domElement);
+        }
+      },
+    };
 
     function disposeSceneResources() {
       scene.traverse((obj) => {
@@ -71,18 +105,6 @@ import * as THREE from "three";
         }
       });
     }
-
-    return {
-      dispose() {
-        running = false;
-        window.removeEventListener("resize", onResize);
-        disposeSceneResources();
-        renderer.dispose();
-        if (renderer.domElement.parentNode) {
-          renderer.domElement.parentNode.removeChild(renderer.domElement);
-        }
-      },
-    };
   }
 
   window.Room = { create: createRoom };
