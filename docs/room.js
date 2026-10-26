@@ -5,7 +5,15 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 (() => {
   "use strict";
 
-  const ROOM_BG_COLOR = 0xd8e2f0;
+  const ROOM_BG_COLOR = 0xf2e2cf;
+  const ROOM_FOG_COLOR = 0xf2e2cf;
+  const ROOM_FOG_NEAR = 12;
+  const ROOM_FOG_FAR = 40;
+  const HEMI_SKY_COLOR = 0xffe0b8;
+  const HEMI_GROUND_COLOR = 0xd9b38c;
+  const HEMI_INTENSITY = 0.7;
+  const KEY_LIGHT_COLOR = 0xffd9a0;
+  const KEY_LIGHT_INTENSITY = 1.6;
   const SLAB_MODEL_URL = "./models/slab.glb";
   const TABLE_MODEL_URL = "./models/table.glb";
   const DRACO_DECODER_PATH = "./vendor/addons/libs/draco/gltf/";
@@ -19,6 +27,9 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
   const LIGHT_POSITION = [4, 6, 3];
+  const FILL_LIGHT_COLOR = 0xbcd0ff;
+  const FILL_LIGHT_INTENSITY = 0.35;
+  const FILL_LIGHT_POSITION = [-5, 3, -4];
 
   function loadModel(loader, url) {
     return new Promise((resolve, reject) => {
@@ -73,12 +84,20 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
     container.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight.position.set(...LIGHT_POSITION);
-    scene.add(dirLight);
+    scene.fog = new THREE.Fog(ROOM_FOG_COLOR, ROOM_FOG_NEAR, ROOM_FOG_FAR);
+
+    const hemi = new THREE.HemisphereLight(HEMI_SKY_COLOR, HEMI_GROUND_COLOR, HEMI_INTENSITY);
+    scene.add(hemi);
+    const keyLight = new THREE.DirectionalLight(KEY_LIGHT_COLOR, KEY_LIGHT_INTENSITY);
+    keyLight.position.set(...LIGHT_POSITION);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(FILL_LIGHT_COLOR, FILL_LIGHT_INTENSITY);
+    fillLight.position.set(...FILL_LIGHT_POSITION);
+    scene.add(fillLight);
 
     const draco = new DRACOLoader();
     draco.setDecoderPath(DRACO_DECODER_PATH);
