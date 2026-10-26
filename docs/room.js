@@ -26,7 +26,10 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
-  const LIGHT_POSITION = [4, 6, 3];
+  const LIGHT_POSITION = [6, 5, -2];
+  const SHADOW_MAP_SIZE = 2048;
+  const SHADOW_CAMERA_BOUNDS = 8;
+  const SHADOW_RADIUS = 4;
   const FILL_LIGHT_COLOR = 0xbcd0ff;
   const FILL_LIGHT_INTENSITY = 0.35;
   const FILL_LIGHT_POSITION = [-5, 3, -4];
@@ -40,6 +43,15 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     });
   }
 
+  function applyShadows(obj, cast, receive) {
+    obj.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = cast;
+        child.receiveShadow = receive;
+      }
+    });
+  }
+
   function buildRoomContent(loader, onReady) {
     const grid = new THREE.Group();
     grid.scale.setScalar(GRID_SCALE);
@@ -48,6 +60,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
       loadModel(loader, TABLE_MODEL_URL),
     ]).then(([slab, table]) => {
       if (slab.status === "fulfilled") {
+        applyShadows(slab.value, true, true);
         for (let x = 0; x < GRID_SIZE; x++) {
           for (let z = 0; z < GRID_SIZE; z++) {
             const cell = slab.value.clone();
@@ -61,6 +74,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
         }
       }
       if (table.status === "fulfilled") {
+        applyShadows(table.value, true, true);
         table.value.scale.setScalar(TABLE_SCALE);
         table.value.position.y = SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE;
         grid.add(table.value);
@@ -86,6 +100,8 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
     scene.fog = new THREE.Fog(ROOM_FOG_COLOR, ROOM_FOG_NEAR, ROOM_FOG_FAR);
@@ -94,6 +110,13 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     scene.add(hemi);
     const keyLight = new THREE.DirectionalLight(KEY_LIGHT_COLOR, KEY_LIGHT_INTENSITY);
     keyLight.position.set(...LIGHT_POSITION);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+    keyLight.shadow.camera.left = -SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.camera.right = SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.camera.top = SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.camera.bottom = -SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.radius = SHADOW_RADIUS;
     scene.add(keyLight);
     const fillLight = new THREE.DirectionalLight(FILL_LIGHT_COLOR, FILL_LIGHT_INTENSITY);
     fillLight.position.set(...FILL_LIGHT_POSITION);
