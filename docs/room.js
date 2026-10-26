@@ -20,16 +20,26 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const CAMERA_TARGET = [0, 0, 0];
   const LIGHT_POSITION = [4, 6, 3];
 
-  function slabGrid(loader, onComplete) {
+  function loadModel(loader, url) {
+    return new Promise((resolve, reject) => {
+      loader.load(url, (gltf) => resolve(gltf.scene), undefined, () => {
+        console.error("Failed to load model:", url);
+        reject(new Error(url));
+      });
+    });
+  }
+
+  function buildRoomContent(loader, onReady) {
     const grid = new THREE.Group();
     grid.scale.setScalar(GRID_SCALE);
-    loader.load(
-      SLAB_MODEL_URL,
-      (gltf) => {
-        const slab = gltf.scene;
+    Promise.allSettled([
+      loadModel(loader, SLAB_MODEL_URL),
+      loadModel(loader, TABLE_MODEL_URL),
+    ]).then(([slab, table]) => {
+      if (slab.status === "fulfilled") {
         for (let x = 0; x < GRID_SIZE; x++) {
           for (let z = 0; z < GRID_SIZE; z++) {
-            const cell = slab.clone();
+            const cell = slab.value.clone();
             cell.position.set(
               (x - (GRID_SIZE - 1) / 2) * CELL_SPACING,
               0,
@@ -38,22 +48,14 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
             grid.add(cell);
           }
         }
-        loader.load(
-          TABLE_MODEL_URL,
-          (gltf) => {
-            const table = gltf.scene;
-            table.scale.setScalar(TABLE_SCALE);
-            table.position.y = SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE;
-            grid.add(table);
-            onComplete(grid);
-          },
-          undefined,
-          () => console.error("Failed to load room model:", TABLE_MODEL_URL)
-        );
-      },
-      undefined,
-      () => console.error("Failed to load room model:", SLAB_MODEL_URL)
-    );
+      }
+      if (table.status === "fulfilled") {
+        table.value.scale.setScalar(TABLE_SCALE);
+        table.value.position.y = SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE;
+        grid.add(table.value);
+      }
+      onReady();
+    });
     return grid;
   }
 
@@ -82,7 +84,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     draco.setDecoderPath(DRACO_DECODER_PATH);
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
-    scene.add(slabGrid(loader, () => render()));
+    scene.add(buildRoomContent(loader, () => render()));
 
     camera.position.set(...CAMERA_POSITION);
     camera.lookAt(...CAMERA_TARGET);
