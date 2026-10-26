@@ -981,8 +981,6 @@
       document.addEventListener("pointerup", onUp);
       document.addEventListener("pointercancel", onUp);
     });
-
-    uiSheetEl.addEventListener("transitionend", () => window.dispatchEvent(new Event("resize")));
   }
 
   initUiSheet();
