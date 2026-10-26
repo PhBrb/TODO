@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 (() => {
   "use strict";
@@ -25,7 +26,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const TABLE_SCALE = 2;
   const TABLE_BASE_Y = -0.279;
   const TABLE_TOP_Y = 0.275;
-  const PLANT_SCALE = 0.5;
+  const PLANT_SCALE = 1;
   const PLANT_BASE_Y = -0.952;
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
@@ -37,6 +38,9 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
   const FILL_LIGHT_COLOR = 0xbcd0ff;
   const FILL_LIGHT_INTENSITY = 0.35;
   const FILL_LIGHT_POSITION = [-5, 3, -4];
+  const CONTROLS_MIN_DISTANCE = 2;
+  const CONTROLS_MAX_DISTANCE = 30;
+  const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
 
   function loadModel(loader, url) {
     return new Promise((resolve, reject) => {
@@ -143,6 +147,14 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     camera.position.set(...CAMERA_POSITION);
     camera.lookAt(...CAMERA_TARGET);
 
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(...CAMERA_TARGET);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = CONTROLS_MIN_DISTANCE;
+    controls.maxDistance = CONTROLS_MAX_DISTANCE;
+    controls.maxPolarAngle = CONTROLS_MAX_POLAR_ANGLE;
+
     function onResize() {
       const width = container.clientWidth;
       const height = Math.max(1, container.clientHeight);
@@ -152,6 +164,15 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     }
     window.addEventListener("resize", onResize);
 
+    let animating = true;
+    function animate() {
+      if (!animating) return;
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
     function render() {
       renderer.render(scene, camera);
     }
@@ -160,6 +181,8 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
     return {
       render,
       dispose() {
+        animating = false;
+        controls.dispose();
         window.removeEventListener("resize", onResize);
         disposeSceneResources();
         draco.dispose();
