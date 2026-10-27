@@ -165,9 +165,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   function layoutRoom(objects, slabCells) {
     const types = TYPES();
     const layout = new Map(); // id -> { model, position, rotation }
-    const cellTaken = new Set(
-      objects.filter((o) => o.cell).map((o) => o.cell[0] + "," + o.cell[1])
-    );
     // slab objects first (hosts), then onObject items
     const ordered = [
       ...objects.filter((o) => types[o.type]?.class === "slab"),
@@ -178,19 +175,10 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       const type = types[o.type];
       if (!type) continue;
       if (type.class === "slab") {
-        const cell = o.cell && slabCells.some((c) => c[0] === o.cell[0] && c[1] === o.cell[1])
-          ? o.cell
-          : null;
-        let x = 0, z = 0;
-        if (cell) {
-          [x, z] = worldPosOfCell(cell);
-        } else {
-          // fallback: first free cell
-          const free = slabCells.find(
-            (c) => !cellTaken.has(c[0] + "," + c[1])
-          );
-          if (free) { cellTaken.add(free[0] + "," + free[1]); [x, z] = worldPosOfCell(free); }
+        if (!o.cell || !slabCells.some((c) => c[0] === o.cell[0] && c[1] === o.cell[1])) {
+          continue; // placement invalid for this room: don't render (state stays untouched)
         }
+        const [x, z] = worldPosOfCell(o.cell);
         const y = SLAB_TOP_Y - type.baseY * type.scale;
         positions.set(o.id, [x, y, z]);
       } else {
@@ -514,7 +502,14 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       }
     }
 
+    function isRoomCell(cell) {
+      const desc = typeof getSceneDesc === "function" ? getSceneDesc() : null;
+      const slabs = desc?.slabs || [];
+      return slabs.some((c) => c[0] === cell[0] && c[1] === cell[1]);
+    }
+
     function showMovePreview(objectId, cell) {
+      if (!isRoomCell(cell)) return; // preview only inside the room
       const model = objectModels.get(objectId);
       if (!model) return;
       const [x, z] = worldPosOfCell(cell);

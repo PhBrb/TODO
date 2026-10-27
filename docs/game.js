@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.32.2";
+  const VERSION = "0.32.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 4;
@@ -1064,6 +1064,10 @@
     if (!obj || !isRecord(placement)) return false;
     if (Array.isArray(placement.cell)) {
       if (typeof placement.cell[0] !== "number" || typeof placement.cell[1] !== "number") return false;
+      // only cells that exist in the current room (slab set)
+      const cells = slabOffsets(slabCountForLevel(levelFromXp(state.xp)));
+      const isRoomCell = cells.some((c) => c[0] === placement.cell[0] && c[1] === placement.cell[1]);
+      if (!isRoomCell) return false;
       delete obj.on;
       obj.cell = [placement.cell[0], placement.cell[1]];
     } else if (typeof placement.on === "string") {
