@@ -423,8 +423,10 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      // intersect with the floor plane (slab top height in grid space)
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -SLAB_TOP_Y);
+      // intersect with the floor plane in WORLD space: the slab top sits at
+      // SLAB_TOP_Y (grid units), which the grid group scales by GRID_SCALE.
+      const worldSlabTopY = SLAB_TOP_Y * GRID_SCALE;
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -worldSlabTopY);
       const point = new THREE.Vector3();
       if (!raycaster.ray.intersectPlane(plane, point)) return null;
       if (!roomContent) return null;
