@@ -54,8 +54,9 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   const DUST_DRIFT_SPEED = 0.06;
   const DUST_COLOR = 0xffe8c4;
   const CAMERA_FOV = 40;
-  const CAMERA_POSITION = [5, 4.5, 7];
-  const CAMERA_TARGET = [0, 0, 0];
+  // camera framing is defined in room units and scaled to the grid, so the
+  // room always fills a similar share of the screen as the island grows
+  const CAMERA_OFFSET = [5, 4.5, 7];
   const LIGHT_POSITION = [6, 5, -2];
   const SHADOW_MAP_SIZE = 2048;
   const SHADOW_CAMERA_BOUNDS = 8;
@@ -63,8 +64,8 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   const FILL_LIGHT_COLOR = 0xbcd0ff;
   const FILL_LIGHT_INTENSITY = 0.35;
   const FILL_LIGHT_POSITION = [-5, 3, -4];
-  const CONTROLS_MIN_DISTANCE = 2;
-  const CONTROLS_MAX_DISTANCE = 30;
+  const CONTROLS_MIN_DISTANCE = 2 * GRID_SCALE;
+  const CONTROLS_MAX_DISTANCE = 30 * GRID_SCALE;
   const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
   const PAN_MARGIN_PX = 32;
 
@@ -270,7 +271,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
   function createCameraControls(camera, container, targetElement) {
     const controls = new OrbitControls(camera, targetElement);
-    controls.target.set(...CAMERA_TARGET);
+    controls.target.set(0, 0, 0);
     controls.enableRotate = false;
     controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
     controls.touches.ONE = THREE.TOUCH.PAN;
@@ -286,12 +287,12 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     const toCenter = new THREE.Vector3();
     const desired = new THREE.Vector3();
     const shift = new THREE.Vector3();
-    const sceneCenter = new THREE.Vector3(...CAMERA_TARGET);
+    const sceneCenter = new THREE.Vector3(0, 0, 0);
 
     function clampPan() {
       const width = container.clientWidth;
       const height = Math.max(1, container.clientHeight);
-      ray.set(...CAMERA_TARGET).project(camera);
+      ray.copy(sceneCenter).project(camera);
       const screenX = (ray.x * 0.5 + 0.5) * width;
       const screenY = (-ray.y * 0.5 + 0.5) * height;
       const clampedX = Math.min(width - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenX));
@@ -317,6 +318,13 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       },
       setPanEnabled(enabled) {
         controls.enablePan = enabled;
+      },
+      setTarget(center) {
+        // keep the current view direction; translate camera + target together
+        const delta = new THREE.Vector3().subVectors(center, controls.target);
+        camera.position.add(delta);
+        controls.target.copy(center);
+        sceneCenter.copy(center);
       },
       dispose() {
         controls.dispose();
@@ -530,6 +538,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     renderer.domElement.addEventListener("pointerleave", () => { pointerDown = null; });
 
     let roomContent = null;
+    let roomCenter = null; // world-space center of the slab island
     function refreshContent() {
       if (roomContent) {
         scene.remove(roomContent);
@@ -540,8 +549,21 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       const desc = typeof getSceneDesc === "function" ? getSceneDesc() : null;
       roomContent = buildRoomContent(loader, desc);
       scene.add(roomContent);
+
+      // camera follows the room's center as the island grows
+      const slabs = desc?.slabs || [];
+      if (slabs.length) {
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        for (const [x, z] of slabs) {
+          minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+          minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
+        }
+        const cx = (minX + maxX) / 2 * CELL_SPACING * GRID_SCALE;
+        const cz = (minZ + maxZ) / 2 * CELL_SPACING * GRID_SCALE;
+        roomCenter = new THREE.Vector3(cx, 0, cz);
+        controls.setTarget(roomCenter);
+      }
     }
-    refreshContent();
     const sunSpot = new THREE.SpotLight(SUNSPOT_COLOR, SUNSPOT_INTENSITY);
     sunSpot.position.set(...WINDOW_POSITION);
     sunSpot.target.position.set(...SUNSPOT_TARGET);
@@ -554,8 +576,12 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     scene.add(dust);
     const clock = new THREE.Clock();
 
-    camera.position.set(...CAMERA_POSITION);
-    camera.lookAt(...CAMERA_TARGET);
+    camera.position.set(
+      CAMERA_OFFSET[0] * GRID_SCALE,
+      CAMERA_OFFSET[1] * GRID_SCALE,
+      CAMERA_OFFSET[2] * GRID_SCALE
+    );
+    camera.lookAt(0, 0, 0);
 
     const controls = createCameraControls(camera, container, renderer.domElement);
 
@@ -569,6 +595,8 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     );
     composer.addPass(bloomPass);
     composer.addPass(new OutputPass());
+
+    refreshContent();
 
     function onResize() {
       const width = container.clientWidth;
@@ -626,11 +654,12 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
   const container = document.getElementById("room-view");
   if (container && window.Game) {
-    const instance = createRoom(container, () => ({
+    let instance = null;
+    instance = createRoom(container, () => ({
       slabs: Game.slabOffsets(Game.slabCountForLevel(Game.levelFromXp(Game.state.xp))),
       objects: Game.state.roomObjects,
-      bindObject: (id, model) => instance.bindObject(id, model),
+      bindObject: (id, model) => instance && instance.bindObject(id, model),
     }));
-    window.addEventListener("game-state-changed", () => instance.refresh());
+    window.addEventListener("game-state-changed", () => instance && instance.refresh());
   }
 })();
