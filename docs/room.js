@@ -54,6 +54,20 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   const DUST_OPACITY = 0.5;
   const DUST_DRIFT_SPEED = 0.06;
   const DUST_COLOR = 0xffe8c4;
+  const CAMERA_FOV = 40;
+  const CAMERA_POSITION = [5, 4.5, 7];
+  const CAMERA_TARGET = [0, 0, 0];
+  const LIGHT_POSITION = [6, 5, -2];
+  const SHADOW_MAP_SIZE = 2048;
+  const SHADOW_CAMERA_BOUNDS = 8;
+  const SHADOW_RADIUS = 4;
+  const FILL_LIGHT_COLOR = 0xbcd0ff;
+  const FILL_LIGHT_INTENSITY = 0.35;
+  const FILL_LIGHT_POSITION = [-5, 3, -4];
+  const CONTROLS_MIN_DISTANCE = 2;
+  const CONTROLS_MAX_DISTANCE = 30;
+  const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
+  const PAN_MARGIN_PX = 32;
 
   function createDustTexture() {
     const canvas = document.createElement("canvas");
@@ -113,21 +127,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     }
     positions.needsUpdate = true;
   }
-  const CAMERA_FOV = 40;
-  const CAMERA_POSITION = [5, 4.5, 7];
-  const CAMERA_TARGET = [0, 0, 0];
-  const LIGHT_POSITION = [6, 5, -2];
-  const SHADOW_MAP_SIZE = 2048;
-  const SHADOW_CAMERA_BOUNDS = 8;
-  const SHADOW_RADIUS = 4;
-  const FILL_LIGHT_COLOR = 0xbcd0ff;
-  const FILL_LIGHT_INTENSITY = 0.35;
-  const FILL_LIGHT_POSITION = [-5, 3, -4];
-  const CONTROLS_MIN_DISTANCE = 2;
-  const CONTROLS_MAX_DISTANCE = 30;
-  const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
-  const PAN_MARGIN_PX = 32;
-
   function loadModel(loader, url) {
     return new Promise((resolve, reject) => {
       loader.load(url, (gltf) => resolve(gltf.scene), undefined, () => {
@@ -150,6 +149,14 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     const glow = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
     glow.position.y = LAMP_LIGHT_Y_OFFSET;
     lamp.add(glow);
+  }
+
+  function placeOnTable(grid, model, scale, baseY, x, tableY) {
+    applyShadows(model, true, true);
+    model.scale.setScalar(scale);
+    model.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - baseY * scale;
+    model.position.x = x;
+    grid.add(model);
   }
 
   function buildRoomContent(loader) {
@@ -183,19 +190,11 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
         grid.add(table.value);
       }
       if (plant.status === "fulfilled" && table.status === "fulfilled") {
-        applyShadows(plant.value, true, true);
-        plant.value.scale.setScalar(PLANT_SCALE);
-        plant.value.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - PLANT_BASE_Y * PLANT_SCALE;
-        plant.value.position.x = -LAMP_POSITION_X;
-        grid.add(plant.value);
+        placeOnTable(grid, plant.value, PLANT_SCALE, PLANT_BASE_Y, -LAMP_POSITION_X, tableY);
       }
       if (lamp.status === "fulfilled" && table.status === "fulfilled") {
-        applyShadows(lamp.value, true, true);
-        lamp.value.scale.setScalar(LAMP_SCALE);
-        lamp.value.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - LAMP_BASE_Y * LAMP_SCALE;
-        lamp.value.position.x = LAMP_POSITION_X;
+        placeOnTable(grid, lamp.value, LAMP_SCALE, LAMP_BASE_Y, LAMP_POSITION_X, tableY);
         makeLampGlow(lamp.value);
-        grid.add(lamp.value);
       }
     });
     return grid;
