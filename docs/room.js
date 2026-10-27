@@ -18,6 +18,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const SLAB_MODEL_URL = "./models/slab.glb";
   const TABLE_MODEL_URL = "./models/table.glb";
   const PLANT_MODEL_URL = "./models/plant.glb";
+  const LAMP_MODEL_URL = "./models/lamp.glb";
   const DRACO_DECODER_PATH = "./vendor/addons/libs/draco/gltf/";
   const GRID_SIZE = 3;
   const CELL_SPACING = 2;
@@ -28,6 +29,20 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const TABLE_TOP_Y = 0.275;
   const PLANT_SCALE = 1;
   const PLANT_BASE_Y = -0.952;
+  const LAMP_SCALE = 1;
+  const LAMP_BASE_Y = -0.951;
+  const LAMP_POSITION_X = 1.6;
+  const LAMP_LIGHT_COLOR = 0xffb46b;
+  const LAMP_LIGHT_INTENSITY = 3;
+  const LAMP_LIGHT_DISTANCE = 6;
+  const LAMP_LIGHT_Y_OFFSET = 0.5;
+  const LAMP_SHADE_OPACITY = 0.8;
+  const SUNRAY_COLOR = 0xffd9a0;
+  const SUNRAY_OPACITY = 0.06;
+  const SUNRAY_WIDTH = 3;
+  const SUNRAY_HEIGHT = 8;
+  const SUNRAY_ROTATION_Y = Math.PI / 5;
+  const SUNRAY_POSITION = [-4, 4, -3];
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
@@ -61,6 +76,40 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     });
   }
 
+  function makeLampGlow(lamp) {
+    lamp.traverse((child) => {
+      if (child.isMesh) {
+        child.material.transparent = true;
+        child.material.opacity = LAMP_SHADE_OPACITY;
+      }
+    });
+    const glow = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
+    glow.position.y = LAMP_LIGHT_Y_OFFSET;
+    lamp.add(glow);
+  }
+
+  function createSunrays() {
+    const rays = new THREE.Group();
+    const geometry = new THREE.PlaneGeometry(SUNRAY_WIDTH, SUNRAY_HEIGHT);
+    const material = new THREE.MeshBasicMaterial({
+      color: SUNRAY_COLOR,
+      transparent: true,
+      opacity: SUNRAY_OPACITY,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+    });
+    const offsets = [[-1, 0], [0, 0.4], [1, -0.2]];
+    for (const [dx, dz] of offsets) {
+      const ray = new THREE.Mesh(geometry, material);
+      ray.position.set(dx, SUNRAY_HEIGHT / 2 - 2, dz);
+      ray.rotation.y = SUNRAY_ROTATION_Y + dx * 0.3;
+      rays.add(ray);
+    }
+    rays.position.set(...SUNRAY_POSITION);
+    return rays;
+  }
+
   function buildRoomContent(loader) {
     const grid = new THREE.Group();
     grid.scale.setScalar(GRID_SCALE);
@@ -68,7 +117,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       loadModel(loader, SLAB_MODEL_URL),
       loadModel(loader, TABLE_MODEL_URL),
       loadModel(loader, PLANT_MODEL_URL),
-    ]).then(([slab, table, plant]) => {
+      loadModel(loader, LAMP_MODEL_URL),
+    ]).then(([slab, table, plant, lamp]) => {
       if (slab.status === "fulfilled") {
         applyShadows(slab.value, true, true);
         for (let x = 0; x < GRID_SIZE; x++) {
@@ -94,7 +144,16 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
         applyShadows(plant.value, true, true);
         plant.value.scale.setScalar(PLANT_SCALE);
         plant.value.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - PLANT_BASE_Y * PLANT_SCALE;
+        plant.value.position.x = -LAMP_POSITION_X;
         grid.add(plant.value);
+      }
+      if (lamp.status === "fulfilled" && table.status === "fulfilled") {
+        applyShadows(lamp.value, true, true);
+        lamp.value.scale.setScalar(LAMP_SCALE);
+        lamp.value.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - LAMP_BASE_Y * LAMP_SCALE;
+        lamp.value.position.x = LAMP_POSITION_X;
+        makeLampGlow(lamp.value);
+        grid.add(lamp.value);
       }
     });
     return grid;
@@ -200,6 +259,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
     scene.add(buildRoomContent(loader));
+    scene.add(createSunrays());
 
     camera.position.set(...CAMERA_POSITION);
     camera.lookAt(...CAMERA_TARGET);
