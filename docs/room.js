@@ -369,6 +369,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
     function bindObject(id, model) {
       objectModels.set(id, model);
+      updateObjectBox(id);
       if (selectedId === id) applyHighlight(model, true);
     }
 
@@ -392,20 +393,35 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       if (next) applyHighlight(next, true);
     }
 
+    // world-space bounding box per object (recomputed after load/move)
+    const objectBoxes = new Map(); // roomObjectId -> THREE.Box3
+
+    function updateObjectBox(id) {
+      const model = objectModels.get(id);
+      if (!model) return;
+      const box = new THREE.Box3().setFromObject(model);
+      objectBoxes.set(id, box);
+    }
+
     function pickObject(event) {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects([...objectModels.values()], true);
-      for (const hit of hits) {
-        let node = hit.object;
-        while (node) {
-          if (node.userData && node.userData.roomObjectId) return node.userData.roomObjectId;
-          node = node.parent;
+      // pick against bounding boxes (cheap, forgiving for thin parts),
+      // nearest box wins
+      const ray = raycaster.ray;
+      let bestId = null;
+      let bestDist = Infinity;
+      for (const [id, box] of objectBoxes) {
+        if (ray.intersectsBox(box)) {
+          // distance to box center as sort key
+          const center = box.getCenter(new THREE.Vector3());
+          const d = ray.distanceSqToPoint(center);
+          if (d < bestDist) { bestDist = d; bestId = id; }
         }
       }
-      return null;
+      return bestId;
     }
 
     function pickSlabCell(event) {
@@ -413,18 +429,15 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const slabGrid = roomContent;
-      if (!slabGrid) return null;
-      const hits = raycaster.intersectObjects(slabGrid.children, true);
-      for (const hit of hits) {
-        // slab cells sit at multiples of CELL_SPACING on the x/z plane
-        const p = hit.point.clone();
-        slabGrid.worldToLocal(p);
-        const cellX = Math.round(p.x / CELL_SPACING);
-        const cellZ = Math.round(p.z / CELL_SPACING);
-        return [cellX, cellZ];
-      }
-      return null;
+      // intersect with the floor plane (slab top height in grid space)
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -SLAB_TOP_Y);
+      const point = new THREE.Vector3();
+      if (!raycaster.ray.intersectPlane(plane, point)) return null;
+      if (!roomContent) return null;
+      roomContent.worldToLocal(point);
+      const cellX = Math.round(point.x / CELL_SPACING);
+      const cellZ = Math.round(point.z / CELL_SPACING);
+      return [cellX, cellZ];
     }
 
     function onPointerDown(event) {
@@ -519,6 +532,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
         scene.remove(roomContent);
         disposeObject(roomContent);
         objectModels.clear();
+        objectBoxes.clear();
       }
       const desc = typeof getSceneDesc === "function" ? getSceneDesc() : null;
       roomContent = buildRoomContent(loader, desc);
