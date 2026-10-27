@@ -456,9 +456,12 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       const dy = event.clientY - pointerDown.y;
       if (Math.hypot(dx, dy) > TAP_SLOP_PX) pointerDown.moved = true;
       if (pointerDown.moved && pointerDown.objectId && selectedId === pointerDown.objectId) {
-        // dragging a selected object: pan disabled via controls.enabled
+        // dragging a selected object: pan is disabled while selected
         const cell = pickSlabCell(event);
-        if (cell) showMovePreview(pointerDown.objectId, cell);
+        if (cell && isRoomCell(cell)) {
+          pointerDown.lastValidCell = cell; // remember what the user sees
+          showMovePreview(pointerDown.objectId, cell);
+        }
       }
     }
 
@@ -466,10 +469,11 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       if (!pointerDown) return;
       const info = pointerDown;
       pointerDown = null;
-      hideMovePreview();
       if (info.moved) {
         if (info.objectId && selectedId === info.objectId) {
-          const cell = pickSlabCell(event);
+          // commit the last cell the preview showed - NOT the raw release
+          // point, which usually sits outside the tiny room island.
+          const cell = info.lastValidCell || null;
           if (cell) commitMove(info.objectId, cell);
         }
         return;
@@ -519,17 +523,11 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     }
 
     function showMovePreview(objectId, cell) {
-      if (!isRoomCell(cell)) return; // preview only inside the room
       const model = objectModels.get(objectId);
       if (!model) return;
       const [x, z] = worldPosOfCell(cell);
       model.position.x = x;
       model.position.z = z;
-    }
-
-    function hideMovePreview() {
-      // positions snap back via the state-driven refresh on commit;
-      // nothing to do here because the preview moves the model directly
     }
 
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
