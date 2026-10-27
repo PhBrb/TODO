@@ -149,6 +149,10 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(...CAMERA_TARGET);
+    controls.enableRotate = false;
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    controls.touches.ONE = THREE.TOUCH.PAN;
+    controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.minDistance = CONTROLS_MIN_DISTANCE;
