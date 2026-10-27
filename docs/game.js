@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.31.0";
+  const VERSION = "0.31.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -33,19 +33,17 @@
   const SLABS_PER_LEVEL = 4;
   const INITIAL_SLABS = 4;
 
-  // Strong pairing (Rosenberg-style spiral): every slab is edge-adjacent to
-  // the previous one, so the room always grows as one connected island.
+  // Rosenberg strong pairing over the positive quadrant: the room starts as
+  // a 2x2 core, then each expansion grows the square kxk -> (k+1)x(k+1)
+  // by walking the new column (x=k, z=0..k) and the new row (z=k, x=k-1..0).
+  // Every new slab touches the existing square, so the room stays connected.
   function slabOffsets(count) {
-    const cells = [[0, 0]];
-    let r = 0;
+    const cells = [[0, 0], [1, 0], [1, 1], [0, 1]];
+    let k = 1;
     while (cells.length < count) {
-      r += 1;
-      const ring = [];
-      for (let x = -r + 1; x <= r; x++) ring.push([x, r]);
-      for (let y = r - 1; y >= -r; y--) ring.push([r, y]);
-      for (let x = r - 1; x >= -r; x--) ring.push([x, -r]);
-      for (let y = -r + 1; y <= r; y++) ring.push([-r, y]);
-      cells.push(...ring);
+      k += 1;
+      for (let z = 0; z <= k; z++) cells.push([k, z]);
+      for (let x = k - 1; x >= 0; x--) cells.push([x, k]);
     }
     return cells.slice(0, count);
   }
