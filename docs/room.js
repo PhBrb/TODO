@@ -61,7 +61,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     });
   }
 
-  function buildRoomContent(loader, onReady) {
+  function buildRoomContent(loader) {
     const grid = new THREE.Group();
     grid.scale.setScalar(GRID_SCALE);
     Promise.allSettled([
@@ -96,9 +96,81 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
         plant.value.position.y = tableY + TABLE_TOP_Y * TABLE_SCALE - PLANT_BASE_Y * PLANT_SCALE;
         grid.add(plant.value);
       }
-      onReady();
     });
     return grid;
+  }
+
+  function createLighting(scene) {
+    scene.fog = new THREE.Fog(ROOM_FOG_COLOR, ROOM_FOG_NEAR, ROOM_FOG_FAR);
+
+    const hemi = new THREE.HemisphereLight(HEMI_SKY_COLOR, HEMI_GROUND_COLOR, HEMI_INTENSITY);
+    scene.add(hemi);
+    const keyLight = new THREE.DirectionalLight(KEY_LIGHT_COLOR, KEY_LIGHT_INTENSITY);
+    keyLight.position.set(...LIGHT_POSITION);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+    keyLight.shadow.camera.left = -SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.camera.right = SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.camera.top = SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.camera.bottom = -SHADOW_CAMERA_BOUNDS;
+    keyLight.shadow.radius = SHADOW_RADIUS;
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(FILL_LIGHT_COLOR, FILL_LIGHT_INTENSITY);
+    fillLight.position.set(...FILL_LIGHT_POSITION);
+    scene.add(fillLight);
+  }
+
+  function createCameraControls(camera, container, targetElement) {
+    const controls = new OrbitControls(camera, targetElement);
+    controls.target.set(...CAMERA_TARGET);
+    controls.enableRotate = false;
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    controls.touches.ONE = THREE.TOUCH.PAN;
+    controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = CONTROLS_MIN_DISTANCE;
+    controls.maxDistance = CONTROLS_MAX_DISTANCE;
+    controls.maxPolarAngle = CONTROLS_MAX_POLAR_ANGLE;
+
+    const ray = new THREE.Vector3();
+    const viewDir = new THREE.Vector3();
+    const toCenter = new THREE.Vector3();
+    const desired = new THREE.Vector3();
+    const shift = new THREE.Vector3();
+    const sceneCenter = new THREE.Vector3(...CAMERA_TARGET);
+
+    function clampPan() {
+      const width = container.clientWidth;
+      const height = Math.max(1, container.clientHeight);
+      ray.set(...CAMERA_TARGET).project(camera);
+      const screenX = (ray.x * 0.5 + 0.5) * width;
+      const screenY = (-ray.y * 0.5 + 0.5) * height;
+      const clampedX = Math.min(width - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenX));
+      const clampedY = Math.min(height - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenY));
+      if (clampedX === screenX && clampedY === screenY) return;
+
+      const ndcX = (clampedX / width) * 2 - 1;
+      const ndcY = -(clampedY / height) * 2 + 1;
+      ray.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
+      camera.getWorldDirection(viewDir);
+      toCenter.subVectors(sceneCenter, camera.position);
+      const depth = toCenter.dot(viewDir);
+      desired.copy(camera.position).addScaledVector(ray, depth / ray.dot(viewDir));
+      shift.subVectors(sceneCenter, desired);
+      camera.position.add(shift);
+      controls.target.add(shift);
+    }
+
+    return {
+      update() {
+        controls.update();
+        clampPan();
+      },
+      dispose() {
+        controls.dispose();
+      },
+    };
   }
 
   function createRoom(container) {
@@ -121,74 +193,18 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    scene.fog = new THREE.Fog(ROOM_FOG_COLOR, ROOM_FOG_NEAR, ROOM_FOG_FAR);
-
-    const hemi = new THREE.HemisphereLight(HEMI_SKY_COLOR, HEMI_GROUND_COLOR, HEMI_INTENSITY);
-    scene.add(hemi);
-    const keyLight = new THREE.DirectionalLight(KEY_LIGHT_COLOR, KEY_LIGHT_INTENSITY);
-    keyLight.position.set(...LIGHT_POSITION);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-    keyLight.shadow.camera.left = -SHADOW_CAMERA_BOUNDS;
-    keyLight.shadow.camera.right = SHADOW_CAMERA_BOUNDS;
-    keyLight.shadow.camera.top = SHADOW_CAMERA_BOUNDS;
-    keyLight.shadow.camera.bottom = -SHADOW_CAMERA_BOUNDS;
-    keyLight.shadow.radius = SHADOW_RADIUS;
-    scene.add(keyLight);
-    const fillLight = new THREE.DirectionalLight(FILL_LIGHT_COLOR, FILL_LIGHT_INTENSITY);
-    fillLight.position.set(...FILL_LIGHT_POSITION);
-    scene.add(fillLight);
+    createLighting(scene);
 
     const draco = new DRACOLoader();
     draco.setDecoderPath(DRACO_DECODER_PATH);
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
-    scene.add(buildRoomContent(loader, () => render()));
+    scene.add(buildRoomContent(loader));
 
     camera.position.set(...CAMERA_POSITION);
     camera.lookAt(...CAMERA_TARGET);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(...CAMERA_TARGET);
-    controls.enableRotate = false;
-    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-    controls.touches.ONE = THREE.TOUCH.PAN;
-    controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.minDistance = CONTROLS_MIN_DISTANCE;
-    controls.maxDistance = CONTROLS_MAX_DISTANCE;
-    controls.maxPolarAngle = CONTROLS_MAX_POLAR_ANGLE;
-
-    const panLimitRay = new THREE.Vector3();
-    const panLimitViewDir = new THREE.Vector3();
-    const panLimitToCenter = new THREE.Vector3();
-    const panLimitDesired = new THREE.Vector3();
-    const panLimitShift = new THREE.Vector3();
-    const sceneCenter = new THREE.Vector3(...CAMERA_TARGET);
-
-    function clampPan() {
-      const width = container.clientWidth;
-      const height = Math.max(1, container.clientHeight);
-      panLimitRay.set(...CAMERA_TARGET).project(camera);
-      const screenX = (panLimitRay.x * 0.5 + 0.5) * width;
-      const screenY = (-panLimitRay.y * 0.5 + 0.5) * height;
-      const clampedX = Math.min(width - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenX));
-      const clampedY = Math.min(height - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenY));
-      if (clampedX === screenX && clampedY === screenY) return;
-
-      const ndcX = (clampedX / width) * 2 - 1;
-      const ndcY = -(clampedY / height) * 2 + 1;
-      panLimitRay.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
-      camera.getWorldDirection(panLimitViewDir);
-      panLimitToCenter.subVectors(sceneCenter, camera.position);
-      const depth = panLimitToCenter.dot(panLimitViewDir);
-      panLimitDesired.copy(camera.position)
-        .addScaledVector(panLimitRay, depth / panLimitRay.dot(panLimitViewDir));
-      panLimitShift.subVectors(sceneCenter, panLimitDesired);
-      camera.position.add(panLimitShift);
-      controls.target.add(panLimitShift);
-    }
+    const controls = createCameraControls(camera, container, renderer.domElement);
 
     function onResize() {
       const width = container.clientWidth;
@@ -203,19 +219,12 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     function animate() {
       if (!animating) return;
       controls.update();
-      clampPan();
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
 
-    function render() {
-      renderer.render(scene, camera);
-    }
-    render();
-
     return {
-      render,
       dispose() {
         animating = false;
         controls.dispose();
