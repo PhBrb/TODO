@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.31.1";
+  const VERSION = "0.31.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -30,6 +30,11 @@
   const RATE_PROMPT_TIMEOUT = 10000;
   const DIFFICULTY_SUGGESTION_STREAK = 5;
   const XP_REWARD = { too_easy: 10, easy: 50, medium: 120, hard: 250 }; // 10x for debugging
+  const XP_BASE_LEVEL = 100;
+  const CHEST_OPEN_MS = 12 * 60 * 60 * 1000;
+  const CHEST_COINS = [20, 30, 40];
+  const CHEST_GEMS = [1, 2];
+  const CHEST_XP = [10, 20];
   const SLABS_PER_LEVEL = 4;
   const INITIAL_SLABS = 4;
 
@@ -51,11 +56,6 @@
   function slabCountForLevel(level) {
     return INITIAL_SLABS + (Math.max(1, level) - 1) * SLABS_PER_LEVEL;
   }
-  const XP_BASE_LEVEL = 100;
-  const CHEST_OPEN_MS = 12 * 60 * 60 * 1000;
-  const CHEST_COINS = [20, 30, 40];
-  const CHEST_GEMS = [1, 2];
-  const CHEST_XP = [10, 20];
   const BOOST_MULT = 1.5;
   const BOOST_DURATION_MS = 60 * 60 * 1000;
   const BOOST_CHANCE_PER_COMPLETION = 0.1;

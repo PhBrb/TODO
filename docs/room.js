@@ -160,7 +160,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       scale: TABLE_SCALE,
       baseY: TABLE_BASE_Y,
       on: "slab",
-      slot: 0,
       decorate: null,
     },
     plant: {
@@ -168,7 +167,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       scale: PLANT_SCALE,
       baseY: PLANT_BASE_Y,
       on: "table",
-      slot: 0,
       offsetX: -ITEM_ON_TABLE_OFFSET,
       decorate: null,
     },
@@ -177,7 +175,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       scale: LAMP_SCALE,
       baseY: LAMP_BASE_Y,
       on: "table",
-      slot: 0,
       offsetX: ITEM_ON_TABLE_OFFSET,
       decorate: makeLampGlow,
     },
