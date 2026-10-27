@@ -426,15 +426,18 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       return bestId;
     }
 
+    // The drag plane: picking on the object's grab height (not the floor)
+    // keeps the picked cell under the finger 1:1. A floor-height pick has a
+    // large parallax offset - the ray continues far past a raised object
+    // before hitting the floor, skewing cells away from the camera.
+    let dragPlaneWorldY = SLAB_TOP_Y * GRID_SCALE;
+
     function pickSlabCell(event) {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      // intersect with the floor plane in WORLD space: the slab top sits at
-      // SLAB_TOP_Y (grid units), which the grid group scales by GRID_SCALE.
-      const worldSlabTopY = SLAB_TOP_Y * GRID_SCALE;
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -worldSlabTopY);
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -dragPlaneWorldY);
       const point = new THREE.Vector3();
       if (!raycaster.ray.intersectPlane(plane, point)) return null;
       if (!roomContent) return null;
@@ -447,7 +450,26 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     function onPointerDown(event) {
       if (event.button !== undefined && event.button !== 0) return;
       const id = pickObject(event);
+      // Drag plane at the grabbed object's top surface so the picked cell
+      // tracks the finger without floor parallax. Computed analytically from
+      // the object's stored position + type config (a Box3.setFromObject
+      // here could see stale matrices right after a refresh, before the
+      // first render updates matrixWorld).
+      dragPlaneWorldY = id ? objectTopWorldY(id) : SLAB_TOP_Y * GRID_SCALE;
       pointerDown = { x: event.clientX, y: event.clientY, objectId: id, moved: false };
+    }
+
+    function objectTopWorldY(id) {
+      const model = objectModels.get(id);
+      const objects = (typeof getSceneDesc === "function" ? getSceneDesc() : null)?.objects || [];
+      const types = TYPES();
+      const obj = objects.find((o) => o.id === id);
+      const type = obj && types[obj.type];
+      if (!model || !type) return SLAB_TOP_Y * GRID_SCALE;
+      // model.position is in grid space; the grid group scales by GRID_SCALE.
+      const originY = model.position.y * GRID_SCALE;
+      const topOffset = (type.surfaceY !== undefined ? type.surfaceY : -type.baseY) * type.scale;
+      return originY + topOffset * GRID_SCALE;
     }
 
     function onPointerMove(event) {

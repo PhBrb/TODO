@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.33.1";
+  const VERSION = "0.33.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 4;
@@ -1045,16 +1045,20 @@
     return { id: "obj" + state.nextId++, type: typeId, cell: null, rotation: 0 };
   }
 
+  const OBJECT_START_CELL = [1, 1]; // first slab object spawns here (room center)
+
   function spawnRoomObject(typeId) {
     const obj = defaultRoomObject(typeId);
     if (!obj) return;
     if (obj.cell === null) {
-      // first free slab in room order
       const cells = slabOffsets(slabCountForLevel(levelFromXp(state.xp)));
       const occupied = new Set(
         state.roomObjects.filter((o) => o.cell).map((o) => o.cell[0] + "," + o.cell[1])
       );
-      obj.cell = cells.find((c) => !occupied.has(c[0] + "," + c[1])) || cells[0];
+      const start = cells.find(
+        (c) => c[0] === OBJECT_START_CELL[0] && c[1] === OBJECT_START_CELL[1] && !occupied.has(c[0] + "," + c[1])
+      );
+      obj.cell = start || cells.find((c) => !occupied.has(c[0] + "," + c[1])) || cells[0];
     }
     state.roomObjects.push(obj);
   }
