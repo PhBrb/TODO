@@ -40,7 +40,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   const LAMP_LIGHT_INTENSITY = 1.2;
   const LAMP_LIGHT_DISTANCE = 6;
   const LAMP_LIGHT_Y_OFFSET = 0.5;
-  const LAMP_SHADE_OPACITY = 0.8;
   const WINDOW_POSITION = [-0.33, 0.32, -0.45];
   const SUNSPOT_TARGET = [0, 0.2, 0.05];
   const SUNSPOT_COLOR = 0xffd9a0;
@@ -148,12 +147,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   }
 
   function makeLampGlow(lamp) {
-    lamp.traverse((child) => {
-      if (child.isMesh) {
-        child.material.transparent = true;
-        child.material.opacity = LAMP_SHADE_OPACITY;
-      }
-    });
     const glow = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
     glow.position.y = LAMP_LIGHT_Y_OFFSET;
     lamp.add(glow);
