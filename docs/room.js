@@ -41,6 +41,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const CONTROLS_MIN_DISTANCE = 2;
   const CONTROLS_MAX_DISTANCE = 30;
   const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
+  const PAN_MARGIN_PX = 32;
 
   function loadModel(loader, url) {
     return new Promise((resolve, reject) => {
@@ -159,6 +160,36 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     controls.maxDistance = CONTROLS_MAX_DISTANCE;
     controls.maxPolarAngle = CONTROLS_MAX_POLAR_ANGLE;
 
+    const panLimitRay = new THREE.Vector3();
+    const panLimitViewDir = new THREE.Vector3();
+    const panLimitToCenter = new THREE.Vector3();
+    const panLimitDesired = new THREE.Vector3();
+    const panLimitShift = new THREE.Vector3();
+    const sceneCenter = new THREE.Vector3(...CAMERA_TARGET);
+
+    function clampPan() {
+      const width = container.clientWidth;
+      const height = Math.max(1, container.clientHeight);
+      panLimitRay.set(...CAMERA_TARGET).project(camera);
+      const screenX = (panLimitRay.x * 0.5 + 0.5) * width;
+      const screenY = (-panLimitRay.y * 0.5 + 0.5) * height;
+      const clampedX = Math.min(width - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenX));
+      const clampedY = Math.min(height - PAN_MARGIN_PX, Math.max(PAN_MARGIN_PX, screenY));
+      if (clampedX === screenX && clampedY === screenY) return;
+
+      const ndcX = (clampedX / width) * 2 - 1;
+      const ndcY = -(clampedY / height) * 2 + 1;
+      panLimitRay.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
+      camera.getWorldDirection(panLimitViewDir);
+      panLimitToCenter.subVectors(sceneCenter, camera.position);
+      const depth = panLimitToCenter.dot(panLimitViewDir);
+      panLimitDesired.copy(camera.position)
+        .addScaledVector(panLimitRay, depth / panLimitRay.dot(panLimitViewDir));
+      panLimitShift.subVectors(sceneCenter, panLimitDesired);
+      camera.position.add(panLimitShift);
+      controls.target.add(panLimitShift);
+    }
+
     function onResize() {
       const width = container.clientWidth;
       const height = Math.max(1, container.clientHeight);
@@ -172,6 +203,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     function animate() {
       if (!animating) return;
       controls.update();
+      clampPan();
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
