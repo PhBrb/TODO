@@ -2,6 +2,10 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 (() => {
   "use strict";
@@ -37,78 +41,20 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const LAMP_LIGHT_DISTANCE = 6;
   const LAMP_LIGHT_Y_OFFSET = 0.5;
   const LAMP_SHADE_OPACITY = 0.8;
-  const SUNSHAFT_COLOR = 0xffd9a0;
-  const SUNSHAFT_OPACITY = 0.14;
-  const SUNSHAFT_TOP_RADIUS = 0.03;
-  const SUNSHAFT_BOTTOM_RADIUS = 0.14;
-  const SUNSHAFT_HEIGHT = 0.62;
-  const SUNSHAFT_TOP_POSITION = [-0.33, 0.32, -0.45];
-  const SUNSHAFT_LANDING_POSITION = [0, 0.21, 0.05];
+  const WINDOW_POSITION = [-0.33, 0.32, -0.45];
+  const SUNSPOT_TARGET = [0, 0.2, 0.05];
+  const SUNSPOT_COLOR = 0xffd9a0;
+  const SUNSPOT_INTENSITY = 2.2;
+  const SUNSPOT_ANGLE = 0.5;
+  const SUNSPOT_PENUMBRA = 0.6;
+  const BLOOM_STRENGTH = 0.35;
+  const BLOOM_RADIUS = 0.4;
+  const BLOOM_THRESHOLD = 0.85;
   const DUST_COUNT = 220;
-  const DUST_AREA = { x: 1.2, y: 0.9, z: 1.2, yMin: 0.02 };
   const DUST_SIZE = 0.012;
   const DUST_OPACITY = 0.5;
   const DUST_DRIFT_SPEED = 0.06;
   const DUST_COLOR = 0xffe8c4;
-
-  function createSunShaftMaterial() {
-    return new THREE.ShaderMaterial({
-      transparent: true,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      uniforms: {
-        shaftColor: { value: new THREE.Color(SUNSHAFT_COLOR) },
-        opacity: { value: SUNSHAFT_OPACITY },
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 shaftColor;
-        uniform float opacity;
-        varying vec2 vUv;
-        void main() {
-          float edgeFade = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x);
-          float heightFade = pow(vUv.y, 1.4);
-          gl_FragColor = vec4(shaftColor, opacity * edgeFade * heightFade);
-        }
-      `,
-    });
-  }
-
-  function createSunShafts() {
-    const shafts = new THREE.Group();
-    const geometry = new THREE.CylinderGeometry(
-      SUNSHAFT_TOP_RADIUS,
-      SUNSHAFT_BOTTOM_RADIUS,
-      SUNSHAFT_HEIGHT,
-      24,
-      1,
-      true
-    );
-    const material = createSunShaftMaterial();
-    const mid = new THREE.Vector3(...SUNSHAFT_TOP_POSITION)
-      .add(new THREE.Vector3(...SUNSHAFT_LANDING_POSITION))
-      .multiplyScalar(0.5);
-    const dir = new THREE.Vector3(...SUNSHAFT_LANDING_POSITION)
-      .sub(new THREE.Vector3(...SUNSHAFT_TOP_POSITION));
-    const offsets = [[-0.06, 0.05], [0.0, 0.0], [0.07, -0.04]];
-    for (const [dx, dz] of offsets) {
-      const shaft = new THREE.Mesh(geometry, material);
-      shaft.position.copy(mid).add(new THREE.Vector3(dx, 0, dz));
-      shaft.quaternion.setFromUnitVectors(
-        new THREE.Vector3(0, 1, 0),
-        dir.clone().normalize()
-      );
-      shafts.add(shaft);
-    }
-    return shafts;
-  }
 
   function createDustTexture() {
     const canvas = document.createElement("canvas");
@@ -128,10 +74,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   function createDust() {
     const positions = new Float32Array(DUST_COUNT * 3);
     const seeds = new Float32Array(DUST_COUNT);
+    const from = new THREE.Vector3(...WINDOW_POSITION);
+    const to = new THREE.Vector3(...SUNSPOT_TARGET);
     for (let i = 0; i < DUST_COUNT; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * DUST_AREA.x;
-      positions[i * 3 + 1] = DUST_AREA.yMin + Math.random() * DUST_AREA.y;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * DUST_AREA.z;
+      const t = Math.random();
+      const spread = 0.06 + t * 0.1;
+      positions[i * 3] = from.x + (to.x - from.x) * t + (Math.random() - 0.5) * spread;
+      positions[i * 3 + 1] = from.y + (to.y - from.y) * t + (Math.random() - 0.5) * spread;
+      positions[i * 3 + 2] = from.z + (to.z - from.z) * t + (Math.random() - 0.5) * spread;
       seeds[i] = Math.random() * Math.PI * 2;
     }
     const geometry = new THREE.BufferGeometry();
@@ -358,7 +308,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
     scene.add(buildRoomContent(loader));
-    scene.add(createSunShafts());
+    const sunSpot = new THREE.SpotLight(SUNSPOT_COLOR, SUNSPOT_INTENSITY);
+    sunSpot.position.set(...WINDOW_POSITION);
+    sunSpot.target.position.set(...SUNSPOT_TARGET);
+    sunSpot.angle = SUNSPOT_ANGLE;
+    sunSpot.penumbra = SUNSPOT_PENUMBRA;
+    sunSpot.decay = 1.2;
+    scene.add(sunSpot);
+    scene.add(sunSpot.target);
     const dust = createDust();
     scene.add(dust);
     const clock = new THREE.Clock();
@@ -368,12 +325,24 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
     const controls = createCameraControls(camera, container, renderer.domElement);
 
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(container.clientWidth, container.clientHeight),
+      BLOOM_STRENGTH,
+      BLOOM_RADIUS,
+      BLOOM_THRESHOLD
+    );
+    composer.addPass(bloomPass);
+    composer.addPass(new OutputPass());
+
     function onResize() {
       const width = container.clientWidth;
       const height = Math.max(1, container.clientHeight);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      composer.setSize(width, height);
     }
     window.addEventListener("resize", onResize);
 
@@ -382,7 +351,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       if (!animating) return;
       controls.update();
       updateDust(dust, clock.getElapsedTime());
-      renderer.render(scene, camera);
+      composer.render();
       requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
@@ -394,6 +363,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
         window.removeEventListener("resize", onResize);
         disposeSceneResources();
         draco.dispose();
+        composer.dispose();
         renderer.dispose();
         if (renderer.domElement.parentNode) {
           renderer.domElement.parentNode.removeChild(renderer.domElement);
