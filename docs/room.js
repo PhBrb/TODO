@@ -38,15 +38,15 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const LAMP_LIGHT_Y_OFFSET = 0.5;
   const LAMP_SHADE_OPACITY = 0.8;
   const SUNSHAFT_COLOR = 0xffd9a0;
-  const SUNSHAFT_OPACITY = 0.10;
-  const SUNSHAFT_TOP_RADIUS = 0.4;
-  const SUNSHAFT_BOTTOM_RADIUS = 2.2;
-  const SUNSHAFT_HEIGHT = 7;
-  const SUNSHAFT_TILT = [0.35, 0, -0.25];
-  const SUNSHAFT_BASES = [[-3.2, 0, -2.4], [-1.4, 0, -1.8], [0.6, 0, -2.6]];
+  const SUNSHAFT_OPACITY = 0.14;
+  const SUNSHAFT_TOP_RADIUS = 0.03;
+  const SUNSHAFT_BOTTOM_RADIUS = 0.14;
+  const SUNSHAFT_HEIGHT = 0.62;
+  const SUNSHAFT_TOP_POSITION = [-0.33, 0.32, -0.45];
+  const SUNSHAFT_LANDING_POSITION = [0, 0.21, 0.05];
   const DUST_COUNT = 220;
-  const DUST_AREA = { x: 6, y: 5, z: 5, yMin: 0.2 };
-  const DUST_SIZE = 0.045;
+  const DUST_AREA = { x: 1.2, y: 0.9, z: 1.2, yMin: 0.02 };
+  const DUST_SIZE = 0.012;
   const DUST_OPACITY = 0.5;
   const DUST_DRIFT_SPEED = 0.06;
   const DUST_COLOR = 0xffe8c4;
@@ -92,11 +92,19 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       true
     );
     const material = createSunShaftMaterial();
-    for (const base of SUNSHAFT_BASES) {
+    const mid = new THREE.Vector3(...SUNSHAFT_TOP_POSITION)
+      .add(new THREE.Vector3(...SUNSHAFT_LANDING_POSITION))
+      .multiplyScalar(0.5);
+    const dir = new THREE.Vector3(...SUNSHAFT_LANDING_POSITION)
+      .sub(new THREE.Vector3(...SUNSHAFT_TOP_POSITION));
+    const offsets = [[-0.06, 0.05], [0.0, 0.0], [0.07, -0.04]];
+    for (const [dx, dz] of offsets) {
       const shaft = new THREE.Mesh(geometry, material);
-      shaft.position.set(base[0], base[1] + SUNSHAFT_HEIGHT / 2, base[2]);
-      shaft.rotation.z = SUNSHAFT_TILT[0];
-      shaft.rotation.x = SUNSHAFT_TILT[2];
+      shaft.position.copy(mid).add(new THREE.Vector3(dx, 0, dz));
+      shaft.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        dir.clone().normalize()
+      );
       shafts.add(shaft);
     }
     return shafts;
