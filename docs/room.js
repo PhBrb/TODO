@@ -327,6 +327,9 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
         controls.update();
         clampPan();
       },
+      setPanEnabled(enabled) {
+        controls.enablePan = enabled;
+      },
       dispose() {
         controls.dispose();
       },
@@ -373,13 +376,16 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
       if (selectedId === id) applyHighlight(model, true);
     }
 
+    const HIGHLIGHT_EMISSIVE = 0x664411;
+
     function applyHighlight(model, on) {
       model.traverse((child) => {
         if (!child.isMesh || !child.material) return;
         const materials = Array.isArray(child.material) ? child.material : [child.material];
         for (const m of materials) {
           m.emissive = m.emissive || new THREE.Color(0);
-          m.emissive.setHex(on ? 0x332200 : 0x000000);
+          m.emissive.setHex(on ? HIGHLIGHT_EMISSIVE : 0x000000);
+          if (m.emissiveIntensity !== undefined) m.emissiveIntensity = on ? 1.5 : 1;
         }
       });
     }
@@ -476,11 +482,11 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
           window.Game?.rotateRoomObject(info.objectId);
         } else {
           setSelected(info.objectId);
-          controls.enablePan = false;
+          controls.setPanEnabled(false);
         }
       } else {
         setSelected(null);
-        controls.enablePan = true;
+        controls.setPanEnabled(true);
       }
     }
 
