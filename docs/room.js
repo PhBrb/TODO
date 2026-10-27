@@ -37,12 +37,125 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   const LAMP_LIGHT_DISTANCE = 6;
   const LAMP_LIGHT_Y_OFFSET = 0.5;
   const LAMP_SHADE_OPACITY = 0.8;
-  const SUNRAY_COLOR = 0xffd9a0;
-  const SUNRAY_OPACITY = 0.06;
-  const SUNRAY_WIDTH = 3;
-  const SUNRAY_HEIGHT = 8;
-  const SUNRAY_ROTATION_Y = Math.PI / 5;
-  const SUNRAY_POSITION = [-4, 4, -3];
+  const SUNSHAFT_COLOR = 0xffd9a0;
+  const SUNSHAFT_OPACITY = 0.10;
+  const SUNSHAFT_TOP_RADIUS = 0.4;
+  const SUNSHAFT_BOTTOM_RADIUS = 2.2;
+  const SUNSHAFT_HEIGHT = 7;
+  const SUNSHAFT_TILT = [0.35, 0, -0.25];
+  const SUNSHAFT_BASES = [[-3.2, 0, -2.4], [-1.4, 0, -1.8], [0.6, 0, -2.6]];
+  const DUST_COUNT = 220;
+  const DUST_AREA = { x: 6, y: 5, z: 5, yMin: 0.2 };
+  const DUST_SIZE = 0.045;
+  const DUST_OPACITY = 0.5;
+  const DUST_DRIFT_SPEED = 0.06;
+  const DUST_COLOR = 0xffe8c4;
+
+  function createSunShaftMaterial() {
+    return new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        shaftColor: { value: new THREE.Color(SUNSHAFT_COLOR) },
+        opacity: { value: SUNSHAFT_OPACITY },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 shaftColor;
+        uniform float opacity;
+        varying vec2 vUv;
+        void main() {
+          float edgeFade = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x);
+          float heightFade = pow(vUv.y, 1.4);
+          gl_FragColor = vec4(shaftColor, opacity * edgeFade * heightFade);
+        }
+      `,
+    });
+  }
+
+  function createSunShafts() {
+    const shafts = new THREE.Group();
+    const geometry = new THREE.CylinderGeometry(
+      SUNSHAFT_TOP_RADIUS,
+      SUNSHAFT_BOTTOM_RADIUS,
+      SUNSHAFT_HEIGHT,
+      24,
+      1,
+      true
+    );
+    const material = createSunShaftMaterial();
+    for (const base of SUNSHAFT_BASES) {
+      const shaft = new THREE.Mesh(geometry, material);
+      shaft.position.set(base[0], base[1] + SUNSHAFT_HEIGHT / 2, base[2]);
+      shaft.rotation.z = SUNSHAFT_TILT[0];
+      shaft.rotation.x = SUNSHAFT_TILT[2];
+      shafts.add(shaft);
+    }
+    return shafts;
+  }
+
+  function createDustTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+    gradient.addColorStop(0.4, "rgba(255, 255, 255, 0.4)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+  }
+
+  function createDust() {
+    const positions = new Float32Array(DUST_COUNT * 3);
+    const seeds = new Float32Array(DUST_COUNT);
+    for (let i = 0; i < DUST_COUNT; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * DUST_AREA.x;
+      positions[i * 3 + 1] = DUST_AREA.yMin + Math.random() * DUST_AREA.y;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * DUST_AREA.z;
+      seeds[i] = Math.random() * Math.PI * 2;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: DUST_COLOR,
+      size: DUST_SIZE,
+      transparent: true,
+      opacity: DUST_OPACITY,
+      map: createDustTexture(),
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    });
+    const points = new THREE.Points(geometry, material);
+    points.userData.seeds = seeds;
+    points.userData.basePositions = positions.slice();
+    return points;
+  }
+
+  function updateDust(dust, elapsed) {
+    const positions = dust.geometry.attributes.position;
+    const base = dust.userData.basePositions;
+    const seeds = dust.userData.seeds;
+    for (let i = 0; i < seeds.length; i++) {
+      const t = elapsed * DUST_DRIFT_SPEED + seeds[i];
+      positions.array[i * 3] = base[i * 3] + Math.sin(t) * 0.25;
+      positions.array[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * 0.7) * 0.15;
+      positions.array[i * 3 + 2] = base[i * 3 + 2] + Math.cos(t * 0.9) * 0.2;
+    }
+    positions.needsUpdate = true;
+  }
   const CAMERA_FOV = 40;
   const CAMERA_POSITION = [5, 4.5, 7];
   const CAMERA_TARGET = [0, 0, 0];
@@ -86,28 +199,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const glow = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
     glow.position.y = LAMP_LIGHT_Y_OFFSET;
     lamp.add(glow);
-  }
-
-  function createSunrays() {
-    const rays = new THREE.Group();
-    const geometry = new THREE.PlaneGeometry(SUNRAY_WIDTH, SUNRAY_HEIGHT);
-    const material = new THREE.MeshBasicMaterial({
-      color: SUNRAY_COLOR,
-      transparent: true,
-      opacity: SUNRAY_OPACITY,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-    });
-    const offsets = [[-1, 0], [0, 0.4], [1, -0.2]];
-    for (const [dx, dz] of offsets) {
-      const ray = new THREE.Mesh(geometry, material);
-      ray.position.set(dx, SUNRAY_HEIGHT / 2 - 2, dz);
-      ray.rotation.y = SUNRAY_ROTATION_Y + dx * 0.3;
-      rays.add(ray);
-    }
-    rays.position.set(...SUNRAY_POSITION);
-    return rays;
   }
 
   function buildRoomContent(loader) {
@@ -259,7 +350,10 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
     scene.add(buildRoomContent(loader));
-    scene.add(createSunrays());
+    scene.add(createSunShafts());
+    const dust = createDust();
+    scene.add(dust);
+    const clock = new THREE.Clock();
 
     camera.position.set(...CAMERA_POSITION);
     camera.lookAt(...CAMERA_TARGET);
@@ -279,6 +373,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     function animate() {
       if (!animating) return;
       controls.update();
+      updateDust(dust, clock.getElapsedTime());
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
