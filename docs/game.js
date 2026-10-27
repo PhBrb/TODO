@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.33.2";
+  const VERSION = "0.33.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 4;
@@ -1013,10 +1013,13 @@
         type: o.type,
         rotation: Math.min(3, Math.max(0, Math.floor(num(o.rotation, 0)))),
       };
-      if (Array.isArray(o.cell) && o.cell.length === 2) {
+      const type = (window.ROOM_OBJECT_TYPES || {})[o.type];
+      if (Array.isArray(o.cell) && o.cell.length === 2 && (!type || type.class === "slab")) {
         entry.cell = [num(o.cell[0], 0), num(o.cell[1], 0)];
       } else if (typeof o.on === "string") {
         entry.on = o.on;
+      } else if (type && type.class === "onObject") {
+        entry.__needsHost = true; // legacy onObject without host: fix below
       } else {
         continue; // placement incomplete: ignore
       }
@@ -1028,6 +1031,27 @@
         const spawned = defaultRoomObject(id);
         if (spawned) out.push(spawned);
       }
+    }
+    // legacy onObject entries that stored a cell (pre-class rules) or lost
+    // their host: attach them to the first object that supports on-top
+    for (const o of out) {
+      if (!o.__needsHost) continue;
+      delete o.__needsHost;
+      const host = out.find((p) => {
+        const t = (window.ROOM_OBJECT_TYPES || {})[p.type];
+        return t && t.supportsOnTop;
+      });
+      if (host) o.on = host.id;
+    }
+    // slab objects that got a null cell (schema-upgrade spawns) initialize
+    // at the start cell (1,1); a deliberately placed cell is kept as-is.
+    for (const o of out) {
+      const type = (window.ROOM_OBJECT_TYPES || {})[o.type];
+      if (!type || type.class !== "slab" || o.cell) continue;
+      const occupied = out.some(
+        (p) => p !== o && p.cell && p.cell[0] === 1 && p.cell[1] === 1
+      );
+      if (!occupied) o.cell = [1, 1];
     }
     return out;
   }
