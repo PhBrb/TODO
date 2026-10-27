@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.30.4";
+  const VERSION = "0.31.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -29,7 +29,30 @@
   const FIRST_TASK_GEM_CHANCE = { day1_2: 0, day3_6: 0.5, day7: 0.5 };
   const RATE_PROMPT_TIMEOUT = 10000;
   const DIFFICULTY_SUGGESTION_STREAK = 5;
-  const XP_REWARD = { too_easy: 1, easy: 5, medium: 12, hard: 25 };
+  const XP_REWARD = { too_easy: 10, easy: 50, medium: 120, hard: 250 }; // 10x for debugging
+  const SLABS_PER_LEVEL = 4;
+  const INITIAL_SLABS = 4;
+
+  // Strong pairing (Rosenberg-style spiral): every slab is edge-adjacent to
+  // the previous one, so the room always grows as one connected island.
+  function slabOffsets(count) {
+    const cells = [[0, 0]];
+    let r = 0;
+    while (cells.length < count) {
+      r += 1;
+      const ring = [];
+      for (let x = -r + 1; x <= r; x++) ring.push([x, r]);
+      for (let y = r - 1; y >= -r; y--) ring.push([r, y]);
+      for (let x = r - 1; x >= -r; x--) ring.push([x, -r]);
+      for (let y = -r + 1; y <= r; y++) ring.push([-r, y]);
+      cells.push(...ring);
+    }
+    return cells.slice(0, count);
+  }
+
+  function slabCountForLevel(level) {
+    return INITIAL_SLABS + (Math.max(1, level) - 1) * SLABS_PER_LEVEL;
+  }
   const XP_BASE_LEVEL = 100;
   const CHEST_OPEN_MS = 12 * 60 * 60 * 1000;
   const CHEST_COINS = [20, 30, 40];
@@ -41,12 +64,8 @@
   const BOOST_COOLDOWN_MS = 2 * 60 * 60 * 1000;
   const SHOP_ITEMS = [
     { id: "plant",       name: "Plant",        emoji: "🪴", costCoins: 50,  costGems: 0, minLevel: 1 },
+    { id: "table",       name: "Table",        emoji: "🪑", costCoins: 150, costGems: 0, minLevel: 1 },
     { id: "lamp",        name: "Lamp",         emoji: "💡", costCoins: 100, costGems: 0, minLevel: 2 },
-    { id: "poster",      name: "Poster",       emoji: "🖼️", costCoins: 150, costGems: 0, minLevel: 3 },
-    { id: "rug",         name: "Rug",          emoji: "🧶", costCoins: 250, costGems: 0, minLevel: 4 },
-    { id: "cat",         name: "Cat",          emoji: "🐱", costCoins: 400, costGems: 0, minLevel: 5 },
-    { id: "crystal",     name: "Crystal",      emoji: "🔮", costCoins: 0,   costGems: 5, minLevel: 3 },
-    { id: "trophy",      name: "Trophy",       emoji: "🏆", costCoins: 0,   costGems: 10, minLevel: 6 },
   ];
 
   function defaultState() {
@@ -209,6 +228,7 @@
     } catch {
       // storage full or unavailable: keep running in-memory
     }
+    window.dispatchEvent(new CustomEvent("game-state-changed"));
   }
 
   function randomMultiplier() {
@@ -971,6 +991,7 @@
     state.coins -= item.costCoins;
     state.gems -= item.costGems;
     state.ownedItems.push(id);
+    saveState();
     return { ok: true };
   }
 
@@ -1079,6 +1100,8 @@
     maybeSuggestDifficultyReduction,
     SHOP_ITEMS,
     shopItemById,
+    slabOffsets,
+    slabCountForLevel,
     itemIsOwned,
     itemIsUnlockable,
     purchaseItem,
