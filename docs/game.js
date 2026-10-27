@@ -2,10 +2,10 @@
   "use strict";
 
 
-  const VERSION = "0.31.2";
+  const VERSION = "0.32.0";
 
   const STORAGE_KEY = "todo-mwe-state";
-  const SCHEMA_VERSION = 3;
+  const SCHEMA_VERSION = 4;
 
   const TIME_LIMIT_MINUTES = [5, 15, 30, 60];
   const TIME_BONUS_COINS = { too_easy: 0, easy: 5, medium: 10, hard: 20 };
@@ -84,6 +84,7 @@
       lastDailyMilestone: 0,
       lastWeeklyMilestone: 0,
       ownedItems: [],
+      roomObjects: [],
       dayStartHour: 0,
       uiSheetHeightVh: 0,
     };
@@ -192,6 +193,7 @@
       ownedItems: Array.isArray(raw.ownedItems)
         ? raw.ownedItems.filter((id) => SHOP_ITEMS.some((it) => it.id === id))
         : [],
+      roomObjects: migrateRoomObjects(raw.roomObjects, raw.ownedItems),
       dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
       uiSheetHeightVh: Math.min(95, Math.max(0, num(raw.uiSheetHeightVh, 0))),
     };
@@ -989,8 +991,101 @@
     state.coins -= item.costCoins;
     state.gems -= item.costGems;
     state.ownedItems.push(id);
+    spawnRoomObject(id);
     saveState();
     return { ok: true };
+  }
+
+  // --- room object placement state -------------------------------------
+  // Each owned item has one room object: { id, type, cell | on, rotation }.
+  // cell: [x, z] slab coordinates for class "slab" objects.
+  // on: id of the host object for class "onObject" objects.
+  // rotation: number of 90 degree steps (0-3).
+
+  function migrateRoomObjects(raw, ownedItems) {
+    if (!Array.isArray(raw)) return [];
+    const out = [];
+    for (const o of raw) {
+      if (!isRecord(o) || typeof o.type !== "string") continue;
+      if (!ownedItems || !ownedItems.includes(o.type)) continue;
+      const entry = {
+        id: str(o.id, ""),
+        type: o.type,
+        rotation: Math.min(3, Math.max(0, Math.floor(num(o.rotation, 0)))),
+      };
+      if (Array.isArray(o.cell) && o.cell.length === 2) {
+        entry.cell = [num(o.cell[0], 0), num(o.cell[1], 0)];
+      } else if (typeof o.on === "string") {
+        entry.on = o.on;
+      } else {
+        continue; // placement incomplete: ignore
+      }
+      out.push(entry);
+    }
+    // ensure every owned item has an object (e.g. after schema upgrade)
+    for (const id of ownedItems || []) {
+      if (!out.some((o) => o.type === id)) {
+        const spawned = defaultRoomObject(id);
+        if (spawned) out.push(spawned);
+      }
+    }
+    return out;
+  }
+
+  function defaultRoomObject(typeId) {
+    const types = window.ROOM_OBJECT_TYPES || {};
+    const type = types[typeId];
+    if (!type) return null;
+    if (type.class === "onObject") {
+      const host = state.roomObjects.find(
+        (o) => types[o.type] && types[o.type].supportsOnTop
+      );
+      return host ? { id: "obj" + state.nextId++, type: typeId, on: host.id, rotation: 0 } : null;
+    }
+    return { id: "obj" + state.nextId++, type: typeId, cell: null, rotation: 0 };
+  }
+
+  function spawnRoomObject(typeId) {
+    const obj = defaultRoomObject(typeId);
+    if (!obj) return;
+    if (obj.cell === null) {
+      // first free slab in room order
+      const cells = slabOffsets(slabCountForLevel(levelFromXp(state.xp)));
+      const occupied = new Set(
+        state.roomObjects.filter((o) => o.cell).map((o) => o.cell[0] + "," + o.cell[1])
+      );
+      obj.cell = cells.find((c) => !occupied.has(c[0] + "," + c[1])) || cells[0];
+    }
+    state.roomObjects.push(obj);
+  }
+
+  function moveRoomObject(id, placement) {
+    const obj = state.roomObjects.find((o) => o.id === id);
+    if (!obj || !isRecord(placement)) return false;
+    if (Array.isArray(placement.cell)) {
+      if (typeof placement.cell[0] !== "number" || typeof placement.cell[1] !== "number") return false;
+      delete obj.on;
+      obj.cell = [placement.cell[0], placement.cell[1]];
+    } else if (typeof placement.on === "string") {
+      const host = state.roomObjects.find((o) => o.id === placement.on);
+      if (!host) return false;
+      const types = window.ROOM_OBJECT_TYPES || {};
+      if (!types[host.type] || !types[host.type].supportsOnTop) return false;
+      delete obj.cell;
+      obj.on = placement.on;
+    } else {
+      return false;
+    }
+    saveState();
+    return true;
+  }
+
+  function rotateRoomObject(id) {
+    const obj = state.roomObjects.find((o) => o.id === id);
+    if (!obj) return false;
+    obj.rotation = (obj.rotation + 1) % 4;
+    saveState();
+    return true;
   }
 
   window.Game = {
@@ -1099,6 +1194,8 @@
     SHOP_ITEMS,
     shopItemById,
     slabOffsets,
+    moveRoomObject,
+    rotateRoomObject,
     slabCountForLevel,
     itemIsOwned,
     itemIsUnlockable,

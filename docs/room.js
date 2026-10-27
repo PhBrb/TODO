@@ -145,43 +145,68 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     });
   }
 
-  function makeLampGlow(lamp) {
-    const glow = new THREE.PointLight(LAMP_LIGHT_COLOR, LAMP_LIGHT_INTENSITY, LAMP_LIGHT_DISTANCE);
-    glow.position.y = LAMP_LIGHT_Y_OFFSET;
-    lamp.add(glow);
+  const TYPES = () => window.ROOM_OBJECT_TYPES || {};
+
+  function decorateObject(typeId, model) {
+    const glowCfg = TYPES()[typeId]?.glow;
+    if (glowCfg) {
+      const glow = new THREE.PointLight(glowCfg.color, glowCfg.intensity, glowCfg.distance);
+      glow.position.y = glowCfg.yOffset;
+      model.add(glow);
+    }
   }
 
-  // Registry of purchasable items: how each model is placed in the room.
-  // supports: which slab-relative surface it sits on, its scale, and an
-  // optional decorate callback (e.g. the lamp's inner light).
-  const ITEM_REGISTRY = {
-    table: {
-      url: "./models/table.glb",
-      scale: TABLE_SCALE,
-      baseY: TABLE_BASE_Y,
-      on: "slab",
-      decorate: null,
-    },
-    plant: {
-      url: "./models/plant.glb",
-      scale: PLANT_SCALE,
-      baseY: PLANT_BASE_Y,
-      on: "table",
-      offsetX: -ITEM_ON_TABLE_OFFSET,
-      decorate: null,
-    },
-    lamp: {
-      url: "./models/lamp.glb",
-      scale: LAMP_SCALE,
-      baseY: LAMP_BASE_Y,
-      on: "table",
-      offsetX: ITEM_ON_TABLE_OFFSET,
-      decorate: makeLampGlow,
-    },
-  };
+  function worldPosOfCell(cell) {
+    return [cell[0] * CELL_SPACING, 0, cell[1] * CELL_SPACING];
+  }
 
-  function tableSurfaceY() {
-    return SLAB_TOP_Y - TABLE_BASE_Y * TABLE_SCALE + TABLE_TOP_Y * TABLE_SCALE;
+  // Build a lookup from object id -> { model, position, rotation } for the
+  // current scene description. Positions are computed in slab-grid space.
+  function layoutRoom(objects, slabCells) {
+    const types = TYPES();
+    const layout = new Map(); // id -> { model, position, rotation }
+    const cellTaken = new Set(
+      objects.filter((o) => o.cell).map((o) => o.cell[0] + "," + o.cell[1])
+    );
+    // slab objects first (hosts), then onObject items
+    const ordered = [
+      ...objects.filter((o) => types[o.type]?.class === "slab"),
+      ...objects.filter((o) => types[o.type]?.class === "onObject"),
+    ];
+    const positions = new Map(); // id -> [x, y, z] in grid space
+    for (const o of ordered) {
+      const type = types[o.type];
+      if (!type) continue;
+      if (type.class === "slab") {
+        const cell = o.cell && slabCells.some((c) => c[0] === o.cell[0] && c[1] === o.cell[1])
+          ? o.cell
+          : null;
+        let x = 0, z = 0;
+        if (cell) {
+          [x, z] = worldPosOfCell(cell);
+        } else {
+          // fallback: first free cell
+          const free = slabCells.find(
+            (c) => !cellTaken.has(c[0] + "," + c[1])
+          );
+          if (free) { cellTaken.add(free[0] + "," + free[1]); [x, z] = worldPosOfCell(free); }
+        }
+        const y = SLAB_TOP_Y - type.baseY * type.scale;
+        positions.set(o.id, [x, y, z]);
+      } else {
+        // onObject: sits on the host's surface
+        const hostPos = positions.get(o.on);
+        const host = objects.find((p) => p.id === o.on);
+        const hostType = host && types[host.type];
+        if (!hostPos || !hostType || !hostType.supportsOnTop) continue;
+        // host position already includes the host's base offset (baseY);
+        // the usable surface sits surfaceY (model units) above the host's
+        // own base, and this object's baseY anchors it on that surface.
+        const surfaceY = hostPos[1] + hostType.surfaceY * hostType.scale;
+        positions.set(o.id, [hostPos[0], surfaceY - type.baseY * type.scale, hostPos[2]]);
+      }
+    }
+    return positions;
   }
 
   function buildRoomContent(loader, sceneDesc) {
@@ -189,13 +214,12 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     grid.scale.setScalar(GRID_SCALE);
 
     const slabCells = (sceneDesc && sceneDesc.slabs) || [[0, 0]];
-    const owned = (sceneDesc && sceneDesc.items) || [];
+    const objects = (sceneDesc && sceneDesc.objects) || [];
+    const types = TYPES();
 
+    const ids = objects.map((o) => o.type).filter((t) => types[t]);
     const jobs = [loadModel(loader, SLAB_MODEL_URL)];
-    for (const id of owned) {
-      const def = ITEM_REGISTRY[id];
-      if (def) jobs.push(loadModel(loader, def.url));
-    }
+    for (const t of new Set(ids)) jobs.push(loadModel(loader, types[t].model));
 
     Promise.allSettled(jobs).then((results) => {
       const [slabResult, ...itemResults] = results;
@@ -209,25 +233,29 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
         grid.add(cell);
       }
 
-      let tableModel = null;
-      owned.forEach((id, i) => {
-        const def = ITEM_REGISTRY[id];
-        const result = itemResults[i];
-        if (!def || result.status !== "fulfilled") return;
-        const model = result.value;
-        applyShadows(model, true, true);
-        model.scale.setScalar(def.scale);
-        if (def.on === "table") {
-          if (!tableModel) return; // items on the table need the table
-          model.position.y = tableSurfaceY() - def.baseY * def.scale;
-          model.position.x = def.offsetX || 0;
-        } else {
-          model.position.y = SLAB_TOP_Y - def.baseY * def.scale;
+      const modelByType = new Map();
+      [...new Set(ids)].forEach((t, i) => {
+        if (itemResults[i] && itemResults[i].status === "fulfilled") {
+          modelByType.set(t, itemResults[i].value);
         }
-        grid.add(model);
-        if (id === "table") tableModel = model;
-        if (def.decorate) def.decorate(model);
       });
+
+      const positions = layoutRoom(objects, slabCells);
+      for (const o of objects) {
+        const type = types[o.type];
+        const template = modelByType.get(o.type);
+        const pos = positions.get(o.id);
+        if (!type || !template || !pos) continue;
+        const model = template.clone();
+        applyShadows(model, true, true);
+        model.scale.setScalar(type.scale);
+        model.position.set(pos[0], pos[1], pos[2]);
+        model.rotation.y = (o.rotation || 0) * Math.PI / 2;
+        model.userData.roomObjectId = o.id;
+        decorateObject(o.type, model);
+        grid.add(model);
+        sceneDesc.bindObject?.(o.id, model);
+      }
     });
     return grid;
   }
@@ -331,11 +359,166 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
     draco.setDecoderPath(DRACO_DECODER_PATH);
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
+    // --- object selection / move / rotate interactions -------------------
+    const objectModels = new Map(); // roomObjectId -> model (bound via bindObject)
+    let selectedId = null;
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let pointerDown = null; // { x, y, objectId, moved }
+    const TAP_SLOP_PX = 6;
+
+    function bindObject(id, model) {
+      objectModels.set(id, model);
+      if (selectedId === id) applyHighlight(model, true);
+    }
+
+    function applyHighlight(model, on) {
+      model.traverse((child) => {
+        if (!child.isMesh || !child.material) return;
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        for (const m of materials) {
+          m.emissive = m.emissive || new THREE.Color(0);
+          m.emissive.setHex(on ? 0x332200 : 0x000000);
+        }
+      });
+    }
+
+    function setSelected(id) {
+      if (selectedId === id) return;
+      const prev = objectModels.get(selectedId);
+      if (prev) applyHighlight(prev, false);
+      selectedId = id;
+      const next = objectModels.get(id);
+      if (next) applyHighlight(next, true);
+    }
+
+    function pickObject(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects([...objectModels.values()], true);
+      for (const hit of hits) {
+        let node = hit.object;
+        while (node) {
+          if (node.userData && node.userData.roomObjectId) return node.userData.roomObjectId;
+          node = node.parent;
+        }
+      }
+      return null;
+    }
+
+    function pickSlabCell(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const slabGrid = roomContent;
+      if (!slabGrid) return null;
+      const hits = raycaster.intersectObjects(slabGrid.children, true);
+      for (const hit of hits) {
+        // slab cells sit at multiples of CELL_SPACING on the x/z plane
+        const p = hit.point.clone();
+        slabGrid.worldToLocal(p);
+        const cellX = Math.round(p.x / CELL_SPACING);
+        const cellZ = Math.round(p.z / CELL_SPACING);
+        return [cellX, cellZ];
+      }
+      return null;
+    }
+
+    function onPointerDown(event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      const id = pickObject(event);
+      pointerDown = { x: event.clientX, y: event.clientY, objectId: id, moved: false };
+    }
+
+    function onPointerMove(event) {
+      if (!pointerDown) return;
+      const dx = event.clientX - pointerDown.x;
+      const dy = event.clientY - pointerDown.y;
+      if (Math.hypot(dx, dy) > TAP_SLOP_PX) pointerDown.moved = true;
+      if (pointerDown.moved && pointerDown.objectId && selectedId === pointerDown.objectId) {
+        // dragging a selected object: pan disabled via controls.enabled
+        const cell = pickSlabCell(event);
+        if (cell) showMovePreview(pointerDown.objectId, cell);
+      }
+    }
+
+    function onPointerUp(event) {
+      if (!pointerDown) return;
+      const info = pointerDown;
+      pointerDown = null;
+      hideMovePreview();
+      if (info.moved) {
+        if (info.objectId && selectedId === info.objectId) {
+          const cell = pickSlabCell(event);
+          if (cell) commitMove(info.objectId, cell);
+        }
+        return;
+      }
+      // tap
+      if (info.objectId) {
+        if (selectedId === info.objectId) {
+          window.Game?.rotateRoomObject(info.objectId);
+        } else {
+          setSelected(info.objectId);
+          controls.enablePan = false;
+        }
+      } else {
+        setSelected(null);
+        controls.enablePan = true;
+      }
+    }
+
+    function commitMove(objectId, cell) {
+      const types = TYPES();
+      const objects = (typeof getSceneDesc === "function" ? getSceneDesc() : null)?.objects || [];
+      const obj = objects.find((o) => o.id === objectId);
+      const type = obj && types[obj.type];
+      if (!type) return;
+      // target slab cell: is a slab-object already there?
+      const occupant = objects.find(
+        (o) => o.cell && o.cell[0] === cell[0] && o.cell[1] === cell[1] && o.id !== objectId
+      );
+      const occupantType = occupant && types[occupant.type];
+      if (type.class === "onObject") {
+        // dragged onto a slab: place on the slab if the class allows, else on the occupant
+        if (occupantType?.supportsOnTop) {
+          window.Game?.moveRoomObject(objectId, { on: occupant.id });
+        } else {
+          window.Game?.moveRoomObject(objectId, { cell });
+        }
+      } else {
+        if (occupant) return; // slab objects cannot stack on each other
+        window.Game?.moveRoomObject(objectId, { cell });
+      }
+    }
+
+    function showMovePreview(objectId, cell) {
+      const model = objectModels.get(objectId);
+      if (!model) return;
+      const [x, z] = worldPosOfCell(cell);
+      model.position.x = x;
+      model.position.z = z;
+    }
+
+    function hideMovePreview() {
+      // positions snap back via the state-driven refresh on commit;
+      // nothing to do here because the preview moves the model directly
+    }
+
+    renderer.domElement.addEventListener("pointerdown", onPointerDown);
+    renderer.domElement.addEventListener("pointermove", onPointerMove);
+    renderer.domElement.addEventListener("pointerup", onPointerUp);
+    renderer.domElement.addEventListener("pointerleave", () => { pointerDown = null; });
+
     let roomContent = null;
     function refreshContent() {
       if (roomContent) {
         scene.remove(roomContent);
         disposeObject(roomContent);
+        objectModels.clear();
       }
       const desc = typeof getSceneDesc === "function" ? getSceneDesc() : null;
       roomContent = buildRoomContent(loader, desc);
@@ -392,6 +575,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
     return {
       refresh: refreshContent,
+      bindObject,
       dispose() {
         animating = false;
         controls.dispose();
@@ -427,7 +611,8 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
   if (container && window.Game) {
     const instance = createRoom(container, () => ({
       slabs: Game.slabOffsets(Game.slabCountForLevel(Game.levelFromXp(Game.state.xp))),
-      items: Game.state.ownedItems,
+      objects: Game.state.roomObjects,
+      bindObject: (id, model) => instance.bindObject(id, model),
     }));
     window.addEventListener("game-state-changed", () => instance.refresh());
   }
