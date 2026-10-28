@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.37.1";
+  const VERSION = "0.37.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -533,7 +533,7 @@
       else if (hoursLeft < 48) score += Math.round(40 * (1 - hoursLeft / 48));
     }
     if (task.repeat !== "none" && task.streak > 0) {
-      score += 15 + Math.min(task.streak, 10) * 2;
+      score = Math.min(50, score + 15 + task.streak * 2);
     }
     if (task.difficulty === "hard") score += 10;
     else if (task.difficulty === "medium") score += 5;
