@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { positionItemGroup, findSurfaceGroup } from "./room-items.js";
 
 const ROTATION_STEP = Math.PI / 2;
-const HIGHLIGHT_EMISSIVE = 0x7a5a2e;
-const HIGHLIGHT_EMISSIVE_INTENSITY = 0.25;
+const HIGHLIGHT_EMISSIVE = 0xffb84d;
+const HIGHLIGHT_EMISSIVE_INTENSITY = 0.45;
 const MIN_DRAG_PX = 6;
 
 export function createInteraction({
@@ -27,7 +27,6 @@ export function createInteraction({
   let dragCandidate = null;
   let dragActive = false;
   let dragCell = null;
-  let suppressNextTap = false;
 
   function setNdc(ev) {
     const rect = domElement.getBoundingClientRect();
@@ -182,17 +181,12 @@ export function createInteraction({
       setPanEnabled(true);
       if (dragCell !== null) onPlaceItem(group.userData.itemId, dragCell);
       dragCell = null;
-      suppressNextTap = true;
       return;
     }
     handleTap(ev);
   }
 
   function handleTap(ev) {
-    if (suppressNextTap) {
-      suppressNextTap = false;
-      return;
-    }
     const group = intersectGroups(ev);
     if (group && group === selectedGroup) {
       onRotateItem(group.userData.itemId);
