@@ -51,6 +51,7 @@ import { createInteraction } from "./room-interaction.js";
   const CONTROLS_MAX_DISTANCE = 30;
   const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
   const PAN_MARGIN_PX = 32;
+  const CHEST_RING_START_GAP = 2.5 / 360;
 
   function createDustTexture() {
     const canvas = document.createElement("canvas");
@@ -397,7 +398,7 @@ import { createInteraction } from "./room-interaction.js";
         chestWasReady = ready;
         if (!ready) {
           const model = pedestalGroup.children[0];
-          if (model) updateCountdownRing(model, display.progress);
+          if (model) updateCountdownRing(model, display.fraction);
         }
         return;
       }
@@ -409,7 +410,7 @@ import { createInteraction } from "./room-interaction.js";
       if (ready) return;
       const model = pedestalGroup.children[0];
       if (!model) return;
-      updateCountdownRing(model, display.progress);
+      updateCountdownRing(model, display.fraction);
     }
 
     return {
@@ -454,17 +455,21 @@ import { createInteraction } from "./room-interaction.js";
     );
   }
 
-  function chestProgress(chest) {
+  // Fraction of the full circle covered by the countdown ring: proportional
+  // to the remaining wait time, but even a freshly earned chest starts with a
+  // small visible gap (CHEST_RING_START_GAP) instead of a seamless full ring.
+  function chestRingFraction(chest) {
     const delay = chest.openDelayMs ?? Game.CHEST_OPEN_MS;
-    return Math.min(1, Math.max(0, (Date.now() - chest.earnedAt) / delay));
+    const remaining = Math.min(delay, Math.max(0, delay - (Date.now() - chest.earnedAt)));
+    return (remaining / delay) * (1 - CHEST_RING_START_GAP);
   }
 
   function chestDisplay() {
     const chest = nextChest();
-    if (!chest) return { state: "none", progress: 0, chest: null };
+    if (!chest) return { state: "none", fraction: 0, chest: null };
     return {
       state: Game.chestReady(chest) ? "ready" : "locked",
-      progress: chestProgress(chest),
+      fraction: chestRingFraction(chest),
       chest,
     };
   }
