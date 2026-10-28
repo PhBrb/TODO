@@ -70,5 +70,11 @@ window.RoomConfig = {
     // emissive glow when the displayed chest can be opened
     highlightColor: 0xffb84d,
     highlightIntensity: 0.5,
+    // countdown ring around the pedestal while the chest is locked
+    ringInnerRadius: 0.5,
+    ringOuterRadius: 0.62,
+    ringColor: 0xffb84d,
+    ringOpacity: 0.85,
+    ringYOffset: 0.02,
   },
 };
