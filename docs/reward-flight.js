@@ -134,13 +134,11 @@
 
     const coinCount = Math.min(MAX_SIMULTANEOUS, Math.floor(coins / COIN_DIVISOR));
     const gemCount = Math.min(MAX_SIMULTANEOUS, gems);
-    const total = coinCount + gemCount;
-    let i = 0;
-    for (let c = 0; c < coinCount; c++, i++) {
-      spawnFlyer(parent, "🪙", from, coinTarget, (i / total) * Math.PI * 2);
+    for (let c = 0; c < coinCount; c++) {
+      spawnFlyer(parent, "🪙", from, coinTarget, Math.random() * Math.PI * 2);
     }
-    for (let g = 0; g < gemCount; g++, i++) {
-      spawnFlyer(parent, "💎", from, gemTarget, (i / total) * Math.PI * 2);
+    for (let g = 0; g < gemCount; g++) {
+      spawnFlyer(parent, "💎", from, gemTarget, Math.random() * Math.PI * 2);
     }
   }
 
