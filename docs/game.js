@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.35.0";
+  const VERSION = "0.35.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -33,6 +33,7 @@
   const CONFETTI_COUNT = { too_easy: 12, easy: 24, medium: 48, hard: 80 };
   const XP_BASE_LEVEL = 100;
   const CHEST_OPEN_MS = 12 * 60 * 60 * 1000;
+  const CHEST_PURCHASE_OPEN_MS = 60 * 1000;
   const CHEST_COINS = [20, 30, 40];
   const CHEST_GEMS = [1, 2];
   const CHEST_XP = [10, 20];
@@ -243,6 +244,7 @@
               earnedAt: num(c.earnedAt, 0),
               opened: c.opened === true,
               openedAt: num(c.openedAt, 0),
+              openDelayMs: num(c.openDelayMs, CHEST_OPEN_MS),
               contents: null,
             }))
         : [],
@@ -447,7 +449,9 @@
   }
 
   function chestReady(chest) {
-    return !chest.opened && Date.now() - chest.earnedAt >= CHEST_OPEN_MS;
+    if (chest.opened) return false;
+    const openDelay = chest.openDelayMs ?? CHEST_OPEN_MS;
+    return Date.now() - chest.earnedAt >= openDelay;
   }
 
   function openChest(chest) {
@@ -762,13 +766,14 @@
     return reward;
   }
 
-  function earnChest() {
+  function earnChest(openDelayMs) {
     const chest = {
       id: state.nextId++,
       earnedAt: Date.now(),
       opened: false,
       openedAt: 0,
       contents: null,
+      openDelayMs: openDelayMs ?? CHEST_OPEN_MS,
     };
     state.chests.push(chest);
     return chest.id;
@@ -1050,6 +1055,7 @@
     state.gems -= item.costGems;
     state.ownedItems.push(id);
     defaultPlaceItem(id);
+    if (id === CHEST_ITEM_ID) earnChest(CHEST_PURCHASE_OPEN_MS);
     saveState();
     return { ok: true };
   }
@@ -1128,6 +1134,7 @@
     XP_BASE_LEVEL,
     CHEST_OPEN_MS,
     CHEST_COINS,
+    CHEST_OPEN_MS,
     CHEST_ITEM_ID,
     CHEST_GEMS,
     CHEST_XP,

@@ -120,6 +120,10 @@
     return `${m}m ${s}s`;
   }
 
+  function chestOpenDelay(chest) {
+    return chest.openDelayMs ?? Game.CHEST_OPEN_MS;
+  }
+
   function timeLimitRemaining(task, now) {
     if (!task.timeLimit || !task.startedAt) return null;
     return task.startedAt + task.timeLimit * 60000 - now;
@@ -755,7 +759,7 @@
     const grouped = new Map();
     for (const chest of unopened) {
       const ready = Game.chestReady(chest);
-      const key = ready ? "ready" : `locked:${Game.CHEST_OPEN_MS - (Date.now() - chest.earnedAt)}`;
+      const key = ready ? "ready" : `locked:${chestOpenDelay(chest) - (Date.now() - chest.earnedAt)}`;
       if (!grouped.has(key)) grouped.set(key, { chest, ready, count: 0 });
       grouped.get(key).count++;
     }
@@ -769,7 +773,7 @@
       } else {
         btn.className = "chest waiting";
         btn.disabled = true;
-        const remaining = Game.CHEST_OPEN_MS - (Date.now() - chest.earnedAt);
+        const remaining = chestOpenDelay(chest) - (Date.now() - chest.earnedAt);
         btn.textContent = `🔒 open in ${formatHoursMinutes(remaining)}${count > 1 ? ` (x${count})` : ""}`;
       }
       chestAreaEl.appendChild(btn);
@@ -816,7 +820,7 @@
     for (const node of chestAreaEl.querySelectorAll(".chest")) {
       const chest = unopened[idx];
       if (!chest) break;
-      const remaining = Game.CHEST_OPEN_MS - (now - chest.earnedAt);
+      const remaining = chestOpenDelay(chest) - (now - chest.earnedAt);
       if (!Game.chestReady(chest) && remaining > 0) {
         node.textContent = `🔒 open in ${formatHoursMinutes(remaining)}`;
       }
