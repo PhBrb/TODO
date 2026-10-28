@@ -19,8 +19,8 @@ window.RoomConfig = {
       baseY: -0.279,
       // other items may be placed on top of this object
       providesSurface: true,
-      // world height of the surface top, relative to the object's base
-      surfaceTopY: 0.55,
+      // model-space height of the surface top above the object's base
+      surfaceTopY: 0.275,
       decorate: null,
     },
     plant: {

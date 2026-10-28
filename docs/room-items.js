@@ -73,10 +73,9 @@ function cellAt(cellIndex, cells) {
 }
 
 function itemBaseY(def, surfaceDef, config) {
-  const floorY = surfaceDef
-    ? config.slabTopY + (surfaceDef.surfaceTopY - surfaceDef.baseY) * surfaceDef.scale
-    : config.slabTopY;
-  return floorY - def.baseY * def.scale;
+  if (!surfaceDef) return config.slabTopY - def.baseY * def.scale;
+  const surfaceTop = config.slabTopY + (surfaceDef.surfaceTopY - surfaceDef.baseY) * surfaceDef.scale;
+  return surfaceTop - def.baseY * def.scale;
 }
 
 function topSlotOffset(groups, group, cellIndex) {
