@@ -422,9 +422,10 @@
     if (locked) cb.title = "Complete the chained predecessor first";
     cb.addEventListener("change", () => {
       if (cb.checked) {
+        const origin = Confetti.originOf(li);
         Game.completeTask(task);
         if (task.done) {
-          Confetti.burst(li, Game.CONFETTI_COUNT[task.difficulty] || 12);
+          Confetti.burstAt(origin.x, origin.y, Game.CONFETTI_COUNT[task.difficulty] || 12);
           cb.checked = true;
         }
       } else {
@@ -499,9 +500,10 @@
         scb.disabled = stLocked;
         if (stLocked) scb.title = "Complete the chained predecessor first";
         scb.addEventListener("change", () => {
+          const origin = Confetti.originOf(row);
           Game.toggleSubtask(task, st);
           if (st.done) {
-            Confetti.burst(row, Math.ceil((Game.CONFETTI_COUNT[st.difficulty] || 12) / 2));
+            Confetti.burstAt(origin.x, origin.y, Math.ceil((Game.CONFETTI_COUNT[st.difficulty] || 12) / 2));
             scb.checked = true;
           }
         });

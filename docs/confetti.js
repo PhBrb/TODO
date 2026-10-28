@@ -71,11 +71,8 @@
     return alive;
   }
 
-  function burst(originEl, count) {
-    if (!originEl || count <= 0) return;
-    const rect = originEl.getBoundingClientRect();
-    const originX = rect.left + rect.width / 2;
-    const originY = rect.top + rect.height / 2;
+  function burstAt(originX, originY, count) {
+    if (!Number.isFinite(originX) || !Number.isFinite(originY) || count <= 0) return;
     const parent = ensureLayer();
     const states = [];
     for (let i = 0; i < count; i++) states.push(spawnPiece(parent, originX, originY));
@@ -88,5 +85,16 @@
     requestAnimationFrame(tick);
   }
 
-  window.Confetti = { burst };
+  function originOf(el) {
+    if (!el) return { x: 0, y: 0 };
+    const rect = el.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  function burst(originEl, count) {
+    const { x, y } = originOf(originEl);
+    burstAt(x, y, count);
+  }
+
+  window.Confetti = { burst, burstAt, originOf };
 })();
