@@ -426,7 +426,6 @@
         Game.completeTask(task);
         if (task.done) {
           Confetti.burstAt(origin, Game.CONFETTI_COUNT[task.difficulty] || 12);
-          cb.checked = true;
         }
       } else {
         Game.uncompleteTask(task);
@@ -504,7 +503,6 @@
           Game.toggleSubtask(task, st);
           if (st.done) {
             Confetti.burstAt(origin, Math.ceil((Game.CONFETTI_COUNT[st.difficulty] || 12) / 2));
-            scb.checked = true;
           }
         });
         const stTitle = document.createElement("span");

@@ -68,7 +68,6 @@
       const progress = (now - s.born) / LIFETIME_MS;
       if (progress >= 1) {
         s.el.remove();
-        s = null;
       } else {
         alive = true;
         paint(s, progress);
