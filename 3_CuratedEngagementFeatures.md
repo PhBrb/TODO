@@ -61,7 +61,7 @@ Curated from 2_EngagemetFeatures.md
     - ~~Confetti effect originates at the completed task; more difficult tasks produce more confetti~~ (sound, banner and fanfare still pending)
 - ~~F23: If streak becomes long without the user reporting it as difficult, suggest reducing its difficulty after completion (after a 5-streak, eg. 5 days for daily, 5 weeks for weekly, without a "harder" rating)~~
 - ~~F84: Backlog: user can create tasks with very low priority. They are not shown in the normal task list. When the normal task list is close to empty, suggest adding a task from the backlog.~~ (implemented as a tab; empty-list suggestion still pending)
-- Task list tabs: Highlight (recommended: bonus, due within 24h, repeating with active streak), Todo, Backlog, Fun
+- Task list tabs: Highlight (top 4 by rating: bonus, deadline urgency, streak, difficulty; backlog penalized), Todo, Backlog, Fun
 - Fun tasks: small fixed reward (5 coins / 5 XP), no difficulty, no repeat/deadline, no goal counter increase, no chest, no chaining; chains always take the list of their first task
 - ~~F85: For repeating tasks with a bonus reward, the bonus is rerolled every time the task becomes available again.~~
 - ~~F86: Option for a custom day start time: the new day starts at a user-chosen time (eg 4am) instead of midnight.~~

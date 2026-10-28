@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.37.0";
+  const VERSION = "0.37.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -522,16 +522,33 @@
     return { coins, gems, streak: state.firstTaskStreak };
   }
 
-  // Recommended tasks for the highlight tab: bonus tasks, tasks due
-  // within the next day, and repeating tasks with an active streak.
+  // Recommended tasks for the highlight tab: every open task gets a
+  // rating and the top HIGHLIGHT_COUNT are shown.
+  function highlightRating(task, now) {
+    let score = 0;
+    if (task.bonus) score += 40;
+    if (task.deadline !== null) {
+      const hoursLeft = (task.deadline - now) / 3600000;
+      if (hoursLeft < 0) score += 50;
+      else if (hoursLeft < 48) score += Math.round(40 * (1 - hoursLeft / 48));
+    }
+    if (task.repeat !== "none" && task.streak > 0) {
+      score += 15 + Math.min(task.streak, 10) * 2;
+    }
+    if (task.difficulty === "hard") score += 10;
+    else if (task.difficulty === "medium") score += 5;
+    if (task.list === "backlog") score -= 10;
+    return score;
+  }
+
   function highlightTasks() {
     const now = Date.now();
-    return state.tasks.filter((t) => {
-      if (t.done || t.list === "fun") return false;
-      if (t.bonus) return true;
-      if (t.deadline !== null && t.deadline - now < 24 * 3600000) return true;
-      return t.repeat !== "none" && t.streak > 0;
-    });
+    return state.tasks
+      .filter((t) => !t.done && t.list !== "fun")
+      .map((t) => ({ task: t, score: highlightRating(t, now) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, HIGHLIGHT_COUNT)
+      .map((e) => e.task);
   }
 
   function addTask(title, difficulty, repeat, deadlineInput, list) {
@@ -573,6 +590,7 @@
   const TASK_LISTS = ["todo", "backlog", "fun"];
   const FUN_TASK_COINS = 5;
   const FUN_TASK_XP = 5;
+  const HIGHLIGHT_COUNT = 4;
 
   function deriveDifficulty(task) {
     if (task.subtasks.length === 0) return task.difficulty;
@@ -1211,6 +1229,8 @@
     TASK_LISTS,
     FUN_TASK_COINS,
     highlightTasks,
+    highlightRating,
+    HIGHLIGHT_COUNT,
     FUN_TASK_XP,
     defaultState,
     resetState,
