@@ -10,7 +10,6 @@
   const SCATTER_SPEED = 90;
   const MAGNET_ACCEL = 9000;
   const MAGNET_MAX_SPEED = 2600;
-  const ARRIVAL_RADIUS = 6;
   const MAX_DT_S = 0.05;
   const COIN_DIVISOR = 3;
   const MAX_SIMULTANEOUS = 8;
@@ -96,19 +95,22 @@
         }
         const stepX = state.vx * dt;
         const stepY = state.vy * dt;
-        // snap on overshoot: if this frame would carry the flyer past the
-        // target along its travel direction, arrive instead of orbiting
-        if (Math.abs(stepX) >= Math.abs(dx) && Math.abs(stepY) >= Math.abs(dy)) {
+        // per-axis clamp: the flyer can never move past the target, so it
+        // can not overshoot and oscillate
+        if (Math.abs(stepX) >= Math.abs(dx)) {
           state.x = state.to.x;
-          state.y = state.to.y;
-          paint(state, 1);
-          flyer.remove();
-          return;
+          state.vx = 0;
+        } else {
+          state.x += stepX;
         }
-        state.x += stepX;
-        state.y += stepY;
+        if (Math.abs(stepY) >= Math.abs(dy)) {
+          state.y = state.to.y;
+          state.vy = 0;
+        } else {
+          state.y += stepY;
+        }
         paint(state, 1);
-        if (Math.hypot(state.to.x - state.x, state.to.y - state.y) < ARRIVAL_RADIUS) {
+        if (state.x === state.to.x && state.y === state.to.y) {
           flyer.remove();
           return;
         }
