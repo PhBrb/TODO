@@ -426,6 +426,13 @@
         Game.completeTask(task);
         if (task.done) {
           Confetti.burstAt(origin, Game.CONFETTI_COUNT[task.difficulty] || 12);
+          RewardFlight.flyRewards(
+            { x: origin.x + origin.width / 2, y: origin.y },
+            task.reward.coins,
+            task.reward.gems,
+            coinBalanceEl,
+            gemBalanceEl
+          );
         }
       } else {
         Game.uncompleteTask(task);
@@ -503,6 +510,13 @@
           Game.toggleSubtask(task, st);
           if (st.done) {
             Confetti.burstAt(origin, Math.ceil((Game.CONFETTI_COUNT[st.difficulty] || 12) / 2));
+            RewardFlight.flyRewards(
+              { x: origin.x + origin.width / 2, y: origin.y },
+              st.reward ? st.reward.coins : 0,
+              st.reward ? st.reward.gems : 0,
+              coinBalanceEl,
+              gemBalanceEl
+            );
           }
         });
         const stTitle = document.createElement("span");
