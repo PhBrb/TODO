@@ -51,7 +51,7 @@ import { createInteraction } from "./room-interaction.js";
   const CONTROLS_MAX_DISTANCE = 30;
   const CONTROLS_MAX_POLAR_ANGLE = Math.PI / 2;
   const PAN_MARGIN_PX = 32;
-  const CHEST_RING_START_GAP = 2.5 / 360;
+  const CHEST_RING_START_GAP = 5 / 360;
 
   function createDustTexture() {
     const canvas = document.createElement("canvas");
