@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.35.1";
+  const VERSION = "0.35.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -888,7 +888,7 @@
     }
     showToast(buildRewardMessage(task, reward, firstBonus));
 
-    if (firstBonus) showToast("📦 Chest earned! Opens in 12h");
+    if (chestEarned) showToast("📦 Chest earned! Opens in 12h");
     maybeStartBoost();
     promptDifficultyRating(task);
     maybeSuggestDifficultyReduction(task);
