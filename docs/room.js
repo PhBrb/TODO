@@ -239,10 +239,11 @@ import { createInteraction } from "./room-interaction.js";
     let rebuild = null;
     let pendingRefresh = false;
 
-    // Slab clones share geometry/material with the cached slab model, so
-    // they must not be disposed - only detached.
+    // Slab clones and item clones share geometry/material with the cached
+    // models, so nothing here may be disposed - only detached.
     function disposeRoomContent(content) {
       content.slabGroup.removeFromParent();
+      content.itemRoot.removeFromParent();
     }
 
     function buildRoomContent(desc) {
