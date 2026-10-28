@@ -26,7 +26,6 @@ Curated from 2_EngagemetFeatures.md
   - ~~contains random coins, gems, items~~ (20-40 coins, 1-2 gems, 10-20 XP; no items yet)
   - ~~opens after 12h~~
   - ~~Chests are opened manually by the user; a counter shows ready and locked chests~~
-  - If multiple boxes exist, show only one button: the currently openable box, or otherwise the one that can be opened next
 
 #### Task 
 - ~~F5: Can be created by user~~

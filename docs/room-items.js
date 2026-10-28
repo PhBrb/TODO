@@ -101,12 +101,12 @@ function countdownRing(config, progress) {
   return ring;
 }
 
-// Regenerates the countdown ring geometry for the current progress. Returns
-// true if the ring still exists (chest still locked), false if it is gone.
+// Regenerates the countdown ring geometry for the current progress.
+// No-op if the pedestal has no ring (chest not locked).
 export function updateCountdownRing(pedestalModel, progress) {
   const config = window.RoomConfig.chestDisplay;
   const old = pedestalModel.children.find((c) => c.userData.isCountdownRing);
-  if (!old) return false;
+  if (!old) return;
   const geometry = new THREE.RingGeometry(
     config.ringInnerRadius,
     config.ringOuterRadius,
@@ -117,7 +117,6 @@ export function updateCountdownRing(pedestalModel, progress) {
   );
   old.geometry.dispose();
   old.geometry = geometry;
-  return true;
 }
 
 export function createItemFactory(loader) {
