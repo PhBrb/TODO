@@ -4,7 +4,8 @@
   // Reward flight: coins/gems pop in at the completed task, scatter slightly
   // outwards so the stack is visible, then get pulled to the balance
   // indicator like a magnet. The destination is clamped into the visible
-  // viewport, because the header balance can be scrolled out of view.
+  // viewport and below the top edge of the scrolling task list, because the
+  // header balance can be scrolled out of view.
   const POP_IN_MS = 200;
   const SCATTER_MS = 350;
   const SCATTER_SPEED = 90;
@@ -30,12 +31,17 @@
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   }
 
-  function clampToViewport(point) {
+  function clampToScrollArea(point, boundaryEl) {
     const margin = 16;
-    return {
+    const clamped = {
       x: Math.min(window.innerWidth - margin, Math.max(margin, point.x)),
       y: Math.min(window.innerHeight - margin, Math.max(margin, point.y)),
     };
+    if (boundaryEl) {
+      const top = boundaryEl.getBoundingClientRect().top;
+      clamped.y = Math.max(clamped.y, top + margin);
+    }
+    return clamped;
   }
 
   function paint(state, scale) {
@@ -120,10 +126,10 @@
     requestAnimationFrame(tick);
   }
 
-  function flyRewards(from, coins, gems, coinTargetEl, gemTargetEl) {
+  function flyRewards(from, coins, gems, coinTargetEl, gemTargetEl, boundaryEl) {
     if (!from) return;
-    const coinTarget = clampToViewport(centerOf(coinTargetEl) || from);
-    const gemTarget = clampToViewport(centerOf(gemTargetEl) || from);
+    const coinTarget = clampToScrollArea(centerOf(coinTargetEl) || from, boundaryEl);
+    const gemTarget = clampToScrollArea(centerOf(gemTargetEl) || from, boundaryEl);
     const parent = ensureLayer();
 
     const coinCount = Math.min(MAX_SIMULTANEOUS, Math.floor(coins / COIN_DIVISOR));

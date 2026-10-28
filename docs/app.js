@@ -2,6 +2,7 @@
   "use strict";
 
   const listEl = document.getElementById("task-list");
+  const sheetContentEl = document.querySelector(".sheet-content");
   const emptyHint = document.getElementById("empty-hint");
   const coinBalanceEl = document.getElementById("coin-balance");
   const gemBalanceEl = document.getElementById("gem-balance");
@@ -431,7 +432,8 @@
             task.reward.coins,
             task.reward.gems,
             coinBalanceEl,
-            gemBalanceEl
+            gemBalanceEl,
+            sheetContentEl
           );
         }
       } else {
@@ -515,7 +517,8 @@
               st.reward ? st.reward.coins : 0,
               st.reward ? st.reward.gems : 0,
               coinBalanceEl,
-              gemBalanceEl
+              gemBalanceEl,
+              sheetContentEl
             );
           }
         });
