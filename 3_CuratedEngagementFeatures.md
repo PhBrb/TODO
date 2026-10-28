@@ -166,16 +166,16 @@ Curated from 2_EngagemetFeatures.md
 
 
 #### Small achievements
-- Eg.:
-  - **F64: Task Master:** Complete X tasks
-  - **F65: Streak Champion:** Maintain X-day streak
-  - **F66: Early Bird:** Complete tasks before noon
-  - **F67: Night Owl:** Complete tasks after 8 PM
-  - **F68: Weekend Warrior:** Complete tasks on weekends
-  - **F69: Perfectionist:** 100% task completion rate for a week
-  - **F70: Collector:** Own X decorations
-  - **F71: Redecorator:** Move items around X times
-- No reward, just shown somewhere
+- ~~Shown in a dedicated overlay (opened via a header button, styled like the shop), with progress bars and locked/unlocked states; unlock announces a toast. No reward, just shown.~~
+- Implemented:
+  - ~~F64: Task Master:~~ First Step (1 task) and Task Master (25 tasks)
+  - ~~F65: Streak Champion:~~ On Fire (3-day streak on one task)
+  - ~~F66: Early Bird:~~ 5 tasks completed before noon
+  - ~~F67: Night Owl:~~ 5 tasks completed after 8 PM
+  - ~~F70: Collector:~~ own all 4 room items
+  - ~~F71: Redecorator:~~ move or rotate room items 10 times
+  - Fun Lover: complete 10 fun tasks
+- Not implemented: F68 (Weekend Warrior), F69 (Perfectionist)
 
 #### Room
 - ~~2.5D room view (three.js): warm lighting with soft shadows, sunbeam with drifting dust, subtle bloom; pan (drag / one finger) and zoom (wheel / pinch), scene center kept in the viewport~~

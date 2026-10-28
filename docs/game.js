@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.37.2";
+  const VERSION = "0.38.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -76,6 +76,17 @@
   const ITEM_ROTATIONS = 4;
   const PLACEMENT_VERSION = 1;
 
+  function defaultAchievementStats() {
+    return {
+      totalCompleted: 0,
+      morningCompleted: 0,
+      nightCompleted: 0,
+      bestStreak: 0,
+      funCompleted: 0,
+      itemMoves: 0,
+    };
+  }
+
   function defaultState() {
     return {
       coins: 0,
@@ -95,6 +106,7 @@
       lastWeeklyMilestone: 0,
       ownedItems: [],
       placedItems: [],
+      achievements: { unlocked: [], stats: defaultAchievementStats() },
       dayStartHour: 0,
       uiSheetHeightVh: 0,
     };
@@ -220,6 +232,19 @@
     return result;
   }
 
+  function migrateAchievements(raw) {
+    const stats = defaultAchievementStats();
+    const rawStats = isRecord(raw) && isRecord(raw.stats) ? raw.stats : {};
+    for (const key of Object.keys(stats)) {
+      stats[key] = num(rawStats[key], 0);
+    }
+    const validIds = new Set(ACHIEVEMENTS.map((a) => a.id));
+    const unlocked = Array.isArray(raw && raw.unlocked)
+      ? raw.unlocked.filter((id) => validIds.has(id))
+      : [];
+    return { unlocked, stats };
+  }
+
   function migrateState(raw) {
     if (!isRecord(raw)) return null;
     const ownedIds = ownedItemIds(raw);
@@ -255,6 +280,7 @@
       lastWeeklyMilestone: raw.lastWeeklyMilestone ?? 0,
       ownedItems: ownedIds,
       placedItems: migratePlacedItems(raw.placedItems, ownedIds),
+      achievements: migrateAchievements(raw.achievements),
       dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
       uiSheetHeightVh: Math.min(95, Math.max(0, num(raw.uiSheetHeightVh, 0))),
     };
@@ -591,6 +617,18 @@
   const FUN_TASK_COINS = 5;
   const FUN_TASK_XP = 5;
   const HIGHLIGHT_COUNT = 4;
+  const ACHIEVEMENTS = [
+    { id: "first_step",  name: "First Step",      emoji: "🏁", hint: "Complete your first task",           goal: 1 },
+    { id: "task_master", name: "Task Master",     emoji: "📜", hint: "Complete 25 tasks",                   goal: 25 },
+    { id: "streak_3",    name: "On Fire",         emoji: "🔥", hint: "Reach a 3-day streak on a task",      goal: 3 },
+    { id: "early_bird",  name: "Early Bird",      emoji: "📅", hint: "Complete 5 tasks before noon",         goal: 5 },
+    { id: "night_owl",   name: "Night Owl",       emoji: "🌙", hint: "Complete 5 tasks after 8 PM",          goal: 5 },
+    { id: "collector",   name: "Collector",       emoji: "🏰", hint: "Own all 4 room items",                goal: 4 },
+    { id: "redecorator", name: "Redecorator",     emoji: "🧱", hint: "Move or rotate room items 10 times",  goal: 10 },
+    { id: "fun_lover",   name: "Fun Lover",       emoji: "🎉", hint: "Complete 10 fun tasks",               goal: 10 },
+  ];
+  const MORNING_END_HOUR = 12;
+  const NIGHT_START_HOUR = 20;
 
   function deriveDifficulty(task) {
     if (task.subtasks.length === 0) return task.difficulty;
@@ -903,6 +941,59 @@
     return unchainIn(state.tasks, task);
   }
 
+  function achievementById(id) {
+    return ACHIEVEMENTS.find((a) => a.id === id) || null;
+  }
+
+  function achievementIsUnlocked(id) {
+    return state.achievements.unlocked.includes(id);
+  }
+
+  // Records progress and returns the ids of achievements unlocked by this
+  // event. Values are treated as new maxima, never decremented.
+  function trackAchievement(progress) {
+    const stats = state.achievements.stats;
+    for (const [key, value] of Object.entries(progress)) {
+      if (typeof value === "number") stats[key] = Math.max(stats[key], value);
+    }
+    const collectorGoal = ACHIEVEMENTS.find((a) => a.id === "collector").goal;
+    const checks = [
+      ["first_step", stats.totalCompleted >= 1],
+      ["task_master", stats.totalCompleted >= 25],
+      ["streak_3", stats.bestStreak >= 3],
+      ["early_bird", stats.morningCompleted >= 5],
+      ["night_owl", stats.nightCompleted >= 5],
+      ["collector", state.ownedItems.length >= collectorGoal],
+      ["redecorator", stats.itemMoves >= 10],
+      ["fun_lover", stats.funCompleted >= 10],
+    ];
+    const newly = [];
+    for (const [id, reached] of checks) {
+      if (reached && !achievementIsUnlocked(id)) {
+        state.achievements.unlocked.push(id);
+        newly.push(id);
+      }
+    }
+    return newly;
+  }
+
+  function announceAchievements(ids) {
+    for (const id of ids) {
+      const a = achievementById(id);
+      if (a) showToast(`\ud83c\udfc6 Achievement unlocked: ${a.name}!`);
+    }
+  }
+
+  function achievementProgressFromCompletion(task, completedAt) {
+    const hour = new Date(completedAt).getHours();
+    return {
+      totalCompleted: state.achievements.stats.totalCompleted + 1,
+      morningCompleted: state.achievements.stats.morningCompleted + (hour < MORNING_END_HOUR ? 1 : 0),
+      nightCompleted: state.achievements.stats.nightCompleted + (hour >= NIGHT_START_HOUR ? 1 : 0),
+      bestStreak: Math.max(state.achievements.stats.bestStreak, task.streak || 0),
+    };
+  }
+
   // Fun tasks are pure enjoyment: small fixed reward, no goal counters,
   // no first-task chest, no streaks.
   function completeFunTask(task) {
@@ -911,6 +1002,10 @@
     task.reward = { coins: FUN_TASK_COINS, gems: 0, xp: FUN_TASK_XP };
     grantXpAndCoins(FUN_TASK_COINS, 0, FUN_TASK_XP);
     showToast(`\ud83c\udf89 +${FUN_TASK_COINS} \ud83e\ude99 +${FUN_TASK_XP} \u2728`);
+    announceAchievements(trackAchievement({
+      totalCompleted: state.achievements.stats.totalCompleted + 1,
+      funCompleted: state.achievements.stats.funCompleted + 1,
+    }));
     saveState();
     render();
   }
@@ -951,6 +1046,8 @@
       timeBonus: reward.timeBonus || 0,
     };
 
+    announceAchievements(trackAchievement(achievementProgressFromCompletion(task, task.completedAt)));
+    announceAchievements(trackAchievement(achievementProgressFromCompletion(task, task.completedAt)));
     if (leveledUp) announceLevelUp();
     if (milestones.weeklyReward > 0) {
       showToast(`🏆 Weekly goal reached! +${WEEKLY_GOAL_REWARD} 🪙`);
@@ -1137,6 +1234,7 @@
     state.ownedItems.push(id);
     defaultPlaceItem(id);
     if (id === CHEST_ITEM_ID) earnChest(CHEST_PURCHASE_OPEN_MS);
+    announceAchievements(trackAchievement({}));
     saveState();
     return { ok: true };
   }
@@ -1170,9 +1268,17 @@
     if (ITEM_TYPES[itemId] === "slab" && cellTakenBy(cellIndex)) {
       return { ok: false, reason: "occupied" };
     }
+    const previousCell = placement.cellIndex;
     placement.cellIndex = cellIndex;
     placement.placementVersion = PLACEMENT_VERSION;
+    const moved = cellIndex !== previousCell;
     saveState();
+    if (moved) {
+      announceAchievements(trackAchievement({
+        itemMoves: state.achievements.stats.itemMoves + 1,
+      }));
+      saveState();
+    }
     return { ok: true };
   }
 
@@ -1181,6 +1287,10 @@
     if (!placement) return { ok: false, reason: "not owned" };
     placement.rotation = (placement.rotation + 1) % ITEM_ROTATIONS;
     placement.placementVersion = PLACEMENT_VERSION;
+    saveState();
+    announceAchievements(trackAchievement({
+      itemMoves: state.achievements.stats.itemMoves + 1,
+    }));
     saveState();
     return { ok: true };
   }
@@ -1231,6 +1341,13 @@
     highlightTasks,
     highlightRating,
     HIGHLIGHT_COUNT,
+    ACHIEVEMENTS,
+    MORNING_END_HOUR,
+    NIGHT_START_HOUR,
+    achievementById,
+    achievementIsUnlocked,
+    trackAchievement,
+    migrateAchievements,
     FUN_TASK_XP,
     defaultState,
     resetState,
