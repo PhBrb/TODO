@@ -179,7 +179,7 @@ Curated from 2_EngagemetFeatures.md
 - ~~Purchased items appear in the room automatically (table on the anchor slab, plant and lamp on the table, lamp carries a warm light)~~
 - ~~F72: Items can be placed in a virtual room to decorate it~~
 - F73: Has treasure room showing coins, gems, chest
-- F74: Can be redecorated
+- ~~F74: Can be redecorated~~
 - F75: Companion walks around
 - F76: Needs (very little) care
 
