@@ -425,7 +425,7 @@
         const origin = Confetti.originOf(li);
         Game.completeTask(task);
         if (task.done) {
-          Confetti.burstAt(origin.x, origin.y, Game.CONFETTI_COUNT[task.difficulty] || 12);
+          Confetti.burstAt(origin, Game.CONFETTI_COUNT[task.difficulty] || 12);
           cb.checked = true;
         }
       } else {
@@ -503,7 +503,7 @@
           const origin = Confetti.originOf(row);
           Game.toggleSubtask(task, st);
           if (st.done) {
-            Confetti.burstAt(origin.x, origin.y, Math.ceil((Game.CONFETTI_COUNT[st.difficulty] || 12) / 2));
+            Confetti.burstAt(origin, Math.ceil((Game.CONFETTI_COUNT[st.difficulty] || 12) / 2));
             scb.checked = true;
           }
         });

@@ -1,15 +1,20 @@
 (() => {
   "use strict";
 
+  // Realistic confetti: quadratic air resistance (a = g - k * v * |v|),
+  // semi-implicit Euler with real frame time, pieces spawned across the
+  // full width of the completed task row.
   const COLORS = ["#6c5ce7", "#00b894", "#fdcb6e", "#e17055", "#74b9ff", "#a29bfe", "#ff7675"];
-  const GRAVITY = 0.35;
-  const DRAG = 0.99;
+  const GRAVITY = 1300;
+  const DRAG_COEFFICIENT = 0.011;
   const SIZE_PX = 8;
-  const SPREAD_UP = -9;
-  const SPREAD_X = 6;
-  const SPIN_MAX = 720;
-  const FADE_START = 0.7;
-  const LIFETIME_MS = 1400;
+  const LAUNCH_VY_MIN = -450;
+  const LAUNCH_VY_MAX = -800;
+  const LAUNCH_VX = 60;
+  const SPIN_MAX_DEG_S = 900;
+  const FADE_START = 0.75;
+  const LIFETIME_MS = 2200;
+  const MAX_DT_S = 0.05;
 
   let layer = null;
 
@@ -21,7 +26,7 @@
     return layer;
   }
 
-  function spawnPiece(parent, originX, originY) {
+  function spawnPiece(parent, origin, spreadFraction) {
     const piece = document.createElement("div");
     piece.className = "confetti-piece";
     piece.style.backgroundColor = COLORS[(Math.random() * COLORS.length) | 0];
@@ -29,12 +34,12 @@
     piece.style.height = (SIZE_PX * (0.4 + Math.random() * 0.8)) + "px";
     const state = {
       el: piece,
-      x: originX,
-      y: originY,
-      vx: (Math.random() - 0.5) * 2 * SPREAD_X,
-      vy: SPREAD_UP * (0.5 + Math.random()),
+      x: origin.x + spreadFraction * origin.width,
+      y: origin.y,
+      vx: (Math.random() - 0.5) * 2 * LAUNCH_VX,
+      vy: LAUNCH_VY_MIN - Math.random() * (LAUNCH_VY_MAX - LAUNCH_VY_MIN),
       rot: Math.random() * 360,
-      vr: (Math.random() - 0.5) * SPIN_MAX,
+      vr: (Math.random() - 0.5) * 2 * SPIN_MAX_DEG_S,
       born: performance.now(),
     };
     parent.appendChild(piece);
@@ -49,16 +54,17 @@
       : "1";
   }
 
-  function step(states, start, now) {
-    const elapsed = now - start;
+  function step(states, dt, now) {
     let alive = false;
     for (const s of states) {
       if (!s) continue;
-      s.vy += GRAVITY;
-      s.vx *= DRAG;
-      s.x += s.vx;
-      s.y += s.vy;
-      s.rot += s.vr / 60;
+      const speed = Math.hypot(s.vx, s.vy);
+      const drag = DRAG_COEFFICIENT * speed;
+      s.vx -= s.vx * drag * dt;
+      s.vy += (GRAVITY - s.vy * drag) * dt;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.rot += s.vr * dt;
       const progress = (now - s.born) / LIFETIME_MS;
       if (progress >= 1) {
         s.el.remove();
@@ -71,29 +77,44 @@
     return alive;
   }
 
-  function burstAt(originX, originY, count) {
-    if (!Number.isFinite(originX) || !Number.isFinite(originY) || count <= 0) return;
+  function burstAt(origin, count) {
+    if (
+      !origin ||
+      !Number.isFinite(origin.x) ||
+      !Number.isFinite(origin.y) ||
+      count <= 0
+    ) {
+      return;
+    }
     const parent = ensureLayer();
     const states = [];
-    for (let i = 0; i < count; i++) states.push(spawnPiece(parent, originX, originY));
+    for (let i = 0; i < count; i++) {
+      const spreadFraction = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
+      states.push(spawnPiece(parent, origin, spreadFraction));
+    }
 
-    const start = performance.now();
+    let last = performance.now();
     function tick(now) {
-      if (!step(states, start, now)) return;
+      const dt = Math.min(MAX_DT_S, (now - last) / 1000);
+      last = now;
+      if (!step(states, dt, now)) return;
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
 
   function originOf(el) {
-    if (!el) return { x: 0, y: 0 };
+    if (!el) return null;
     const rect = el.getBoundingClientRect();
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    return {
+      x: rect.left,
+      y: rect.top + rect.height / 2,
+      width: rect.width,
+    };
   }
 
   function burst(originEl, count) {
-    const { x, y } = originOf(originEl);
-    burstAt(x, y, count);
+    burstAt(originOf(originEl), count);
   }
 
   window.Confetti = { burst, burstAt, originOf };
