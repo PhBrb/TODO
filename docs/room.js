@@ -360,6 +360,8 @@ import { createInteraction } from "./room-interaction.js";
     }
     requestAnimationFrame(animate);
 
+    let chestWasReady = null;
+
     function chestTick() {
       const pedestalGroup = itemGroups.find((g) => g.userData.itemId === "pedestal");
       if (!pedestalGroup) return;
@@ -367,10 +369,21 @@ import { createInteraction } from "./room-interaction.js";
         ? getSceneDesc().chestDisplay
         : null;
       if (!display || !display.chest) return;
-      if (Game.chestReady(display.chest)) {
+      const ready = Game.chestReady(display.chest);
+      if (chestWasReady === null) {
+        chestWasReady = ready;
+        if (!ready) {
+          const model = pedestalGroup.children[0];
+          if (model) updateCountdownRing(model, display.progress);
+        }
+        return;
+      }
+      if (ready !== chestWasReady) {
+        chestWasReady = ready;
         refreshContent();
         return;
       }
+      if (ready) return;
       const model = pedestalGroup.children[0];
       if (!model) return;
       updateCountdownRing(model, display.progress);
