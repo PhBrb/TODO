@@ -20,6 +20,7 @@ Curated from 2_EngagemetFeatures.md
   - 25% chance for 2 gems on medium, 50% chance on hard
 - ~~F4: Chests~~
   - ~~earned as daily reward for first completed task~~
+  - Chest Pedestal: chests are only earned after buying the pedestal item in the store; the pedestal in the room shows the newest chest - highlighted if it can be opened, plain if still locked, empty if none
   - ~~contains random coins, gems, items~~ (20-40 coins, 1-2 gems, 10-20 XP; no items yet)
   - ~~opens after 12h~~
   - ~~Chests are opened manually by the user; a counter shows ready and locked chests~~

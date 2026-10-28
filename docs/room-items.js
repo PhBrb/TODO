@@ -31,6 +31,52 @@ function decorate(model, def, config) {
   model.add(glow);
 }
 
+function boxMesh(size, color) {
+  const geometry = new THREE.BoxGeometry(size[0], size[1], size[2]);
+  const material = new THREE.MeshStandardMaterial({ color });
+  return new THREE.Mesh(geometry, material);
+}
+
+// Procedural chest pedestal: a small gray pedestal with an optional brown
+// chest on top. The chest glows when it can be opened (chestState:
+// "ready" | "locked" | "none").
+export function createChestPedestalModel(chestState) {
+  const config = window.RoomConfig.chestDisplay;
+  const group = new THREE.Group();
+
+  const pedestal = boxMesh(config.pedestalSize, config.pedestalColor);
+  pedestal.position.y = config.pedestalSize[1] / 2;
+  group.add(pedestal);
+
+  if (chestState !== "none") {
+    const chest = new THREE.Group();
+    const body = boxMesh(config.chestSize, config.chestColor);
+    body.position.y = config.chestSize[1] / 2;
+    const lidSize = [
+      config.chestSize[0] + config.chestLidOverhang * 2,
+      config.chestSize[1] * 0.4,
+      config.chestSize[2] + config.chestLidOverhang * 2,
+    ];
+    const lid = boxMesh(lidSize, config.chestColor);
+    lid.position.y = config.chestSize[1] + lidSize[1] / 2;
+    chest.add(body);
+    chest.add(lid);
+    chest.position.y = config.pedestalSize[1];
+    if (chestState === "ready") {
+      chest.traverse((child) => {
+        if (child.isMesh && child.material.emissive) {
+          child.material.emissive.setHex(config.highlightColor);
+          child.material.emissiveIntensity = config.highlightIntensity;
+        }
+      });
+    }
+    group.add(chest);
+  }
+
+  applyShadows(group, true, true);
+  return group;
+}
+
 export function createItemFactory(loader) {
   const config = window.RoomConfig;
   const baseModels = new Map();
@@ -50,9 +96,12 @@ export function createItemFactory(loader) {
   }
 
   return {
-    create(itemId) {
+    create(itemId, chestState) {
       const def = config.items[itemId];
       if (!def) return Promise.reject(new Error(itemId));
+      if (!def.url) {
+        return Promise.resolve(createChestPedestalModel(chestState || "none"));
+      }
       return baseModel(itemId).then((model) => {
         const clone = model.clone();
         clone.scale.setScalar(def.scale);
@@ -123,11 +172,13 @@ export function positionItemGroup(group, cellIndex, cells, surfaceDef) {
   );
 }
 
-export function buildItems(factory, cells, placements) {
+export function buildItems(factory, cells, placements, chestState) {
   const config = window.RoomConfig;
   const root = new THREE.Group();
   const valid = placements.filter((p) => config.items[p.itemId]);
-  return Promise.allSettled(valid.map((p) => factory.create(p.itemId))).then((results) => {
+  return Promise.allSettled(
+    valid.map((p) => factory.create(p.itemId, p.itemId === "pedestal" ? chestState : undefined))
+  ).then((results) => {
     const groups = [];
     valid.forEach((p, i) => {
       const result = results[i];

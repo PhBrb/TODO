@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.34.5";
+  const VERSION = "0.35.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -65,11 +65,13 @@
     { id: "plant",       name: "Plant",        emoji: "🪴", costCoins: 50,  costGems: 0, minLevel: 1 },
     { id: "table",       name: "Table",        emoji: "🪑", costCoins: 150, costGems: 0, minLevel: 1 },
     { id: "lamp",        name: "Lamp",         emoji: "💡", costCoins: 100, costGems: 0, minLevel: 2 },
+    { id: "pedestal",    name: "Chest Pedestal", emoji: "📦", costCoins: 75,  costGems: 0, minLevel: 1 },
   ];
 
   // Placement classes: "slab" items occupy a floor cell, "top" items sit on
   // top of slab items (e.g. the table). Mirrors RoomConfig.items in room-config.js.
-  const ITEM_TYPES = { plant: "top", table: "slab", lamp: "top" };
+  const ITEM_TYPES = { plant: "top", table: "slab", lamp: "top", pedestal: "slab" };
+  const CHEST_ITEM_ID = "pedestal";
   const ITEM_ROTATIONS = 4;
   const PLACEMENT_VERSION = 1;
 
@@ -855,7 +857,7 @@
       reward.gems += firstBonus.gems;
     }
 
-    const chestEarned = Boolean(firstBonus);
+    const chestEarned = Boolean(firstBonus) && itemIsOwned(CHEST_ITEM_ID);
     const chestId = chestEarned ? earnChest() : null;
 
     const leveledUp = grantXpAndCoins(reward.coins, reward.gems, reward.xp);
@@ -1126,6 +1128,7 @@
     XP_BASE_LEVEL,
     CHEST_OPEN_MS,
     CHEST_COINS,
+    CHEST_ITEM_ID,
     CHEST_GEMS,
     CHEST_XP,
     BOOST_MULT,

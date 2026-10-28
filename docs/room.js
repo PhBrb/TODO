@@ -248,6 +248,7 @@ import { createInteraction } from "./room-interaction.js";
       const desc = typeof getSceneDesc === "function" ? getSceneDesc() : null;
       currentCells = (desc && desc.slabs) || [[0, 0]];
       const placements = (desc && desc.placements) || [];
+      const chestState = (desc && desc.chestState) || "none";
 
       clearRoom();
       const selectedId = interaction.getSelected()
@@ -264,7 +265,7 @@ import { createInteraction } from "./room-interaction.js";
             slabGroup.add(cell);
             slabMeshes.push(cell);
           }
-          return buildItems(itemFactory, currentCells, placements);
+          return buildItems(itemFactory, currentCells, placements, chestState);
         })
         .then(({ root, groups }) => {
           itemRoot.add(root);
@@ -373,11 +374,18 @@ import { createInteraction } from "./room-interaction.js";
 
   window.Room = { create: createRoom };
 
+  function chestDisplayState() {
+    const unopened = Game.state.chests.filter((c) => !c.opened);
+    if (unopened.length === 0) return "none";
+    return unopened.some((c) => Game.chestReady(c)) ? "ready" : "locked";
+  }
+
   const container = document.getElementById("room-view");
   if (container && window.Game) {
     const instance = createRoom(container, () => ({
       slabs: Game.slabOffsets(Game.slabCountForLevel(Game.levelFromXp(Game.state.xp))),
       placements: Game.state.placedItems,
+      chestState: chestDisplayState(),
     }));
     window.addEventListener("game-state-changed", () => instance.refresh());
   }
