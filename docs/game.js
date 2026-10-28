@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.31.2";
+  const VERSION = "0.32.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -66,6 +66,12 @@
     { id: "lamp",        name: "Lamp",         emoji: "💡", costCoins: 100, costGems: 0, minLevel: 2 },
   ];
 
+  // Placement classes: "slab" items occupy a floor cell, "top" items sit on
+  // top of slab items (e.g. the table). Mirrors RoomConfig.items in room-config.js.
+  const ITEM_TYPES = { plant: "top", table: "slab", lamp: "top" };
+  const ITEM_ROTATIONS = 4;
+  const PLACEMENT_VERSION = 1;
+
   function defaultState() {
     return {
       coins: 0,
@@ -84,6 +90,7 @@
       lastDailyMilestone: 0,
       lastWeeklyMilestone: 0,
       ownedItems: [],
+      placedItems: [],
       dayStartHour: 0,
       uiSheetHeightVh: 0,
     };
@@ -158,8 +165,59 @@
     };
   }
 
+  function ownedItemIds(raw) {
+    return Array.isArray(raw.ownedItems)
+      ? raw.ownedItems.filter((id) => SHOP_ITEMS.some((it) => it.id === id))
+      : [];
+  }
+
+  function normalizePlaced(itemId, cellIndex, rotation) {
+    return {
+      itemId,
+      cellIndex,
+      rotation: ((rotation % ITEM_ROTATIONS) + ITEM_ROTATIONS) % ITEM_ROTATIONS,
+      placementVersion: PLACEMENT_VERSION,
+    };
+  }
+
+  function migratePlacedItems(rawPlaced, ownedIds) {
+    const valid = Array.isArray(rawPlaced)
+      ? rawPlaced
+          .filter((p) =>
+            isRecord(p) &&
+            ITEM_TYPES[p.itemId] &&
+            ownedIds.includes(p.itemId) &&
+            Number.isInteger(p.cellIndex) &&
+            p.cellIndex >= 0)
+          .map((p) => normalizePlaced(p.itemId, p.cellIndex, num(p.rotation, 0)))
+      : [];
+    const byItem = new Map();
+    for (const p of valid) if (!byItem.has(p.itemId)) byItem.set(p.itemId, p);
+
+    const slabCellsTaken = new Set();
+    let nextCell = 0;
+    const freeCell = () => {
+      while (slabCellsTaken.has(nextCell)) nextCell++;
+      const cell = nextCell;
+      slabCellsTaken.add(cell);
+      return cell;
+    };
+
+    const result = [];
+    for (const id of ownedIds) {
+      let p = byItem.get(id) || normalizePlaced(id, ITEM_TYPES[id] === "slab" ? freeCell() : 0, 0);
+      if (ITEM_TYPES[id] === "slab") {
+        if (slabCellsTaken.has(p.cellIndex)) p = normalizePlaced(id, freeCell(), p.rotation);
+        else slabCellsTaken.add(p.cellIndex);
+      }
+      result.push(p);
+    }
+    return result;
+  }
+
   function migrateState(raw) {
     if (!isRecord(raw)) return null;
+    const ownedIds = ownedItemIds(raw);
     const tasks = Array.isArray(raw.tasks)
       ? raw.tasks.map(migrateTask).filter(Boolean)
       : [];
@@ -189,9 +247,8 @@
       boostCooldownUntil: num(raw.boostCooldownUntil, 0),
       lastDailyMilestone: raw.lastDailyMilestone ?? 0,
       lastWeeklyMilestone: raw.lastWeeklyMilestone ?? 0,
-      ownedItems: Array.isArray(raw.ownedItems)
-        ? raw.ownedItems.filter((id) => SHOP_ITEMS.some((it) => it.id === id))
-        : [],
+      ownedItems: ownedIds,
+      placedItems: migratePlacedItems(raw.placedItems, ownedIds),
       dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
       uiSheetHeightVh: Math.min(95, Math.max(0, num(raw.uiSheetHeightVh, 0))),
     };
@@ -989,6 +1046,51 @@
     state.coins -= item.costCoins;
     state.gems -= item.costGems;
     state.ownedItems.push(id);
+    defaultPlaceItem(id);
+    saveState();
+    return { ok: true };
+  }
+
+  function itemPlacement(itemId) {
+    return state.placedItems.find((p) => p.itemId === itemId) || null;
+  }
+
+  function cellTakenBy(cellIndex) {
+    return state.placedItems.find(
+      (p) => ITEM_TYPES[p.itemId] === "slab" && p.cellIndex === cellIndex
+    ) || null;
+  }
+
+  function defaultPlaceItem(id) {
+    if (itemPlacement(id)) return;
+    const cell = ITEM_TYPES[id] === "slab" ? firstFreeCell() : 0;
+    state.placedItems.push(normalizePlaced(id, cell, 0));
+  }
+
+  function firstFreeCell() {
+    let cell = 0;
+    while (cellTakenBy(cell)) cell++;
+    return cell;
+  }
+
+  function placeItem(itemId, cellIndex) {
+    const placement = itemPlacement(itemId);
+    if (!placement) return { ok: false, reason: "not owned" };
+    if (!Number.isInteger(cellIndex) || cellIndex < 0) return { ok: false, reason: "cell" };
+    if (ITEM_TYPES[itemId] === "slab" && cellTakenBy(cellIndex)) {
+      return { ok: false, reason: "occupied" };
+    }
+    placement.cellIndex = cellIndex;
+    placement.placementVersion = PLACEMENT_VERSION;
+    saveState();
+    return { ok: true };
+  }
+
+  function rotateItem(itemId) {
+    const placement = itemPlacement(itemId);
+    if (!placement) return { ok: false, reason: "not owned" };
+    placement.rotation = (placement.rotation + 1) % ITEM_ROTATIONS;
+    placement.placementVersion = PLACEMENT_VERSION;
     saveState();
     return { ok: true };
   }
@@ -1100,6 +1202,13 @@
     shopItemById,
     slabOffsets,
     slabCountForLevel,
+    ITEM_TYPES,
+    ITEM_ROTATIONS,
+    PLACEMENT_VERSION,
+    itemPlacement,
+    cellTakenBy,
+    placeItem,
+    rotateItem,
     itemIsOwned,
     itemIsUnlockable,
     purchaseItem,
