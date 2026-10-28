@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.33.2";
+  const VERSION = "0.33.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -30,7 +30,7 @@
   const RATE_PROMPT_TIMEOUT = 10000;
   const DIFFICULTY_SUGGESTION_STREAK = 5;
   const XP_REWARD = { too_easy: 10, easy: 50, medium: 120, hard: 250 }; // 10x for debugging
-  const CONFETTI_COUNT = { too_easy: 6, easy: 12, medium: 24, hard: 40 };
+  const CONFETTI_COUNT = { too_easy: 12, easy: 24, medium: 48, hard: 80 };
   const XP_BASE_LEVEL = 100;
   const CHEST_OPEN_MS = 12 * 60 * 60 * 1000;
   const CHEST_COINS = [20, 30, 40];

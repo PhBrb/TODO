@@ -6,10 +6,10 @@
   // full width of the completed task row.
   const COLORS = ["#6c5ce7", "#00b894", "#fdcb6e", "#e17055", "#74b9ff", "#a29bfe", "#ff7675"];
   const GRAVITY = 1300;
-  const DRAG_COEFFICIENT = 0.011;
+  const DRAG_COEFFICIENT = 0.009;
   const SIZE_PX = 8;
-  const LAUNCH_VY_MIN = -450;
-  const LAUNCH_VY_MAX = -800;
+  const LAUNCH_VY_MIN = -700;
+  const LAUNCH_VY_MAX = -1150;
   const LAUNCH_VX = 60;
   const SPIN_MAX_DEG_S = 900;
   const FADE_START = 0.75;
@@ -35,7 +35,7 @@
     const state = {
       el: piece,
       x: origin.x + spreadFraction * origin.width,
-      y: origin.y,
+      y: origin.y + (Math.random() - 0.5) * origin.height,
       vx: (Math.random() - 0.5) * 2 * LAUNCH_VX,
       vy: LAUNCH_VY_MIN - Math.random() * (LAUNCH_VY_MAX - LAUNCH_VY_MIN),
       rot: Math.random() * 360,
@@ -110,6 +110,7 @@
       x: rect.left,
       y: rect.top + rect.height / 2,
       width: rect.width,
+      height: rect.height,
     };
   }
 
