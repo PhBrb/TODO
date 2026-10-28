@@ -1,15 +1,17 @@
 (() => {
   "use strict";
 
-  // Reward flight: coins/gems pop in at the completed task, hold for a
-  // moment, then get pulled to the balance indicator like a magnet. The
-  // destination is clamped into the visible viewport, because the header
-  // balance can be scrolled out of view.
+  // Reward flight: coins/gems pop in at the completed task, scatter slightly
+  // outwards so the stack is visible, then get pulled to the balance
+  // indicator like a magnet. The destination is clamped into the visible
+  // viewport, because the header balance can be scrolled out of view.
   const POP_IN_MS = 200;
-  const HOLD_MS = 1000;
+  const SCATTER_MS = 350;
+  const SCATTER_SPEED = 90;
   const MAGNET_ACCEL = 9000;
   const MAGNET_MAX_SPEED = 2600;
   const ARRIVAL_RADIUS = 6;
+  const MAX_DT_S = 0.05;
   const COIN_DIVISOR = 3;
   const MAX_SIMULTANEOUS = 8;
 
@@ -37,42 +39,50 @@
     };
   }
 
-  function spawnFlyer(parent, emoji, from, to) {
+  function paint(state, scale) {
+    state.el.style.transform =
+      `translate(${state.x}px, ${state.y}px) translate(-50%, -50%) scale(${scale})`;
+  }
+
+  function spawnFlyer(parent, emoji, from, to, angle) {
     const flyer = document.createElement("div");
     flyer.className = "reward-flyer";
     flyer.textContent = emoji;
-    flyer.style.transform = `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(0)`;
     parent.appendChild(flyer);
     const state = {
       el: flyer,
       x: from.x,
       y: from.y,
-      vx: 0,
-      vy: 0,
+      vx: Math.cos(angle) * SCATTER_SPEED,
+      vy: Math.sin(angle) * SCATTER_SPEED,
+      to,
       phase: "pop",
       phaseStart: performance.now(),
-      to,
+      last: null,
     };
+    paint(state, 0);
 
     function tick(now) {
       const phaseAge = now - state.phaseStart;
       if (state.phase === "pop") {
         const t = Math.min(1, phaseAge / POP_IN_MS);
-        const eased = 1 - Math.pow(1 - t, 3);
-        const scale = eased;
-        flyer.style.transform =
-          `translate(${state.x}px, ${state.y}px) translate(-50%, -50%) scale(${scale})`;
+        paint(state, 1 - Math.pow(1 - t, 3));
         if (t >= 1) {
-          state.phase = "hold";
+          state.phase = "scatter";
           state.phaseStart = now;
         }
-      } else if (state.phase === "hold") {
-        if (phaseAge >= HOLD_MS) {
+      } else if (state.phase === "scatter") {
+        const t = Math.min(1, phaseAge / SCATTER_MS);
+        const decay = 1 - t;
+        state.x += state.vx * decay * MAX_DT_S;
+        state.y += state.vy * decay * MAX_DT_S;
+        paint(state, 1);
+        if (t >= 1) {
           state.phase = "magnet";
-          state.phaseStart = now;
+          state.last = now;
         }
       } else {
-        const dt = Math.min(0.05, (now - (state.last ?? now)) / 1000);
+        const dt = Math.min(MAX_DT_S, (now - state.last) / 1000);
         state.last = now;
         const dx = state.to.x - state.x;
         const dy = state.to.y - state.y;
@@ -84,10 +94,20 @@
           state.vx = (state.vx / speed) * MAGNET_MAX_SPEED;
           state.vy = (state.vy / speed) * MAGNET_MAX_SPEED;
         }
-        state.x += state.vx * dt;
-        state.y += state.vy * dt;
-        flyer.style.transform =
-          `translate(${state.x}px, ${state.y}px) translate(-50%, -50%) scale(1)`;
+        const stepX = state.vx * dt;
+        const stepY = state.vy * dt;
+        // snap on overshoot: if this frame would carry the flyer past the
+        // target along its travel direction, arrive instead of orbiting
+        if (Math.abs(stepX) >= Math.abs(dx) && Math.abs(stepY) >= Math.abs(dy)) {
+          state.x = state.to.x;
+          state.y = state.to.y;
+          paint(state, 1);
+          flyer.remove();
+          return;
+        }
+        state.x += stepX;
+        state.y += stepY;
+        paint(state, 1);
         if (Math.hypot(state.to.x - state.x, state.to.y - state.y) < ARRIVAL_RADIUS) {
           flyer.remove();
           return;
@@ -106,11 +126,13 @@
 
     const coinCount = Math.min(MAX_SIMULTANEOUS, Math.floor(coins / COIN_DIVISOR));
     const gemCount = Math.min(MAX_SIMULTANEOUS, gems);
-    for (let i = 0; i < coinCount; i++) {
-      spawnFlyer(parent, "🪙", from, coinTarget);
+    const total = coinCount + gemCount;
+    let i = 0;
+    for (let c = 0; c < coinCount; c++, i++) {
+      spawnFlyer(parent, "🪙", from, coinTarget, (i / total) * Math.PI * 2);
     }
-    for (let i = 0; i < gemCount; i++) {
-      spawnFlyer(parent, "💎", from, gemTarget);
+    for (let g = 0; g < gemCount; g++, i++) {
+      spawnFlyer(parent, "💎", from, gemTarget, (i / total) * Math.PI * 2);
     }
   }
 
