@@ -177,7 +177,7 @@ Curated from 2_EngagemetFeatures.md
 - ~~2.5D room view (three.js): warm lighting with soft shadows, sunbeam with drifting dust, subtle bloom; pan (drag / one finger) and zoom (wheel / pinch), scene center kept in the viewport~~
 - ~~Room grows with levels: 4 slabs at level 1, +4 per level, placed in Rosenberg strong-pairing order (positive coordinates, 2x2 core, square-ring expansion) - always one connected island~~
 - ~~Purchased items appear in the room automatically (table on the anchor slab, plant and lamp on the table, lamp carries a warm light)~~
-- F72: Items can be placed in a virtual room to decorate it
+- ~~F72: Items can be placed in a virtual room to decorate it~~
 - F73: Has treasure room showing coins, gems, chest
 - F74: Can be redecorated
 - F75: Companion walks around

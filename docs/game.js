@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.32.2";
+  const VERSION = "0.32.3";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -67,7 +67,7 @@
   ];
 
   // Placement classes: "slab" items occupy a floor cell, "top" items sit on
-  // top of slab items (e.g. the table). Mirrors ROOM_ITEMS in room.js.
+  // top of slab items (e.g. the table). Mirrors RoomConfig.items in room-config.js.
   const ITEM_TYPES = { plant: "top", table: "slab", lamp: "top" };
   const ITEM_ROTATIONS = 4;
   const PLACEMENT_VERSION = 1;
@@ -217,6 +217,7 @@
 
   function migrateState(raw) {
     if (!isRecord(raw)) return null;
+    const ownedIds = ownedItemIds(raw);
     const tasks = Array.isArray(raw.tasks)
       ? raw.tasks.map(migrateTask).filter(Boolean)
       : [];
@@ -246,8 +247,8 @@
       boostCooldownUntil: num(raw.boostCooldownUntil, 0),
       lastDailyMilestone: raw.lastDailyMilestone ?? 0,
       lastWeeklyMilestone: raw.lastWeeklyMilestone ?? 0,
-      ownedItems: ownedItemIds(raw),
-      placedItems: migratePlacedItems(raw.placedItems, ownedItemIds(raw)),
+      ownedItems: ownedIds,
+      placedItems: migratePlacedItems(raw.placedItems, ownedIds),
       dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
       uiSheetHeightVh: Math.min(95, Math.max(0, num(raw.uiSheetHeightVh, 0))),
     };
