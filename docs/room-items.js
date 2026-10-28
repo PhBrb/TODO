@@ -222,7 +222,7 @@ export function buildItems(factory, cells, placements, chestDisplay) {
   return Promise.allSettled(
     valid.map((p) =>
       p.itemId === "pedestal"
-        ? factory.create(p.itemId, display.state, display.progress)
+        ? factory.create(p.itemId, display.state, display.fraction)
         : factory.create(p.itemId)
     )
   ).then((results) => {
