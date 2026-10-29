@@ -175,7 +175,15 @@ Curated from 2_EngagemetFeatures.md
   - ~~F70: Collector:~~ own all 4 room items
   - ~~F71: Redecorator:~~ move or rotate room items 10 times
   - Fun Lover: complete 10 fun tasks
-- Not implemented: F68 (Weekend Warrior), F69 (Perfectionist)
+  - ~~F68: Weekend Warrior:~~ 5 tasks completed on weekends
+  - Marathon: complete 100 tasks
+  - Chain Gang: complete 5 chained tasks
+  - Bonus Hunter: complete 5 bonus tasks
+  - Treasure Hunter: open 5 chests
+  - Goal Getter: reach 5 daily goals
+  - Big Spender: spend 500 coins in the shop
+  - Decorator: buy your first room item
+- Not implemented: F69 (Perfectionist)
 
 #### Room
 - ~~2.5D room view (three.js): warm lighting with soft shadows, sunbeam with drifting dust, subtle bloom; pan (drag / one finger) and zoom (wheel / pinch), scene center kept in the viewport~~

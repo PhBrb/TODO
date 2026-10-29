@@ -940,9 +940,17 @@
     const keyMap = {
       first_step: "totalCompleted",
       task_master: "totalCompleted",
+      marathon: "totalCompleted",
       streak_3: "bestStreak",
       early_bird: "morningCompleted",
       night_owl: "nightCompleted",
+      weekend_warrior: "weekendCompleted",
+      chain_gang: "chainedCompleted",
+      bonus_hunter: "bonusCompleted",
+      chests_opened: "chestsOpened",
+      goal_getter: "dailyGoalsReached",
+      big_spender: "coinsSpent",
+      decorator: "itemsBought",
       redecorator: "itemMoves",
       fun_lover: "funCompleted",
     };

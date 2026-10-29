@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.38.0";
+  const VERSION = "0.38.1";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -84,6 +84,13 @@
       bestStreak: 0,
       funCompleted: 0,
       itemMoves: 0,
+      weekendCompleted: 0,
+      chainedCompleted: 0,
+      bonusCompleted: 0,
+      chestsOpened: 0,
+      dailyGoalsReached: 0,
+      coinsSpent: 0,
+      itemsBought: 0,
     };
   }
 
@@ -485,6 +492,9 @@
     if (!chestReady(chest)) return;
     chest.opened = true;
     chest.openedAt = Date.now();
+    announceAchievements(trackAchievement({
+      chestsOpened: state.achievements.stats.chestsOpened + 1,
+    }));
     const coins = CHEST_COINS[Math.floor(Math.random() * CHEST_COINS.length)];
     const gems = CHEST_GEMS[Math.floor(Math.random() * CHEST_GEMS.length)];
     const xp = CHEST_XP[Math.floor(Math.random() * CHEST_XP.length)];
@@ -626,6 +636,14 @@
     { id: "collector",   name: "Collector",       emoji: "🏰", hint: "Own all 4 room items",                goal: 4 },
     { id: "redecorator", name: "Redecorator",     emoji: "🧱", hint: "Move or rotate room items 10 times",  goal: 10 },
     { id: "fun_lover",   name: "Fun Lover",       emoji: "🎉", hint: "Complete 10 fun tasks",               goal: 10 },
+    { id: "weekend_warrior", name: "Weekend Warrior", emoji: "⛱️", hint: "Complete 5 tasks on weekends",     goal: 5 },
+    { id: "marathon",    name: "Marathon",         emoji: "🎽", hint: "Complete 100 tasks",                 goal: 100 },
+    { id: "chain_gang",  name: "Chain Gang",       emoji: "🧱", hint: "Complete 5 chained tasks",           goal: 5 },
+    { id: "bonus_hunter", name: "Bonus Hunter",     emoji: "⭐", hint: "Complete 5 bonus tasks",              goal: 5 },
+    { id: "chests_opened", name: "Treasure Hunter", emoji: "📦", hint: "Open 5 chests",                     goal: 5 },
+    { id: "goal_getter", name: "Goal Getter",      emoji: "🏆", hint: "Reach 5 daily goals",                 goal: 5 },
+    { id: "big_spender", name: "Big Spender",       emoji: "🪙", hint: "Spend 500 coins in the shop",         goal: 500 },
+    { id: "decorator",   name: "Decorator",        emoji: "🌿", hint: "Buy your first room item",            goal: 1 },
   ];
   const MORNING_END_HOUR = 12;
   const NIGHT_START_HOUR = 20;
@@ -886,6 +904,12 @@
     return rewardAmount;
   }
 
+  function trackDailyGoal() {
+    announceAchievements(trackAchievement({
+      dailyGoalsReached: reachedGoalCount(state.dailyCompleted),
+    }));
+  }
+
   function clawBackMilestone(reached, milestoneKey, rewardAmount) {
     if (state[milestoneKey] === undefined || reached >= state[milestoneKey]) return;
     state.coins = Math.max(0, state.coins - rewardAmount);
@@ -966,6 +990,14 @@
       ["collector", state.ownedItems.length >= collectorGoal],
       ["redecorator", stats.itemMoves >= 10],
       ["fun_lover", stats.funCompleted >= 10],
+      ["weekend_warrior", stats.weekendCompleted >= 5],
+      ["marathon", stats.totalCompleted >= 100],
+      ["chain_gang", stats.chainedCompleted >= 5],
+      ["bonus_hunter", stats.bonusCompleted >= 5],
+      ["chests_opened", stats.chestsOpened >= 5],
+      ["goal_getter", stats.dailyGoalsReached >= 5],
+      ["big_spender", stats.coinsSpent >= 500],
+      ["decorator", stats.itemsBought >= 1],
     ];
     const newly = [];
     for (const [id, reached] of checks) {
@@ -985,12 +1017,16 @@
   }
 
   function achievementProgressFromCompletion(task, completedAt) {
-    const hour = new Date(completedAt).getHours();
+    const date = new Date(completedAt);
+    const stats = state.achievements.stats;
     return {
-      totalCompleted: state.achievements.stats.totalCompleted + 1,
-      morningCompleted: state.achievements.stats.morningCompleted + (hour < MORNING_END_HOUR ? 1 : 0),
-      nightCompleted: state.achievements.stats.nightCompleted + (hour >= NIGHT_START_HOUR ? 1 : 0),
-      bestStreak: Math.max(state.achievements.stats.bestStreak, task.streak || 0),
+      totalCompleted: stats.totalCompleted + 1,
+      morningCompleted: stats.morningCompleted + (date.getHours() < MORNING_END_HOUR ? 1 : 0),
+      nightCompleted: stats.nightCompleted + (date.getHours() >= NIGHT_START_HOUR ? 1 : 0),
+      weekendCompleted: stats.weekendCompleted + (date.getDay() === 0 || date.getDay() === 6 ? 1 : 0),
+      bestStreak: Math.max(stats.bestStreak, task.streak || 0),
+      chainedCompleted: stats.chainedCompleted + (task.chainedAfter ? 1 : 0),
+      bonusCompleted: stats.bonusCompleted + (task.bonus ? 1 : 0),
     };
   }
 
@@ -1035,6 +1071,7 @@
     state.dailyCompleted += 1;
     state.weeklyCompleted += 1;
     const milestones = grantMilestones();
+    trackDailyGoal();
 
     task.reward = {
       coins: reward.coins,
@@ -1232,6 +1269,8 @@
     state.coins -= item.costCoins;
     state.gems -= item.costGems;
     state.ownedItems.push(id);
+    state.achievements.stats.coinsSpent += item.costCoins;
+    state.achievements.stats.itemsBought += 1;
     defaultPlaceItem(id);
     if (id === CHEST_ITEM_ID) earnChest(CHEST_PURCHASE_OPEN_MS);
     announceAchievements(trackAchievement({}));
