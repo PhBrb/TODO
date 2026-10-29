@@ -596,6 +596,11 @@ header h1 {
   align-content: flex-start;
 }
 
+#achievements-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .shop-item {
   width: calc(50% - 5px);
   background: var(--bg);
