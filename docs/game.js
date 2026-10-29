@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.38.1";
+  const VERSION = "0.38.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -1083,7 +1083,6 @@
       timeBonus: reward.timeBonus || 0,
     };
 
-    announceAchievements(trackAchievement(achievementProgressFromCompletion(task, task.completedAt)));
     announceAchievements(trackAchievement(achievementProgressFromCompletion(task, task.completedAt)));
     if (leveledUp) announceLevelUp();
     if (milestones.weeklyReward > 0) {
