@@ -789,3 +789,7 @@ header h1 {
   min-width: 34px;
   text-align: right;
 }
+
+.confetti-behind {
+  z-index: 0;
+}

@@ -17,13 +17,25 @@
   const MAX_DT_S = 0.05;
 
   let layer = null;
+  let behindLayer = null;
 
+  // Pieces spawn behind the UI sheet (thrown from behind the task) and are
+  // promoted to the front layer once they rise above the task row, so the
+  // fall happens in front of it.
   function ensureLayer() {
     if (layer && layer.isConnected) return layer;
     layer = document.createElement("div");
     layer.className = "confetti-layer";
     document.body.appendChild(layer);
     return layer;
+  }
+
+  function ensureBehindLayer() {
+    if (behindLayer && behindLayer.isConnected) return behindLayer;
+    behindLayer = document.createElement("div");
+    behindLayer.className = "confetti-layer confetti-behind";
+    document.body.appendChild(behindLayer);
+    return behindLayer;
   }
 
   function spawnPiece(parent, origin, spreadFraction) {
@@ -85,17 +97,27 @@
     ) {
       return;
     }
-    const parent = ensureLayer();
+    const parent = ensureBehindLayer();
+    const front = ensureLayer();
+    const promoteY = origin.y - origin.height / 2;
     const states = [];
     for (let i = 0; i < count; i++) {
       const spreadFraction = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
-      states.push(spawnPiece(parent, origin, spreadFraction));
+      const state = spawnPiece(parent, origin, spreadFraction);
+      state.promoted = false;
+      states.push(state);
     }
 
     let last = performance.now();
     function tick(now) {
       const dt = Math.min(MAX_DT_S, (now - last) / 1000);
       last = now;
+      for (const s of states) {
+        if (!s.promoted && s.y <= promoteY) {
+          s.promoted = true;
+          if (s.el.parentNode !== front) front.appendChild(s.el);
+        }
+      }
       if (!step(states, dt, now)) return;
       requestAnimationFrame(tick);
     }
