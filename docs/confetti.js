@@ -19,9 +19,11 @@
   let layer = null;
   let behindLayer = null;
 
-  // Pieces spawn behind the UI sheet (thrown from behind the task) and are
-  // promoted to the front layer once they rise above the task row, so the
-  // fall happens in front of it.
+  // Pieces spawn inside the scrollable sheet content, before the task list
+  // in paint order, so the completed task row covers them (thrown from
+  // behind). Once a piece rises above the row it is promoted to the
+  // viewport-level front layer, converting coordinates back, so the fall
+  // happens in front of the sheet.
   function ensureLayer() {
     if (layer && layer.isConnected) return layer;
     layer = document.createElement("div");
@@ -33,9 +35,16 @@
   function ensureBehindLayer() {
     if (behindLayer && behindLayer.isConnected) return behindLayer;
     behindLayer = document.createElement("div");
-    behindLayer.className = "confetti-layer confetti-behind";
-    document.body.appendChild(behindLayer);
+    behindLayer.className = "confetti-behind-layer";
+    const scroller = document.querySelector(".sheet-content");
+    if (!scroller) return ensureLayer();
+    scroller.insertBefore(behindLayer, scroller.firstChild);
     return behindLayer;
+  }
+
+  function scrollOffset() {
+    const scroller = document.querySelector(".sheet-content");
+    return scroller ? scroller.scrollTop : 0;
   }
 
   function spawnPiece(parent, origin, spreadFraction) {
@@ -99,12 +108,14 @@
     }
     const parent = ensureBehindLayer();
     const front = ensureLayer();
+    const top = scrollOffset();
     const promoteY = origin.y - origin.height / 2;
     const states = [];
     for (let i = 0; i < count; i++) {
       const spreadFraction = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
       const state = spawnPiece(parent, origin, spreadFraction);
       state.promoted = false;
+      state.y += top; // into behind-layer (sheet-content) local space
       states.push(state);
     }
 
@@ -113,8 +124,9 @@
       const dt = Math.min(MAX_DT_S, (now - last) / 1000);
       last = now;
       for (const s of states) {
-        if (!s.promoted && s.y <= promoteY) {
+        if (!s.promoted && s.y <= promoteY + top) {
           s.promoted = true;
+          s.y -= top; // back to viewport space for the front layer
           if (s.el.parentNode !== front) front.appendChild(s.el);
         }
       }
