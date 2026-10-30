@@ -4,7 +4,7 @@
   const listEl = document.getElementById("task-list");
   const tabsEl = document.getElementById("task-tabs");
   const listSelect = document.getElementById("list-select");
-  let activeTab = "todo";
+  let activeTab = "highlight";
   const sheetContentEl = document.querySelector(".sheet-content");
   const emptyHint = document.getElementById("empty-hint");
   const coinBalanceEl = document.getElementById("coin-balance");
