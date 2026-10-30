@@ -91,7 +91,19 @@ header h1 {
 .stats { display: flex; gap: 12px; font-size: 0.9rem; }
 .stats b { color: var(--accent); }
 
-.daily-progress { margin-bottom: 16px; }
+.daily-progress {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  z-index: 2;
+  box-sizing: border-box;
+  background: var(--bg);
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  box-shadow: 0 2px 12px rgba(45, 42, 61, 0.12);
+}
 
 .daily-progress-label {
   margin: 0 0 6px;

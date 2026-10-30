@@ -10,6 +10,23 @@
 <body>
   <div id="room-view"></div>
 
+  <div class="daily-progress">
+    <p class="daily-progress-label">Today: <b id="daily-progress">0/5</b></p>
+    <div class="daily-bar" id="daily-bar"></div>
+    <p class="daily-progress-label">This week: <b id="weekly-progress">0/10</b></p>
+    <div class="daily-bar" id="weekly-bar"></div>
+    <p class="daily-progress-label">Level <b id="level-display-inline">1</b> — <b id="xp-progress">0/100 XP</b></p>
+    <p class="daily-progress-label day-start-label">New day starts at
+      <select id="day-start-select" aria-label="Day start hour">
+        <option value="0">00:00 (midnight)</option>
+        <option value="2">02:00</option>
+        <option value="4">04:00</option>
+        <option value="5">05:00</option>
+        <option value="6">06:00</option>
+      </select>
+    </p>
+  </div>
+
   <section id="ui-sheet" class="ui-sheet" aria-label="Task panel">
     <div id="sheet-handle" class="sheet-handle">
       <span class="sheet-handle-bar"></span>
@@ -29,23 +46,6 @@
       </header>
 
       <div id="boost-banner" class="boost-banner hidden">⚡ Reward boost x1.5 — <span id="boost-timer"></span></div>
-
-      <div class="daily-progress">
-        <p class="daily-progress-label">Today: <b id="daily-progress">0/5</b></p>
-        <div class="daily-bar" id="daily-bar"></div>
-        <p class="daily-progress-label">This week: <b id="weekly-progress">0/10</b></p>
-        <div class="daily-bar" id="weekly-bar"></div>
-        <p class="daily-progress-label">Level <b id="level-display-inline">1</b> — <b id="xp-progress">0/100 XP</b></p>
-        <p class="daily-progress-label day-start-label">New day starts at
-          <select id="day-start-select" aria-label="Day start hour">
-            <option value="0">00:00 (midnight)</option>
-            <option value="2">02:00</option>
-            <option value="4">04:00</option>
-            <option value="5">05:00</option>
-            <option value="6">06:00</option>
-          </select>
-        </p>
-      </div>
 
       <main>
         <div class="task-tabs" id="task-tabs">
