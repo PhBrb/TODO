@@ -442,16 +442,19 @@
 
     const title = document.createElement("div");
     title.className = "task-title";
-    title.textContent = task.title;
-
-    const meta = document.createElement("div");
-    meta.className = "task-meta";
     const badge = document.createElement("span");
     badge.className = "badge " + (task.difficulty || "fun");
     badge.textContent = task.list === "fun"
       ? "🎈 fun"
       : task.difficulty.replace("_", " ");
-    meta.appendChild(badge);
+    const titleText = document.createElement("span");
+    titleText.className = "task-title-text";
+    titleText.textContent = task.title;
+    title.appendChild(badge);
+    title.appendChild(titleText);
+
+    const meta = document.createElement("div");
+    meta.className = "task-meta";
     if (task.repeat !== "none") {
       const rep = document.createElement("span");
       rep.className = "badge repeat";
@@ -553,7 +556,17 @@
         const addBtn = document.createElement("button");
         addBtn.type = "button";
         addBtn.textContent = "+";
+        addBtn.title = "Add subtask";
+        const addForm = document.createElement("div");
+        addForm.className = "subtask-add-form hidden";
+        addForm.appendChild(addInput);
+        addForm.appendChild(addDiff);
         addBtn.addEventListener("click", () => {
+          if (addForm.classList.contains("hidden")) {
+            addForm.classList.remove("hidden");
+            addInput.focus();
+            return;
+          }
           const v = addInput.value.trim();
           if (!v) return;
           Game.addSubtask(task.id, v, addDiff.value);
@@ -565,9 +578,8 @@
             if (v) Game.addSubtask(task.id, v, addDiff.value);
           }
         });
-        addRow.appendChild(addInput);
-        addRow.appendChild(addDiff);
         addRow.appendChild(addBtn);
+        addRow.appendChild(addForm);
         sublist.appendChild(addRow);
       }
       body.appendChild(sublist);

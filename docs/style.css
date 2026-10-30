@@ -145,7 +145,7 @@ header h1 {
 }
 
 .task.done { opacity: 0.55; }
-.task.done .task-title { text-decoration: line-through; }
+.task.done .task-title-text { text-decoration: line-through; }
 
 .task input[type="checkbox"] {
   width: 22px;
@@ -155,7 +155,14 @@ header h1 {
 }
 
 .task-body { flex: 1; min-width: 0; }
-.task-title { font-weight: 600; overflow-wrap: break-word; }
+.task-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.task-title .badge { font-size: 0.6rem; padding: 1px 6px; flex-shrink: 0; }
+.task-title-text { overflow-wrap: break-word; }
 .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
 
 .badge {
@@ -306,12 +313,22 @@ header h1 {
 .subtask-add {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
   margin-top: 4px;
 }
 
-.subtask-add input[type="text"] {
-  flex: 1 1 100%;
+.subtask-add-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.subtask-add-form input[type="text"] {
+  flex: 1 1 140px;
   min-width: 0;
   padding: 6px 8px;
   border: 1px solid #ddd8f0;
@@ -320,8 +337,8 @@ header h1 {
   background: #fff;
 }
 
-.subtask-add select {
-  flex: 1;
+.subtask-add-form select {
+  flex: 0 1 auto;
   min-width: 0;
   border: 1px solid #ddd8f0;
   border-radius: 8px;
