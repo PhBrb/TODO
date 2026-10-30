@@ -159,7 +159,7 @@ header h1 {
 .task-difficulty-badge {
   position: absolute;
   top: 0;
-  left: 0;
+  left: -32px;
   z-index: 1;
   font-size: 0.6rem;
   padding: 1px 6px;
