@@ -84,52 +84,50 @@
 
       <button id="reset-btn" type="button">Reset all data</button>
 
-      <div id="shop-overlay" class="shop-overlay hidden">
-        <div class="shop-panel">
-          <div class="shop-header">
-            <h2>🛒 Shop</h2>
-            <button id="shop-close" type="button" aria-label="Close shop">✕</button>
-          </div>
-          <div class="shop-tabs">
-            <button id="tab-shop" type="button" class="active">Shop</button>
-            <button id="tab-owned" type="button">Owned</button>
-          </div>
-          <div id="shop-content"></div>
-        </div>
-      </div>
-
-      <div id="achievements-overlay" class="shop-overlay hidden">
-        <div class="shop-panel">
-          <div class="shop-header">
-            <h2>🏆 Achievements</h2>
-            <button id="achievements-close" type="button" aria-label="Close achievements">✕</button>
-          </div>
-          <div id="achievements-content"></div>
-        </div>
-      </div>
-
-      <div id="settings-overlay" class="shop-overlay hidden">
-        <div class="shop-panel">
-          <div class="shop-header">
-            <h2>⚙️ Settings</h2>
-            <button id="settings-close" type="button" aria-label="Close settings">✕</button>
-          </div>
-          <div id="settings-content">
-            <label class="deadline-label" id="settings-day-start-wrap">🌅 New day starts at
-              <select id="day-start-select" aria-label="Day start hour">
-                <option value="0">00:00 (midnight)</option>
-                <option value="2">02:00</option>
-                <option value="4">04:00</option>
-                <option value="5">05:00</option>
-                <option value="6">06:00</option>
-              </select>
-            </label>
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
+
+  <div id="shop-overlay" class="shop-overlay hidden">
+    <div class="shop-panel">
+      <div class="shop-header">
+        <h2>🛒 Shop</h2>
+        <button id="shop-close" type="button" aria-label="Close shop">✕</button>
+      </div>
+      <div class="shop-tabs">
+        <button id="tab-shop" type="button" class="active">Shop</button>
+        <button id="tab-owned" type="button">Owned</button>
+      </div>
+      <div id="shop-content"></div>
+    </div>
+  </div>
+  <div id="achievements-overlay" class="shop-overlay hidden">
+    <div class="shop-panel">
+      <div class="shop-header">
+        <h2>🏆 Achievements</h2>
+        <button id="achievements-close" type="button" aria-label="Close achievements">✕</button>
+      </div>
+      <div id="achievements-content"></div>
+    </div>
+  </div>
+  <div id="settings-overlay" class="shop-overlay hidden">
+    <div class="shop-panel">
+      <div class="shop-header">
+        <h2>⚙️ Settings</h2>
+        <button id="settings-close" type="button" aria-label="Close settings">✕</button>
+      </div>
+      <div id="settings-content">
+        <label class="deadline-label" id="settings-day-start-wrap">🌅 New day starts at
+          <select id="day-start-select" aria-label="Day start hour">
+            <option value="0">00:00 (midnight)</option>
+            <option value="2">02:00</option>
+            <option value="4">04:00</option>
+            <option value="5">05:00</option>
+            <option value="6">06:00</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast hidden"></div>
 
