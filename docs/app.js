@@ -19,7 +19,7 @@
   const versionEl = document.getElementById("app-version");
   const form = document.getElementById("task-form");
   const taskInput = document.getElementById("task-input");
-  const difficultySelect = document.getElementById("difficulty-select");
+  let difficultySelect;
   const repeatSelect = document.getElementById("repeat-select");
   const deadlineInput = document.getElementById("deadline-input");
   const deadlineWrap = document.getElementById("deadline-wrap");
@@ -94,6 +94,12 @@
     [30, "30 min"],
     [60, "60 min"],
   ];
+
+  difficultySelect = WheelSelect.createWheelSelect(DIFFICULTY_OPTIONS, {
+    selected: "easy",
+    label: "Difficulty",
+  });
+  document.getElementById("difficulty-wheel").appendChild(difficultySelect.el);
 
   function buildSelect(options, selected) {
     const select = document.createElement("select");
