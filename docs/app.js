@@ -1152,10 +1152,23 @@
   const sheetHandleEl = document.getElementById("sheet-handle");
   const topProgressEl = document.querySelector(".daily-progress");
   const SHEET_MIN_VH = 25;
+  const SHEET_TOP_GAP_PX = 8;
+
+  let vhProbeEl = null;
+  function getVhPx() {
+    if (!vhProbeEl) {
+      vhProbeEl = document.createElement("div");
+      vhProbeEl.style.cssText =
+        "position:fixed;top:0;left:0;width:0;height:100vh;visibility:hidden;pointer-events:none;";
+      document.body.appendChild(vhProbeEl);
+    }
+    return vhProbeEl.getBoundingClientRect().height;
+  }
 
   function getSheetMaxVh() {
-    const topUiPx = topProgressEl ? topProgressEl.getBoundingClientRect().height : 0;
-    const maxVh = 100 - (topUiPx / window.innerHeight) * 100;
+    const topUiBottom = topProgressEl ? topProgressEl.getBoundingClientRect().bottom : 0;
+    const availablePx = Math.max(0, window.innerHeight - topUiBottom - SHEET_TOP_GAP_PX);
+    const maxVh = (availablePx / getVhPx()) * 100;
     return Math.max(SHEET_MIN_VH, maxVh);
   }
 
@@ -1183,7 +1196,7 @@
       if (!dragging) return;
       ev.preventDefault();
       const dy = ev.clientY - startY;
-      const vhPerPx = 100 / window.innerHeight;
+      const vhPerPx = 100 / getVhPx();
       const next = Math.min(getSheetMaxVh(), Math.max(SHEET_MIN_VH, startVh - dy * vhPerPx));
       applySheetHeightVh(next);
     };
