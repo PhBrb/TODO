@@ -285,6 +285,15 @@
     for (const control of controls) row.appendChild(control);
     row.appendChild(save);
     row.appendChild(cancel);
+
+    const initialValues = () => [input.value, ...controls.map((c) => c.value)];
+    const initial = initialValues();
+    row.addEventListener("focusout", (e) => {
+      if (row.contains(e.relatedTarget)) return;
+      const current = initialValues();
+      if (current.every((v, i) => v === initial[i])) closeExistingEditRows();
+    });
+
     input.focus();
     return row;
   }
