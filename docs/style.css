@@ -493,8 +493,11 @@ header h1 {
   gap: 10px;
 }
 
+.task-input-row { display: flex; gap: 8px; }
+
 #task-input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 12px;
   border: 1px solid #ddd8f0;
   border-radius: 10px;
