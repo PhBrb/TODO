@@ -423,7 +423,7 @@ import { createInteraction } from "./room-interaction.js";
         camera.clearViewOffset();
       } else {
         const visibleHeight = Math.max(1, height * visibleRatio);
-        camera.setViewOffset(width, height, 0, height - visibleHeight, width, visibleHeight);
+        camera.setViewOffset(width, height, 0, 0, width, visibleHeight);
       }
       camera.updateProjectionMatrix();
     }
