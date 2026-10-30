@@ -245,8 +245,14 @@
     );
   }
 
+  let hiddenTaskActions = null;
+
   function closeExistingEditRows() {
     document.querySelectorAll(".edit-row").forEach((el) => el.remove());
+    if (hiddenTaskActions) {
+      hiddenTaskActions.classList.remove("hidden");
+      hiddenTaskActions = null;
+    }
   }
 
   function buildEditRow(className, title, controls, onSave) {
@@ -273,7 +279,7 @@
     const cancel = document.createElement("button");
     cancel.type = "button";
     cancel.textContent = "Cancel";
-    cancel.addEventListener("click", () => row.remove());
+    cancel.addEventListener("click", () => closeExistingEditRows());
 
     row.appendChild(input);
     for (const control of controls) row.appendChild(control);
@@ -298,6 +304,11 @@
       document
         .querySelector(`[data-id="${parent.id}"] .subtask-list`)
         .appendChild(row);
+    }
+    const parentActions = document.querySelector(`[data-id="${parent.id}"] > .task-actions`);
+    if (parentActions) {
+      hiddenTaskActions = parentActions;
+      parentActions.classList.add("hidden");
     }
     input.focus();
   }
