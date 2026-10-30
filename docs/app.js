@@ -478,7 +478,7 @@
 
     const editingThisTask = editingTaskId === task.id && pendingEdit && pendingEdit.kind === "task";
     const title = editingThisTask ? buildTitleInput(task.title) : document.createElement("div");
-    title.className = editingThisTask ? "task-title title-input" : "task-title";
+    title.className = editingThisTask ? "task-title editing" : "task-title";
     if (!editingThisTask) title.textContent = task.title;
 
     const badge = document.createElement("span");
@@ -522,6 +522,7 @@
       }
     }
 
+    if (editingThisTask) title.appendChild(badge);
     body.appendChild(title);
     body.appendChild(meta);
     if (editingThisTask) {
@@ -665,7 +666,7 @@
     li.appendChild(cb);
     li.appendChild(body);
     li.appendChild(actions);
-    li.appendChild(badge);
+    if (!editingThisTask) li.appendChild(badge);
     return li;
   }
 
