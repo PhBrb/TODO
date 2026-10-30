@@ -477,9 +477,18 @@
     body.className = "task-body";
 
     const editingThisTask = editingTaskId === task.id && pendingEdit && pendingEdit.kind === "task";
-    const title = editingThisTask ? buildTitleInput(task.title) : document.createElement("div");
-    title.className = editingThisTask ? "task-title editing" : "task-title";
-    if (!editingThisTask) title.textContent = task.title;
+    let title;
+    let titleInput = null;
+    if (editingThisTask) {
+      titleInput = buildTitleInput(task.title);
+      title = document.createElement("div");
+      title.className = "task-title editing";
+      title.appendChild(titleInput);
+    } else {
+      title = document.createElement("div");
+      title.className = "task-title";
+      title.textContent = task.title;
+    }
 
     const badge = document.createElement("span");
     badge.className = "badge task-difficulty-badge " + (task.difficulty || "fun");
@@ -526,7 +535,7 @@
     body.appendChild(title);
     body.appendChild(meta);
     if (editingThisTask) {
-      activateEdit(li, title, pendingEdit.controls, pendingEdit.onSave);
+      activateEdit(li, titleInput, pendingEdit.controls, pendingEdit.onSave);
       body.appendChild(buildEditControlsRow());
     }
 
