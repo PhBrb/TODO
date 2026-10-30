@@ -125,7 +125,7 @@ header h1 {
   gap: 8px;
 }
 
-.progress-line .daily-progress-label { flex-shrink: 0; }
+.progress-line .daily-progress-label { flex: 0 0 72px; text-align: right; }
 
 .progress-line .daily-bar { flex: 1; min-width: 0; }
 
