@@ -489,5 +489,6 @@ import { createInteraction } from "./room-interaction.js";
     }));
     window.addEventListener("game-state-changed", () => instance.refresh());
     window.Room.lastInstance = instance;
+    window.dispatchEvent(new CustomEvent("room-ready"));
   }
 })();
