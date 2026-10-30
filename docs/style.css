@@ -306,9 +306,21 @@ header h1 {
   flex-shrink: 0;
 }
 
-.subtask-title { flex: 1; overflow-wrap: break-word; }
+.subtask-title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 
-.subtask .badge { font-size: 0.6rem; padding: 1px 6px; }
+.subtask-difficulty-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.subtask-difficulty-dot.too_easy { background: #b0b0c0; }
+.subtask-difficulty-dot.easy      { background: #00916e; }
+.subtask-difficulty-dot.medium    { background: #d35400; }
+.subtask-difficulty-dot.hard      { background: #c0392b; }
+
+.subtask-edit, .subtask-delete { flex-shrink: 0; }
 
 .subtask-delete { font-size: 0.75rem; padding: 2px 4px; }
 

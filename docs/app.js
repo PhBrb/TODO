@@ -528,8 +528,8 @@
         stEdit.textContent = "✎";
         stEdit.addEventListener("click", () => openSubtaskEditRow(task, st));
         const stBadge = document.createElement("span");
-        stBadge.className = "badge " + st.difficulty;
-        stBadge.textContent = st.difficulty.replace("_", " ");
+        stBadge.className = "subtask-difficulty-dot " + st.difficulty;
+        stBadge.title = st.difficulty.replace("_", " ");
         const stDel = document.createElement("button");
         stDel.className = "task-delete subtask-delete";
         stDel.textContent = "✕";
