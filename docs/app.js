@@ -645,7 +645,8 @@
     edit.addEventListener("click", () => openEditRow(task));
 
     const actions = document.createElement("div");
-    actions.className = "task-actions" + (editingSubtaskOf(task) ? " hidden" : "");
+    const editingThis = editingTaskId === task.id || editingSubtaskOf(task);
+    actions.className = "task-actions" + (editingThis ? " hidden" : "");
     actions.appendChild(edit);
     actions.appendChild(del);
 
