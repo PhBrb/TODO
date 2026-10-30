@@ -245,8 +245,14 @@
     );
   }
 
+  let hiddenTaskActions = null;
+
   function closeExistingEditRows() {
     document.querySelectorAll(".edit-row").forEach((el) => el.remove());
+    if (hiddenTaskActions) {
+      hiddenTaskActions.classList.remove("hidden");
+      hiddenTaskActions = null;
+    }
   }
 
   function buildEditRow(className, title, controls, onSave) {
@@ -273,13 +279,21 @@
     const cancel = document.createElement("button");
     cancel.type = "button";
     cancel.textContent = "Cancel";
-    cancel.addEventListener("click", () => row.remove());
+    cancel.addEventListener("click", () => closeExistingEditRows());
 
     row.appendChild(input);
     for (const control of controls) row.appendChild(control);
     row.appendChild(save);
     row.appendChild(cancel);
-    input.focus();
+
+    const initialValues = () => [input.value, ...controls.map((c) => c.value)];
+    const initial = initialValues();
+    row.addEventListener("focusout", (e) => {
+      if (row.contains(e.relatedTarget)) return;
+      const current = initialValues();
+      if (current.every((v, i) => v === initial[i])) closeExistingEditRows();
+    });
+
     return row;
   }
 
@@ -299,7 +313,12 @@
         .querySelector(`[data-id="${parent.id}"] .subtask-list`)
         .appendChild(row);
     }
-    input.focus();
+    const parentActions = document.querySelector(`[data-id="${parent.id}"] > .task-actions`);
+    if (parentActions) {
+      hiddenTaskActions = parentActions;
+      parentActions.classList.add("hidden");
+    }
+    row.querySelector("input").focus();
   }
 
   const RATING_OPTIONS = [
@@ -444,14 +463,14 @@
     title.className = "task-title";
     title.textContent = task.title;
 
-    const meta = document.createElement("div");
-    meta.className = "task-meta";
     const badge = document.createElement("span");
-    badge.className = "badge " + (task.difficulty || "fun");
+    badge.className = "badge task-difficulty-badge " + (task.difficulty || "fun");
     badge.textContent = task.list === "fun"
       ? "🎈 fun"
       : task.difficulty.replace("_", " ");
-    meta.appendChild(badge);
+
+    const meta = document.createElement("div");
+    meta.className = "task-meta";
     if (task.repeat !== "none") {
       const rep = document.createElement("span");
       rep.className = "badge repeat";
@@ -528,8 +547,8 @@
         stEdit.textContent = "✎";
         stEdit.addEventListener("click", () => openSubtaskEditRow(task, st));
         const stBadge = document.createElement("span");
-        stBadge.className = "badge " + st.difficulty;
-        stBadge.textContent = st.difficulty.replace("_", " ");
+        stBadge.className = "subtask-difficulty-dot " + st.difficulty;
+        stBadge.title = st.difficulty.replace("_", " ");
         const stDel = document.createElement("button");
         stDel.className = "task-delete subtask-delete";
         stDel.textContent = "✕";
@@ -553,7 +572,17 @@
         const addBtn = document.createElement("button");
         addBtn.type = "button";
         addBtn.textContent = "+";
+        addBtn.title = "Add subtask";
+        const addForm = document.createElement("div");
+        addForm.className = "subtask-add-form hidden";
+        addForm.appendChild(addInput);
+        addForm.appendChild(addDiff);
         addBtn.addEventListener("click", () => {
+          if (addForm.classList.contains("hidden")) {
+            addForm.classList.remove("hidden");
+            addInput.focus();
+            return;
+          }
           const v = addInput.value.trim();
           if (!v) return;
           Game.addSubtask(task.id, v, addDiff.value);
@@ -563,11 +592,16 @@
             e.preventDefault();
             const v = addInput.value.trim();
             if (v) Game.addSubtask(task.id, v, addDiff.value);
+          } else if (e.key === "Escape") {
+            addForm.classList.add("hidden");
+            addInput.blur();
           }
         });
-        addRow.appendChild(addInput);
-        addRow.appendChild(addDiff);
+        addForm.addEventListener("focusout", (e) => {
+          if (!addRow.contains(e.relatedTarget)) addForm.classList.add("hidden");
+        });
         addRow.appendChild(addBtn);
+        addRow.appendChild(addForm);
         sublist.appendChild(addRow);
       }
       body.appendChild(sublist);
@@ -603,6 +637,7 @@
     li.appendChild(cb);
     li.appendChild(body);
     li.appendChild(actions);
+    li.appendChild(badge);
     return li;
   }
 
@@ -689,6 +724,7 @@
       }
     );
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
+    row.querySelector("input").focus();
   }
 
   function tasksForTab() {
