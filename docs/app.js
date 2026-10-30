@@ -485,7 +485,6 @@
       }
     }
 
-    body.appendChild(badge);
     body.appendChild(title);
     body.appendChild(meta);
 
@@ -574,7 +573,13 @@
             e.preventDefault();
             const v = addInput.value.trim();
             if (v) Game.addSubtask(task.id, v, addDiff.value);
+          } else if (e.key === "Escape") {
+            addForm.classList.add("hidden");
+            addInput.blur();
           }
+        });
+        addForm.addEventListener("focusout", (e) => {
+          if (!addRow.contains(e.relatedTarget)) addForm.classList.add("hidden");
         });
         addRow.appendChild(addBtn);
         addRow.appendChild(addForm);
@@ -613,6 +618,7 @@
     li.appendChild(cb);
     li.appendChild(body);
     li.appendChild(actions);
+    li.appendChild(badge);
     return li;
   }
 
