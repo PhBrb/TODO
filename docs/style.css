@@ -52,7 +52,7 @@ body {
 
 .sheet-handle {
   flex: none;
-  padding: 16px 0 12px;
+  padding: 10px 0 8px;
   cursor: grab;
   touch-action: none;
 }
@@ -87,7 +87,9 @@ body {
   margin-top: 2px;
 }
 
-.top-stats-actions { display: flex; gap: 2px; margin-left: auto; }
+.top-stats .version { order: 2; margin-left: auto; font-size: 0.65rem; }
+
+.top-stats-actions { display: flex; gap: 2px; order: 3; }
 
 .top-stats-actions button {
   border: none;
@@ -96,8 +98,6 @@ body {
   cursor: pointer;
   padding: 2px 4px;
 }
-
-.top-stats .version { font-size: 0.65rem; }
 
 .daily-progress {
   position: fixed;
@@ -165,11 +165,11 @@ body {
 
 #task-list {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .task {
@@ -178,7 +178,7 @@ body {
   gap: 10px;
   background: var(--card);
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 9px 12px;
   box-shadow: var(--shadow);
   position: relative;
 }
@@ -270,7 +270,7 @@ body {
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid #ddd8f0;
   border-radius: 10px;
   background: #fff;
@@ -297,16 +297,16 @@ body {
   border: 1px solid #ffeaa7;
   color: #b8860b;
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   text-align: center;
 }
 
 #reset-btn {
   display: block;
-  margin: 32px auto 0;
+  margin: 20px auto 0;
   border: 1px solid #ddd8f0;
   background: none;
   color: var(--muted);
@@ -321,7 +321,7 @@ body {
 .task-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
 .subtask-list {
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -531,8 +531,8 @@ body {
 .empty-hint {
   text-align: center;
   color: var(--muted);
-  padding: 24px 0;
-  margin-bottom: 16px;
+  padding: 16px 0;
+  margin-bottom: 10px;
 }
 
 .hidden { display: none !important; }
@@ -540,11 +540,11 @@ body {
 #task-form {
   background: var(--card);
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .task-input-row { display: flex; gap: 8px; }
@@ -564,7 +564,7 @@ body {
 
 .form-row select {
   flex: 1;
-  padding: 10px 8px;
+  padding: 7px 8px;
   border: 1px solid #ddd8f0;
   border-radius: 10px;
   background: #fff;
@@ -812,7 +812,7 @@ body {
 .task-tabs {
   display: flex;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .task-tabs button {
@@ -820,7 +820,7 @@ body {
   border: 1px solid #ddd8f0;
   border-radius: 10px;
   background: #fff;
-  padding: 8px 4px;
+  padding: 6px 4px;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--muted);
