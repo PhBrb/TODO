@@ -19,6 +19,17 @@
       <div class="daily-bar" id="weekly-bar"></div>
       <p class="daily-progress-label">Week: <b id="weekly-progress">0/10</b></p>
     </div>
+    <div class="stats top-stats">
+      <span class="coins">🪙 <b id="coin-balance">0</b></span>
+      <span class="gems">💎 <b id="gem-balance">0</b></span>
+      <span class="level">✨ Lv <b id="level-display">1</b></span>
+      <span class="top-stats-actions">
+        <button id="shop-btn" type="button" aria-label="Open shop">🛒</button>
+        <button id="achievements-btn" type="button" aria-label="Achievements">🏆</button>
+        <button id="settings-btn" type="button" aria-label="Settings">⚙️</button>
+      </span>
+      <span class="version" id="app-version"></span>
+    </div>
   </div>
 
   <section id="ui-sheet" class="ui-sheet" aria-label="Task panel">
@@ -26,19 +37,6 @@
       <span class="sheet-handle-bar"></span>
     </div>
     <div class="sheet-content">
-
-      <header>
-        <h1>TODO</h1>
-        <div class="stats">
-          <span class="coins">🪙 <b id="coin-balance">0</b></span>
-          <span class="gems">💎 <b id="gem-balance">0</b></span>
-          <span class="level">✨ Lv <b id="level-display">1</b></span>
-          <button id="shop-btn" type="button" aria-label="Open shop">🛒</button>
-          <button id="achievements-btn" type="button" aria-label="Achievements">🏆</button>
-          <button id="settings-btn" type="button" aria-label="Settings">⚙️</button>
-          <span class="version" id="app-version"></span>
-        </div>
-      </header>
 
       <div id="boost-banner" class="boost-banner hidden">⚡ Reward boost x1.5 — <span id="boost-timer"></span></div>
 
