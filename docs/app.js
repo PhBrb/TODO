@@ -294,7 +294,6 @@
       if (current.every((v, i) => v === initial[i])) closeExistingEditRows();
     });
 
-    input.focus();
     return row;
   }
 
@@ -319,7 +318,7 @@
       hiddenTaskActions = parentActions;
       parentActions.classList.add("hidden");
     }
-    input.focus();
+    row.querySelector("input").focus();
   }
 
   const RATING_OPTIONS = [
@@ -725,6 +724,7 @@
       }
     );
     listEl.insertBefore(row, listEl.querySelector(`[data-id="${task.id}"]`).nextSibling);
+    row.querySelector("input").focus();
   }
 
   function tasksForTab() {
