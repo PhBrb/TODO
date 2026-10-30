@@ -145,7 +145,7 @@ header h1 {
 }
 
 .task.done { opacity: 0.55; }
-.task.done .task-title-text { text-decoration: line-through; }
+.task.done .task-title { text-decoration: line-through; }
 
 .task input[type="checkbox"] {
   width: 22px;
@@ -154,15 +154,16 @@ header h1 {
   flex-shrink: 0;
 }
 
-.task-body { flex: 1; min-width: 0; }
-.task-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
+.task-body { flex: 1; min-width: 0; position: relative; }
+.task-title { font-weight: 600; overflow-wrap: break-word; }
+.task-difficulty-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  font-size: 0.6rem;
+  padding: 1px 6px;
 }
-.task-title .badge { font-size: 0.6rem; padding: 1px 6px; flex-shrink: 0; }
-.task-title-text { overflow-wrap: break-word; }
 .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
 
 .badge {

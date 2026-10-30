@@ -442,16 +442,13 @@
 
     const title = document.createElement("div");
     title.className = "task-title";
+    title.textContent = task.title;
+
     const badge = document.createElement("span");
-    badge.className = "badge " + (task.difficulty || "fun");
+    badge.className = "badge task-difficulty-badge " + (task.difficulty || "fun");
     badge.textContent = task.list === "fun"
       ? "🎈 fun"
       : task.difficulty.replace("_", " ");
-    const titleText = document.createElement("span");
-    titleText.className = "task-title-text";
-    titleText.textContent = task.title;
-    title.appendChild(badge);
-    title.appendChild(titleText);
 
     const meta = document.createElement("div");
     meta.className = "task-meta";
@@ -488,6 +485,7 @@
       }
     }
 
+    body.appendChild(badge);
     body.appendChild(title);
     body.appendChild(meta);
 
