@@ -372,10 +372,6 @@ header h1 {
   cursor: pointer;
 }
 
-.subtask-edit-row {
-  margin: 4px 0 0 24px;
-}
-
 .task-edit {
   border: none;
   background: none;
@@ -385,27 +381,31 @@ header h1 {
   cursor: pointer;
 }
 
-.edit-row {
-  list-style: none;
-  background: #f0edff;
-  border-radius: 12px;
-  padding: 10px;
+.title-input {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  font-size: inherit;
+  font-weight: 600;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.subtask .title-input { font-size: 0.85rem; font-weight: 400; }
+
+.edit-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  margin-top: 6px;
 }
 
-.edit-row input[type="text"] {
-  flex: 1 1 100%;
-  padding: 8px;
-  border: 1px solid #ddd8f0;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.edit-row select {
+.edit-controls select {
   flex: 1;
+  min-width: 0;
   padding: 6px;
   border: 1px solid #ddd8f0;
   border-radius: 8px;
@@ -413,17 +413,17 @@ header h1 {
   font-size: 0.75rem;
 }
 
-.edit-row .deadline-label {
+.edit-controls .deadline-label {
   flex: 1 1 100%;
   padding: 6px 8px;
   font-size: 0.75rem;
 }
 
-.edit-row .deadline-label input {
+.edit-controls .deadline-label input {
   font-size: 0.75rem;
 }
 
-.edit-row button {
+.edit-controls button {
   border: none;
   border-radius: 8px;
   padding: 6px 12px;
@@ -432,8 +432,8 @@ header h1 {
   cursor: pointer;
 }
 
-.edit-row button:first-of-type { background: var(--accent); color: #fff; }
-.edit-row button:last-of-type { background: #fff; color: var(--muted); }
+.edit-controls button:first-of-type { background: var(--accent); color: #fff; }
+.edit-controls button:last-of-type { background: #fff; color: var(--muted); }
 
 .rating-panel {
   position: fixed;
@@ -686,8 +686,8 @@ header h1 {
   font-weight: 700;
 }
 
-.edit-row input[type="time"],
-.edit-row input[type="number"] {
+.edit-controls input[type="time"],
+.edit-controls input[type="number"] {
   flex: 1;
   min-width: 0;
   padding: 6px;
