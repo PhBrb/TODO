@@ -920,6 +920,9 @@
   const tabShop = document.getElementById("tab-shop");
   const tabOwned = document.getElementById("tab-owned");
   const shopContent = document.getElementById("shop-content");
+  const settingsBtn = document.getElementById("settings-btn");
+  const settingsOverlay = document.getElementById("settings-overlay");
+  const settingsClose = document.getElementById("settings-close");
   let shopTab = "shop";
 
   function itemCostLabel(item) {
@@ -1107,6 +1110,20 @@
   shopClose.addEventListener("click", closeShop);
   shopOverlay.addEventListener("click", (e) => {
     if (e.target === shopOverlay) closeShop();
+  });
+
+  function openSettings() {
+    settingsOverlay.classList.remove("hidden");
+  }
+
+  function closeSettings() {
+    settingsOverlay.classList.add("hidden");
+  }
+
+  settingsBtn.addEventListener("click", openSettings);
+  settingsClose.addEventListener("click", closeSettings);
+  settingsOverlay.addEventListener("click", (e) => {
+    if (e.target === settingsOverlay) closeSettings();
   });
   tabShop.addEventListener("click", () => {
     shopTab = "shop";

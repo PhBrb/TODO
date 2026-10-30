@@ -98,7 +98,7 @@ header h1 {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  z-index: 2;
+  z-index: 40;
   box-sizing: border-box;
   background: var(--bg);
   padding: calc(6px + env(safe-area-inset-top)) 12px 6px;
@@ -616,6 +616,24 @@ header h1 {
   z-index: 50;
 }
 
+.shop-overlay .shop-panel { padding-top: 12px; }
+
+#settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+#settings-content select {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
 .shop-panel {
   background: var(--card);
   border-radius: 20px 20px 0 0;
@@ -723,16 +741,6 @@ header h1 {
   text-align: center;
   color: var(--muted);
   padding: 24px 0;
-}
-
-.day-start-label select {
-  border: 1px solid #ddd8f0;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.7rem;
-  padding: 1px 3px;
-  color: var(--accent);
-  font-weight: 700;
 }
 
 .edit-controls input[type="time"],
