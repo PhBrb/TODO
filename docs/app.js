@@ -1150,18 +1150,28 @@
 
   const uiSheetEl = document.getElementById("ui-sheet");
   const sheetHandleEl = document.getElementById("sheet-handle");
+  const topProgressEl = document.querySelector(".daily-progress");
   const SHEET_MIN_VH = 25;
-  const SHEET_MAX_VH = 95;
+
+  function getSheetMaxVh() {
+    const topUiPx = topProgressEl ? topProgressEl.getBoundingClientRect().height : 0;
+    const maxVh = 100 - (topUiPx / window.innerHeight) * 100;
+    return Math.max(SHEET_MIN_VH, maxVh);
+  }
 
   function applySheetHeightVh(vh) {
-    uiSheetEl.style.height = vh + "vh";
+    const clamped = Math.min(getSheetMaxVh(), Math.max(SHEET_MIN_VH, vh));
+    uiSheetEl.style.height = clamped + "vh";
     const roomApi = window.Room && window.Room.lastInstance;
-    if (roomApi) roomApi.setVisibleHeightRatio(Math.max(0, 1 - vh / 100));
+    if (roomApi) roomApi.setVisibleHeightRatio(Math.max(0, 1 - clamped / 100));
   }
 
   function initUiSheet() {
     applySheetHeightVh(Game.state.uiSheetHeightVh || SHEET_MIN_VH);
     window.addEventListener("room-ready", () => {
+      applySheetHeightVh(parseFloat(uiSheetEl.style.height) || SHEET_MIN_VH);
+    });
+    window.addEventListener("resize", () => {
       applySheetHeightVh(parseFloat(uiSheetEl.style.height) || SHEET_MIN_VH);
     });
 
@@ -1174,7 +1184,7 @@
       ev.preventDefault();
       const dy = ev.clientY - startY;
       const vhPerPx = 100 / window.innerHeight;
-      const next = Math.min(SHEET_MAX_VH, Math.max(SHEET_MIN_VH, startVh - dy * vhPerPx));
+      const next = Math.min(getSheetMaxVh(), Math.max(SHEET_MIN_VH, startVh - dy * vhPerPx));
       applySheetHeightVh(next);
     };
     const onUp = () => {
