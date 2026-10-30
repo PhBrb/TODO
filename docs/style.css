@@ -315,10 +315,10 @@ header h1 {
   flex-shrink: 0;
 }
 
-.subtask-difficulty-dot.too_easy { background: #f0f0f5; }
-.subtask-difficulty-dot.easy      { background: #e0f7ef; }
-.subtask-difficulty-dot.medium    { background: #fff3e0; }
-.subtask-difficulty-dot.hard      { background: #ffe3e3; }
+.subtask-difficulty-dot.too_easy { background: #b5b3c3; }
+.subtask-difficulty-dot.easy      { background: #70c4ae; }
+.subtask-difficulty-dot.medium    { background: #e9a470; }
+.subtask-difficulty-dot.hard      { background: #e08e87; }
 
 .subtask-edit, .subtask-delete { flex-shrink: 0; }
 
