@@ -27,8 +27,6 @@
   const repeatTimeWrap = document.getElementById("repeat-time-wrap");
   const repeatTimeInput = document.getElementById("repeat-time-input");
   const toastEl = document.getElementById("toast");
-  const levelInlineEl = document.getElementById("level-display-inline");
-  const xpProgressEl = document.getElementById("xp-progress");
 
   let toastTimer = null;
   const toastQueue = [];
@@ -821,13 +819,7 @@
     wFill.style.width = Math.min(100, (Game.state.weeklyCompleted / nextWeekly) * 100) + "%";
     weeklyBar.appendChild(wFill);
 
-    const level = Game.levelFromXp(Game.state.xp);
-    levelDisplayEl.textContent = level;
-    levelInlineEl.textContent = level;
-    const curLevelXp = Game.levelStartXp(level);
-    const nextLevelXp = Game.xpForLevel(level + 1);
-    xpProgressEl.textContent =
-      `${Game.state.xp - curLevelXp}/${nextLevelXp - curLevelXp} XP`;
+    levelDisplayEl.textContent = Game.levelFromXp(Game.state.xp);
 
     if (Game.isBoostActive()) {
       boostBannerEl.classList.remove("hidden");
