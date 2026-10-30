@@ -1153,11 +1153,15 @@
   const SHEET_MIN_VH = 25;
   const SHEET_MAX_VH = 95;
 
+  let roomApi = null;
+
   function applySheetHeightVh(vh) {
     uiSheetEl.style.height = vh + "vh";
+    if (roomApi) roomApi.setVisibleHeightRatio(Math.max(0, 1 - vh / 100));
   }
 
   function initUiSheet() {
+    roomApi = window.Room && window.Room.lastInstance ? window.Room.lastInstance : null;
     applySheetHeightVh(Game.state.uiSheetHeightVh || SHEET_MIN_VH);
 
     let dragging = false;

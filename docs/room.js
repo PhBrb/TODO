@@ -358,13 +358,15 @@ import { createInteraction } from "./room-interaction.js";
 
     refreshContent();
 
+    let visibleRatio = 1;
+
     function onResize() {
       const width = container.clientWidth;
       const height = Math.max(1, container.clientHeight);
       camera.aspect = width / height;
-      camera.updateProjectionMatrix();
       renderer.setSize(width, height);
       composer.setSize(width, height);
+      setVisibleHeightRatio(visibleRatio);
     }
     window.addEventListener("resize", onResize);
 
@@ -413,8 +415,22 @@ import { createInteraction } from "./room-interaction.js";
       updateCountdownRing(model, display.fraction);
     }
 
+    function setVisibleHeightRatio(ratio) {
+      visibleRatio = Math.min(1, Math.max(0, ratio));
+      const height = Math.max(1, container.clientHeight);
+      const width = container.clientWidth;
+      if (visibleRatio >= 1) {
+        camera.clearViewOffset();
+      } else {
+        const visibleHeight = Math.max(1, height * visibleRatio);
+        camera.setViewOffset(width, height, 0, height - visibleHeight, width, visibleHeight);
+      }
+      camera.updateProjectionMatrix();
+    }
+
     return {
       refresh: refreshContent,
+      setVisibleHeightRatio,
       dispose() {
         animating = false;
         controls.dispose();
@@ -482,5 +498,6 @@ import { createInteraction } from "./room-interaction.js";
       chestDisplay: chestDisplay(),
     }));
     window.addEventListener("game-state-changed", () => instance.refresh());
+    window.Room.lastInstance = instance;
   }
 })();
