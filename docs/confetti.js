@@ -5,15 +5,15 @@
   // semi-implicit Euler with real frame time, pieces spawned across the
   // full width of the completed task row.
   const COLORS = ["#6c5ce7", "#00b894", "#fdcb6e", "#e17055", "#74b9ff", "#a29bfe", "#ff7675"];
-  const GRAVITY = 1300;
+  const GRAVITY = 130;
   const DRAG_COEFFICIENT = 0.009;
   const SIZE_PX = 8;
-  const LAUNCH_VY_MIN = -700;
-  const LAUNCH_VY_MAX = -1150;
-  const LAUNCH_VX = 60;
-  const SPIN_MAX_DEG_S = 900;
+  const LAUNCH_VY_MIN = -70;
+  const LAUNCH_VY_MAX = -115;
+  const LAUNCH_VX = 6;
+  const SPIN_MAX_DEG_S = 90;
   const FADE_START = 0.75;
-  const LIFETIME_MS = 2200;
+  const LIFETIME_MS = 22000;
   const MAX_DT_S = 0.05;
 
   let layer = null;
