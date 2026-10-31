@@ -829,7 +829,6 @@
       }
       const node = taskNode(task);
       listEl.appendChild(node);
-      if (activeEdit && activeEdit.scope === node) activeEdit.input.focus();
     }
 
     listEl.classList.toggle("editing", editingTaskId !== null || editingSubtaskKey !== null);
