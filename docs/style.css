@@ -512,7 +512,7 @@ body.actions-hidden .subtask-add { display: none; }
   font-size: 0.75rem;
 }
 
-.edit-controls button {
+.edit-controls > button {
   border: none;
   border-radius: 8px;
   padding: 6px 12px;
@@ -521,8 +521,8 @@ body.actions-hidden .subtask-add { display: none; }
   cursor: pointer;
 }
 
-.edit-controls button:first-of-type { background: var(--accent); color: #fff; }
-.edit-controls button:last-of-type { background: #fff; color: var(--muted); }
+.edit-controls > button:first-of-type { background: var(--accent); color: #fff; }
+.edit-controls > button:last-of-type { background: #fff; color: var(--muted); }
 
 .rating-panel {
   position: fixed;
