@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.51.1";
+  const VERSION = "0.52.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -662,7 +662,7 @@
       .map((e) => e.task);
   }
 
-  function addTask(title, difficulty, repeat, deadlineInput, list) {
+  function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) {
     const taskList = TASK_LISTS.includes(list) ? list : "todo";
     const isFun = taskList === "fun";
     const isBonus = !isFun && Math.random() < BONUS_TASK_RATE;
@@ -687,7 +687,7 @@
       repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
       repeatCustomFromCompletion: false,
       chainedAfter: 0,
-      timeLimit: 0,
+      timeLimit: isFun ? 0 : (TIME_LIMIT_MINUTES.includes(timeLimit) ? timeLimit : 0),
       startedAt: 0,
       ratedDifficulty: null,
       difficultySuggested: false,

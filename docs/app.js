@@ -21,6 +21,7 @@
   const taskInput = document.getElementById("task-input");
   let difficultySelect;
   let repeatSelect;
+  let timeLimitSelect;
   const scheduleContainer = document.getElementById("repeat-schedule");
   let scheduleControls = null;
   const toastEl = document.getElementById("toast");
@@ -93,6 +94,8 @@
   const CUSTOM_DAYS_OPTIONS = Array.from({ length: 31 }, (_, i) => [i, i === 1 ? "1 day" : `${i} days`]);
   const CUSTOM_HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => [i, i === 1 ? "1 hour" : `${i} hours`]);
   const CUSTOM_MINUTES_OPTIONS = Array.from({ length: 60 }, (_, i) => [i, i === 1 ? "1 min" : `${i} min`]);
+  const TIME_OF_DAY_HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => [i, String(i).padStart(2, "0")]);
+  const TIME_OF_DAY_MINUTES_OPTIONS = Array.from({ length: 60 }, (_, i) => [i, String(i).padStart(2, "0")]);
   const TIME_LIMIT_OPTIONS = [
     [0, "No time limit"],
     [5, "5 min"],
@@ -119,32 +122,23 @@
   listSelect = mountWheel("list-wheel", LIST_OPTIONS, "todo", "List", updateCreateFormMode);
   difficultySelect = mountWheel("difficulty-wheel", DIFFICULTY_OPTIONS, "easy", "Difficulty");
   repeatSelect = mountWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
-
-  function minutesToTimeValue(minutes) {
-    if (!Number.isFinite(minutes)) return "";
-    return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-  }
-
-  function timeValueToMinutes(value) {
-    if (!value) return NaN;
-    const [h, m] = value.split(":").map(Number);
-    return (h || 0) * 60 + (m || 0);
-  }
+  timeLimitSelect = mountWheel("time-limit-wheel", TIME_LIMIT_OPTIONS, 0, "Time limit");
 
   function buildScheduleControls(repeat, values = {}, compact = false) {
     const wrap = document.createElement("div");
     wrap.className = "repeat-schedule";
     const read = {};
     const addTimeOfDay = (minutes) => {
-      const label = document.createElement("label");
-      label.className = "deadline-label";
+      const label = document.createElement("span");
+      label.className = "due-at-label";
       label.textContent = "🔔 Due at ";
-      const input = document.createElement("input");
-      input.type = "time";
-      input.value = minutesToTimeValue(minutes);
-      label.appendChild(input);
       wrap.appendChild(label);
-      read.repeatTime = () => timeValueToMinutes(input.value);
+      const m = Number.isFinite(minutes) ? minutes : 9 * 60;
+      const hour = createWheel(TIME_OF_DAY_HOURS_OPTIONS, Math.floor(m / 60), "Hour", null, compact);
+      const minute = createWheel(TIME_OF_DAY_MINUTES_OPTIONS, m % 60, "Minute", null, compact);
+      wrap.appendChild(hour.el);
+      wrap.appendChild(minute.el);
+      read.repeatTime = () => Number(hour.value) * 60 + Number(minute.value);
     };
     if (repeat === "none") {
       const label = document.createElement("label");
@@ -1124,10 +1118,11 @@
   });
 
   function updateCreateFormMode() {
-    if (!listSelect || !difficultySelect || !repeatSelect) return;
+    if (!listSelect || !difficultySelect || !repeatSelect || !timeLimitSelect) return;
     const isFun = listSelect.value === "fun";
     difficultySelect.disabled = isFun;
     repeatSelect.disabled = isFun;
+    timeLimitSelect.disabled = isFun;
     const repeat = isFun ? "none" : repeatSelect.value;
     scheduleContainer.innerHTML = "";
     scheduleControls = buildScheduleControls(repeat, {}, false);
@@ -1145,7 +1140,8 @@
       listSelect.value === "fun" ? null : difficultySelect.value,
       repeat,
       values.deadline || "",
-      listSelect.value
+      listSelect.value,
+      Number(timeLimitSelect.value)
     );
     if (repeat !== "none" && repeat !== "every_5min") {
       Game.editTask(taskId, values);

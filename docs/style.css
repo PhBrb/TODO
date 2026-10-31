@@ -915,7 +915,10 @@ body.actions-hidden .subtask-add { display: none; }
 }
 
 .repeat-schedule .deadline-label { flex: 1 1 100%; }
+.repeat-schedule .due-at-label { align-self: center; font-size: 0.85rem; white-space: nowrap; }
 .repeat-schedule .wheel-select { flex: 1; min-width: 0; }
+.repeat-schedule .due-at-hour,
+.repeat-schedule .due-at-minute { flex: 0 1 22%; }
 
 .day-toggle-grid {
   flex: 1 1 100%;
