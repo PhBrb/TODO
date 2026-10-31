@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.50.5";
+  const VERSION = "0.51.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -1263,6 +1263,9 @@
     if (updates.title !== undefined) {
       const t = updates.title.trim();
       if (t) task.title = t;
+    }
+    if (updates.list !== undefined && TASK_LISTS.includes(updates.list)) {
+      task.list = updates.list;
     }
     if (
       updates.difficulty !== undefined &&
