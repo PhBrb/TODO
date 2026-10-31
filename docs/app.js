@@ -159,9 +159,7 @@
     } else if (repeat === "daily") {
       addTimeOfDay(values.repeatTime);
     } else if (repeat === "weekly") {
-      const selected = values.repeatWeekdays && values.repeatWeekdays.length > 0
-        ? values.repeatWeekdays
-        : [1];
+      const selected = values.repeatWeekdays || [1];
       const group = document.createElement("div");
       group.className = "day-toggle-grid weekday-grid";
       const buttons = WEEKDAY_CHECKBOXES.map(([day, label]) => {
@@ -179,10 +177,8 @@
         return { btn, day };
       });
       wrap.appendChild(group);
-      read.repeatWeekdays = () => {
-        const days = buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
-        return days.length > 0 ? days : [1];
-      };
+      read.repeatWeekdays = () =>
+        buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
       addTimeOfDay(values.repeatTime);
     } else if (repeat === "monthly") {
       const weekday = values.repeatMonthlyWeekday ?? null;
@@ -274,6 +270,12 @@
       read.repeatCustomFromCompletion = () => cb.checked;
     }
     return { el: wrap, read };
+  }
+
+  function readScheduleValues(read) {
+    const out = {};
+    for (const key of Object.keys(read)) out[key] = read[key]();
+    return out;
   }
 
   function buildSelect(options, selected) {
@@ -938,7 +940,7 @@
           difficulty: diff.value,
           repeat: rep.value,
           timeLimit: Number(timeLimit.value),
-          ...schedule.read,
+          ...readScheduleValues(schedule.read),
         };
         if (isRepeating) {
           updates.repeatAfterCompletion = afterCompCb.checked;
@@ -1081,7 +1083,7 @@
     const title = taskInput.value.trim();
     if (!title) return;
     const repeat = listSelect.value === "fun" ? "none" : repeatSelect.value;
-    const values = scheduleControls ? scheduleControls.read : {};
+    const values = scheduleControls ? readScheduleValues(scheduleControls.read) : {};
     const taskId = Game.addTask(
       title,
       listSelect.value === "fun" ? null : difficultySelect.value,

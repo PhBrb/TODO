@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.50.5";
+  const VERSION = "0.50.6";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -431,9 +431,7 @@
       return d.getTime();
     }
     if (repeat === "weekly") {
-      const weekdays = (task.repeatWeekdays && task.repeatWeekdays.length > 0
-        ? task.repeatWeekdays
-        : [1]);
+      const weekdays = task.repeatWeekdays || [];
       for (let offset = 1; offset <= 7; offset++) {
         const candidate = new Date(base);
         candidate.setDate(candidate.getDate() + offset);
@@ -1286,7 +1284,10 @@
       task.repeatAfterCompletion = updates.repeatAfterCompletion === true;
     }
     if (updates.repeatWeekdays !== undefined) {
-      task.repeatWeekdays = normalizeWeekdays(updates.repeatWeekdays, null);
+      const raw = Array.isArray(updates.repeatWeekdays) ? updates.repeatWeekdays : [];
+      task.repeatWeekdays = [...new Set(raw
+        .map((d) => Math.floor(Number(d)))
+        .filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
     }
     if (updates.repeatMonthlyWeekday !== undefined) {
       task.repeatMonthlyWeekday = updates.repeatMonthlyWeekday === null
