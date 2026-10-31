@@ -79,7 +79,8 @@ body {
 
 body.actions-hidden .task-actions,
 body.actions-hidden .subtask-edit,
-body.actions-hidden .subtask-delete { display: none; }
+body.actions-hidden .subtask-delete,
+body.actions-hidden .subtask-add { display: none; }
 
 .sheet-handle:active { cursor: grabbing; }
 
