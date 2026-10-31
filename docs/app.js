@@ -127,6 +127,10 @@
   repeatSelect = mountWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
   timeLimitSelect = mountWheel("time-limit-wheel", TIME_LIMIT_OPTIONS, 0, "Time limit");
 
+  function isRepeatingRepeat(repeat) {
+    return repeat !== "none" && repeat !== "every_5min";
+  }
+
   function createDueAtWheels(minutes, compact = false) {
     const m = Number.isFinite(minutes) ? minutes : 9 * 60;
     const hour = createWheel(TIME_OF_DAY_HOURS_OPTIONS, Math.floor(m / 60), "Hour", null, compact);
@@ -238,25 +242,31 @@
       };
       read.repeatMonthlyFirst = () => firstBtn.classList.contains("on");
     } else if (repeat === "custom") {
+      const everyLabel = document.createElement("span");
+      everyLabel.className = "repeat-every-label";
+      everyLabel.textContent = "Repeat every";
+      wrap.appendChild(everyLabel);
       const days = createWheel(CUSTOM_DAYS_OPTIONS, values.customDays ?? 1, "Days", null, compact);
       const hours = createWheel(CUSTOM_HOURS_OPTIONS, values.customHours ?? 0, "Hours", null, compact);
       const mins = createWheel(CUSTOM_MINUTES_OPTIONS, values.customMinutes ?? 0, "Minutes", null, compact);
       wrap.appendChild(days.el);
       wrap.appendChild(hours.el);
       wrap.appendChild(mins.el);
-      const fromCompLabel = document.createElement("label");
-      fromCompLabel.className = "after-completion-label";
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.checked = values.repeatCustomFromCompletion === true;
-      const span = document.createElement("span");
-      span.textContent = "Start counting after completion";
-      fromCompLabel.appendChild(cb);
-      fromCompLabel.appendChild(span);
-      wrap.appendChild(fromCompLabel);
       read.repeatCustomMs = () =>
         (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
-      read.repeatCustomFromCompletion = () => cb.checked;
+    }
+    if (isRepeatingRepeat(repeat)) {
+      const afterCompLabel = document.createElement("label");
+      afterCompLabel.className = "after-completion-label";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = values.repeatAfterCompletion === true;
+      const span = document.createElement("span");
+      span.textContent = "Start counting after completion";
+      afterCompLabel.appendChild(cb);
+      afterCompLabel.appendChild(span);
+      wrap.appendChild(afterCompLabel);
+      read.repeatAfterCompletion = () => cb.checked;
     }
     return { el: wrap, read };
   }
@@ -897,12 +907,8 @@
       customDays: Math.floor(customMs / 86400000),
       customHours: Math.floor(customMs / 3600000) % 24,
       customMinutes: Math.floor(customMs / 60000) % 60,
-      repeatCustomFromCompletion: task.repeatCustomFromCompletion,
+      repeatAfterCompletion: task.repeatAfterCompletion,
     };
-  }
-
-  function isRepeatingRepeat(repeat) {
-    return repeat !== "none" && repeat !== "every_5min";
   }
 
   function labeledField(labelText, els, hidden = false) {
@@ -949,16 +955,6 @@
     bottomRow.appendChild(dueAtField);
     bottomRow.appendChild(timeLimitField);
 
-    const afterComp = document.createElement("label");
-    afterComp.className = "after-completion-label";
-    const afterCompCb = document.createElement("input");
-    afterCompCb.type = "checkbox";
-    afterCompCb.checked = task.repeatAfterCompletion === true;
-    const afterCompText = document.createElement("span");
-    afterCompText.textContent = "Time after completion";
-    afterComp.appendChild(afterCompCb);
-    afterComp.appendChild(afterCompText);
-
     function onListChange() {
       updateWheelsEnabled();
       applyRepeatChange();
@@ -995,7 +991,6 @@
         dueAt = null;
       }
       dueAtField.classList.toggle("hidden", !showDueAt);
-      afterComp.classList.toggle("hidden", !isRepeatingRepeat(repeat));
     }
 
     updateWheelsEnabled();
@@ -1003,7 +998,7 @@
 
     pendingEdit = {
       kind: "task",
-      controls: [selectors, scheduleWrap, bottomRow, afterComp],
+      controls: [selectors, scheduleWrap, bottomRow],
       onSave: (title) => {
         const isFun = listSel.value === "fun";
         const repeat = effectiveRepeat();
@@ -1016,9 +1011,6 @@
         };
         if (dueAt) updates.repeatTime = dueAt.read();
         if (!isFun) updates.difficulty = diff.value;
-        if (isRepeatingRepeat(repeat)) {
-          updates.repeatAfterCompletion = afterCompCb.checked;
-        }
         clearEditing();
         Game.editTask(task.id, updates);
       },
