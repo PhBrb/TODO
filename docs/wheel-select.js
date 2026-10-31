@@ -51,7 +51,12 @@
 
     function selectByIndex(i, scroll = true) {
       i = Math.max(0, Math.min(options.length - 1, i));
-      value = String(options[i][0]);
+      const next = String(options[i][0]);
+      if (next === value && scroll === false) {
+        highlightIndex(i);
+        return;
+      }
+      value = next;
       highlightIndex(i);
       if (scroll) {
         programmaticUntil = performance.now() + 400;
@@ -104,6 +109,7 @@
 
     highlightIndex(indexOfValue(value));
     requestAnimationFrame(() => {
+      programmaticUntil = performance.now() + 150;
       track.scrollTop = scrollTopForIndex(indexOfValue(value));
     });
 

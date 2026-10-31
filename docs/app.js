@@ -160,28 +160,21 @@
     return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
   }
 
-  const TIME_OF_DAY_OPTIONS = (() => {
-    const opts = [];
-    for (let m = 0; m < 24 * 60; m += 15) {
-      opts.push([m, minutesToTimeValue(m)]);
-    }
-    return opts;
-  })();
+  const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => [h, String(h).padStart(2, "0")]);
+  const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, m) => [m, String(m).padStart(2, "0")]);
 
   function buildScheduleControls(repeat, values = {}, compact = false) {
     const wrap = document.createElement("div");
     wrap.className = "repeat-schedule";
     const read = {};
     const addTimeOfDay = (minutes) => {
-      const wheel = createWheel(
-        TIME_OF_DAY_OPTIONS,
-        Number.isFinite(minutes) ? minutes : 0,
-        "Due at",
-        null,
-        compact
-      );
-      wrap.appendChild(wheel.el);
-      read.repeatTime = () => Number(wheel.value);
+      const h = Number.isFinite(minutes) ? Math.floor(minutes / 60) : 0;
+      const m = Number.isFinite(minutes) ? minutes % 60 : 0;
+      const hours = createWheel(HOUR_OPTIONS, h, "Hour", null, compact);
+      const mins = createWheel(MINUTE_OPTIONS, m, "Minute", null, compact);
+      wrap.appendChild(hours.el);
+      wrap.appendChild(mins.el);
+      read.repeatTime = () => Number(hours.value) * 60 + Number(mins.value);
     };
     if (repeat === "none") {
       const label = document.createElement("label");

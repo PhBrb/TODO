@@ -953,11 +953,13 @@ body.actions-hidden .subtask-add { display: none; }
   color: #fff;
 }
 
-.edit-schedule { margin-top: 6px; }
+.edit-schedule { margin-top: 6px; max-width: 100%; overflow: hidden; }
 .edit-schedule .deadline-label { flex: 1 1 100%; }
-.edit-schedule .wheel-select { flex: 1 1 30%; }
+.edit-schedule .wheel-select { flex: 1 1 30%; min-width: 0; }
 .edit-schedule .repeat-schedule { gap: 6px; }
 .edit-schedule .form-row { flex-wrap: wrap; }
+.edit-schedule .day-toggle-grid { min-width: 0; }
+.edit-schedule .day-toggle { min-width: 0; padding: 5px 2px; }
 
 .after-completion-label {
   display: flex;
