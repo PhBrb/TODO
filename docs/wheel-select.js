@@ -52,18 +52,17 @@
     function selectByIndex(i, scroll = true) {
       i = Math.max(0, Math.min(options.length - 1, i));
       const next = String(options[i][0]);
-      if (next === value && scroll === false) {
-        highlightIndex(i);
-        return;
-      }
+      const changed = next !== value;
       value = next;
       highlightIndex(i);
       if (scroll) {
         programmaticUntil = performance.now() + 400;
         track.scrollTo({ top: scrollTopForIndex(i), behavior: "smooth" });
       }
-      wrap.dispatchEvent(new CustomEvent("wheelchange", { detail: value }));
-      onChange?.(value);
+      if (changed) {
+        wrap.dispatchEvent(new CustomEvent("wheelchange", { detail: value }));
+        onChange?.(value);
+      }
     }
 
     function itemIndexAtCenter() {
