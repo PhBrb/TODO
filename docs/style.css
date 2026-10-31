@@ -352,7 +352,7 @@ body.actions-hidden .subtask-add { display: none; }
 
 #task-list.editing input[type="checkbox"] { display: none; }
 
-.subtask-list.chain-locked { opacity: 0.45; }
+.subtask-list.chain-locked .subtask { opacity: 0.45; }
 
 .subtask-list {
   margin-top: 6px;
