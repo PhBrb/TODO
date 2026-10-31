@@ -43,7 +43,7 @@
     }
 
     function scrollTopForIndex(i) {
-      return ITEM_HEIGHT_PX + i * ITEM_HEIGHT_PX;
+      return i * ITEM_HEIGHT_PX;
     }
 
     function selectByIndex(i, scroll = true) {
@@ -58,7 +58,7 @@
     }
 
     function itemIndexAtCenter() {
-      return Math.round((track.scrollTop - ITEM_HEIGHT_PX) / ITEM_HEIGHT_PX);
+      return Math.round(track.scrollTop / ITEM_HEIGHT_PX);
     }
 
     track.addEventListener("scroll", () => {
