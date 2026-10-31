@@ -255,7 +255,7 @@
       read.repeatCustomMs = () =>
         (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
     }
-    if (isRepeatingRepeat(repeat)) {
+    if (repeat === "custom") {
       const afterCompLabel = document.createElement("label");
       afterCompLabel.className = "after-completion-label";
       const cb = document.createElement("input");

@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.54.1";
+  const VERSION = "0.54.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -419,7 +419,7 @@
       const interval = task.repeatCustomMs || CUSTOM_REPEAT_DEFAULT_MS;
       return (task.repeatAfterCompletion ? completedAt : Date.now()) + interval;
     }
-    const base = task.repeatAfterCompletion ? completedAt : Date.now();
+    const base = Date.now();
     const d = new Date(base);
     const tod = timeOfDayMs(task.repeatTime);
     if (repeat === "daily") {
