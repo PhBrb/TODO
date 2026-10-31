@@ -897,15 +897,45 @@
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
-  function openEditRow(task) {
-    const diff = createWheel(DIFFICULTY_OPTIONS, task.difficulty, "Difficulty", null, true);
-    diff.disabled = task.subtasks.length > 0;
-    diff.el.title = task.subtasks.length > 0
-      ? "Difficulty is derived from the most difficult sub-task"
-      : "";
+  function scheduleValuesFromTask(task) {
+    const customMs = task.repeatCustomMs ?? 86400000;
+    return {
+      deadline: task.deadline || null,
+      repeatTime: Number.isFinite(task.repeatTime) ? task.repeatTime : null,
+      repeatWeekdays: task.repeatWeekdays,
+      repeatMonthlyWeekday: task.repeatMonthlyWeekday ?? null,
+      repeatMonthlyFirst: task.repeatMonthlyFirst,
+      customDays: Math.floor(customMs / 86400000),
+      customHours: Math.floor(customMs / 3600000) % 24,
+      customMinutes: Math.floor(customMs / 60000) % 60,
+      repeatCustomFromCompletion: task.repeatCustomFromCompletion,
+    };
+  }
 
-    const isRepeating = task.repeat !== "none" && task.repeat !== "every_5min";
-    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", null, true);
+  function isRepeatingRepeat(repeat) {
+    return repeat !== "none" && repeat !== "every_5min";
+  }
+
+  function openEditRow(task) {
+    clearEditing();
+    editingTaskId = task.id;
+
+    const listSel = createWheel(LIST_OPTIONS, task.list || "todo", "List", onListChange, true);
+    const diff = createWheel(DIFFICULTY_OPTIONS, task.difficulty ?? "easy", "Difficulty", null, true);
+    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", applyRepeatChange, true);
+    rep.el.title = task.list === "fun" ? "Fun tasks never repeat" : "";
+
+    const selectors = document.createElement("div");
+    selectors.className = "edit-selectors";
+    selectors.appendChild(listSel.el);
+    selectors.appendChild(diff.el);
+    selectors.appendChild(rep.el);
+
+    const scheduleValues = scheduleValuesFromTask(task);
+    const scheduleWrap = document.createElement("div");
+    scheduleWrap.className = "repeat-schedule edit-schedule";
+    let schedule = buildScheduleControls(task.repeat, scheduleValues, true);
+    scheduleWrap.appendChild(schedule.el);
 
     const timeLimit = createWheel(TIME_LIMIT_OPTIONS, task.timeLimit || 0, "Time limit", null, true);
     const timeLimitWrap = document.createElement("label");
@@ -923,26 +953,52 @@
     afterComp.appendChild(afterCompCb);
     afterComp.appendChild(afterCompText);
 
-    const schedule = buildScheduleControls(task.repeat, task, true);
-    schedule.el.classList.add("edit-schedule");
+    function onListChange() {
+      updateWheelsEnabled();
+      applyRepeatChange();
+    }
 
-    const controls = [diff.el, rep.el, schedule.el, timeLimitWrap];
-    if (isRepeating) controls.push(afterComp);
+    function effectiveRepeat() {
+      return listSel.value === "fun" ? "none" : rep.value;
+    }
 
-    clearEditing();
-    editingTaskId = task.id;
+    function updateWheelsEnabled() {
+      const isFun = listSel.value === "fun";
+      diff.disabled = isFun || task.subtasks.length > 0;
+      rep.disabled = isFun;
+      diff.el.title = task.subtasks.length > 0
+        ? "Difficulty is derived from the most difficult sub-task"
+        : "";
+      rep.el.title = isFun ? "Fun tasks never repeat" : "";
+    }
+
+    function applyRepeatChange() {
+      const repeat = effectiveRepeat();
+      Object.assign(scheduleValues, readScheduleValues(schedule.read));
+      scheduleWrap.innerHTML = "";
+      schedule = buildScheduleControls(repeat, scheduleValues, true);
+      scheduleWrap.appendChild(schedule.el);
+      afterComp.classList.toggle("hidden", !isRepeatingRepeat(repeat));
+    }
+
+    updateWheelsEnabled();
+    applyRepeatChange();
+
     pendingEdit = {
       kind: "task",
-      controls,
+      controls: [selectors, scheduleWrap, timeLimitWrap, afterComp],
       onSave: (title) => {
+        const isFun = listSel.value === "fun";
+        const repeat = effectiveRepeat();
         const updates = {
           title,
-          difficulty: diff.value,
-          repeat: rep.value,
+          repeat,
+          list: listSel.value,
           timeLimit: Number(timeLimit.value),
           ...readScheduleValues(schedule.read),
         };
-        if (isRepeating) {
+        if (!isFun) updates.difficulty = diff.value;
+        if (isRepeatingRepeat(repeat)) {
           updates.repeatAfterCompletion = afterCompCb.checked;
         }
         clearEditing();
