@@ -101,7 +101,7 @@
       }
     });
 
-    selectByIndex(indexOfValue(value), false);
+    highlightIndex(indexOfValue(value));
     requestAnimationFrame(() => {
       track.scrollTop = scrollTopForIndex(indexOfValue(value));
     });

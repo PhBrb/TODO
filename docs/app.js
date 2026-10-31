@@ -22,6 +22,7 @@
   let difficultySelect;
   let repeatSelect;
   const scheduleContainer = document.getElementById("repeat-schedule");
+  let scheduleControls = null;
   const toastEl = document.getElementById("toast");
 
   let toastTimer = null;
@@ -980,8 +981,6 @@
     }
     render();
   });
-
-  let scheduleControls = null;
 
   function updateCreateFormMode() {
     if (!listSelect || !difficultySelect || !repeatSelect) return;
