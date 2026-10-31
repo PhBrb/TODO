@@ -507,14 +507,35 @@
     render();
   }
 
+  // A tap outside the edited row only ends editing if the pointer didn't move
+  // (i.e. the touch wasn't a scroll); track movement between down and up.
+  let outsideEditDown = null;
   document.addEventListener("pointerdown", (e) => {
     if (!activeEdit) return;
+    if (activeEdit.scope.contains(e.target)) return;
+    outsideEditDown = { x: e.clientX, y: e.clientY };
+  }, true);
+
+  document.addEventListener("pointermove", (e) => {
+    if (!outsideEditDown) return;
+    if (Math.abs(e.clientX - outsideEditDown.x) > 8 || Math.abs(e.clientY - outsideEditDown.y) > 8) {
+      outsideEditDown = null;
+    }
+  }, true);
+
+  document.addEventListener("pointerup", (e) => {
+    if (!activeEdit || !outsideEditDown) return;
+    outsideEditDown = null;
     if (activeEdit.scope.contains(e.target)) return;
     const current = editValues(activeEdit.input, activeEdit.controls);
     if (current.every((v, i) => v === activeEdit.initial[i])) {
       clearEditing();
       render();
     }
+  }, true);
+
+  document.addEventListener("pointercancel", () => {
+    outsideEditDown = null;
   }, true);
 
 
