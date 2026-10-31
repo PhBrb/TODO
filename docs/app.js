@@ -100,15 +100,19 @@
     ["fun", "Fun"],
   ];
 
-  function buildWheel(containerId, options, selected, label, onChange) {
-    const wheel = WheelSelect.createWheelSelect(options, { selected, label, onChange });
+  function createWheel(options, selected, label, onChange, compact = false) {
+    return WheelSelect.createWheelSelect(options, { selected, label, onChange, compact });
+  }
+
+  function mountWheel(containerId, options, selected, label, onChange) {
+    const wheel = createWheel(options, selected, label, onChange);
     document.getElementById(containerId).appendChild(wheel.el);
     return wheel;
   }
 
-  listSelect = buildWheel("list-wheel", LIST_OPTIONS, "todo", "List", updateCreateFormMode);
-  difficultySelect = buildWheel("difficulty-wheel", DIFFICULTY_OPTIONS, "easy", "Difficulty");
-  repeatSelect = buildWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
+  listSelect = mountWheel("list-wheel", LIST_OPTIONS, "todo", "List", updateCreateFormMode);
+  difficultySelect = mountWheel("difficulty-wheel", DIFFICULTY_OPTIONS, "easy", "Difficulty");
+  repeatSelect = mountWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
 
   function buildSelect(options, selected) {
     const select = document.createElement("select");
@@ -690,13 +694,13 @@
   }
 
   function openEditRow(task) {
-    const diff = buildSelect(DIFFICULTY_OPTIONS, task.difficulty);
+    const diff = createWheel(DIFFICULTY_OPTIONS, task.difficulty, "Difficulty", null, true);
     diff.disabled = task.subtasks.length > 0;
-    diff.title = task.subtasks.length > 0
+    diff.el.title = task.subtasks.length > 0
       ? "Difficulty is derived from the most difficult sub-task"
       : "";
 
-    const rep = buildSelect(REPEAT_OPTIONS, task.repeat);
+    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", null, true);
 
     const dl = document.createElement("input");
     dl.type = "datetime-local";
@@ -718,11 +722,11 @@
     repTimeWrap.textContent = "🕐 Repeat due at ";
     repTimeWrap.appendChild(repTime);
 
-    const timeLimit = buildSelect(TIME_LIMIT_OPTIONS, task.timeLimit || 0);
+    const timeLimit = createWheel(TIME_LIMIT_OPTIONS, task.timeLimit || 0, "Time limit", null, true);
     const timeLimitWrap = document.createElement("label");
     timeLimitWrap.className = "deadline-label";
     timeLimitWrap.textContent = "⏱️ Time limit ";
-    timeLimitWrap.appendChild(timeLimit);
+    timeLimitWrap.appendChild(timeLimit.el);
 
     const afterComp = document.createElement("label");
     afterComp.className = "after-completion-label";
@@ -735,8 +739,8 @@
     afterComp.appendChild(afterCompText);
 
     const controls = isRepeating
-      ? [diff, rep, repTimeWrap, afterComp, timeLimitWrap]
-      : [diff, rep, dlWrap, timeLimitWrap];
+      ? [diff.el, rep.el, repTimeWrap, afterComp, timeLimitWrap]
+      : [diff.el, rep.el, dlWrap, timeLimitWrap];
 
     clearEditing();
     editingTaskId = task.id;

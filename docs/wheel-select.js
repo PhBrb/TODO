@@ -5,10 +5,13 @@
   // scroll with the mouse wheel to move, it snaps to the nearest option and
   // fires onChange. Keyboard arrows work when the wheel has focus.
   const ITEM_HEIGHT_PX = 32;
+  const COMPACT_ITEM_HEIGHT_PX = 24;
+  const COMPACT_PEEK_PX = 8;
 
-  function createWheelSelect(options, { selected, label, onChange } = {}) {
+  function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
+    const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
     const wrap = document.createElement("div");
-    wrap.className = "wheel-select";
+    wrap.className = "wheel-select" + (compact ? " compact" : "");
     wrap.setAttribute("role", "listbox");
     wrap.setAttribute("aria-label", label || "");
     wrap.tabIndex = 0;
@@ -38,7 +41,7 @@
     }
 
     function scrollTopForIndex(i) {
-      return i * ITEM_HEIGHT_PX;
+      return i * itemHeight;
     }
 
     function highlightIndex(i) {
@@ -59,7 +62,7 @@
     }
 
     function itemIndexAtCenter() {
-      return Math.max(0, Math.min(options.length - 1, Math.round(track.scrollTop / ITEM_HEIGHT_PX)));
+      return Math.max(0, Math.min(options.length - 1, Math.round(track.scrollTop / itemHeight)));
     }
 
     track.addEventListener("pointerdown", () => {
