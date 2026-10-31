@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.50.7";
+  const VERSION = "0.51.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -1263,6 +1263,16 @@
     if (updates.title !== undefined) {
       const t = updates.title.trim();
       if (t) task.title = t;
+    }
+    if (updates.list !== undefined &&
+        TASK_LISTS.includes(updates.list) &&
+        updates.list !== task.list) {
+      task.list = updates.list;
+      task.chainedAfter = null;
+      for (const st of task.subtasks) st.chainedAfter = null;
+      for (const other of state.tasks) {
+        if (other.chainedAfter === task.id) other.chainedAfter = null;
+      }
     }
     if (
       updates.difficulty !== undefined &&

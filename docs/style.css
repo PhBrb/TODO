@@ -952,7 +952,10 @@ body.actions-hidden .subtask-add { display: none; }
   color: #fff;
 }
 
-.edit-schedule { margin-top: 6px; }
+.edit-selectors { display: flex; gap: 8px; align-items: center; flex: 1 1 100%; }
+.edit-selectors .wheel-select { flex: 1; min-width: 0; }
+
+.edit-schedule { margin-top: 6px; flex: 1 1 100%; }
 .edit-schedule .deadline-label { flex: 1 1 100%; }
 .edit-schedule .wheel-select { flex: 1 1 30%; }
 
