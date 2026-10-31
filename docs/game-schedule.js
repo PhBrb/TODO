@@ -94,7 +94,10 @@ function nextOccurrence(task, completedAt) {
   if (repeat === "every_5min") return completedAt + 300000;
   if (repeat === "custom") {
     const interval = task.repeatCustomMs || CUSTOM_REPEAT_DEFAULT_MS;
-    return (task.repeatAfterCompletion ? completedAt : Date.now()) + interval;
+    if (task.repeatAfterCompletion) return completedAt + interval;
+    const anchor = task.createdAt || completedAt;
+    const n = Math.floor((completedAt - anchor) / interval) + 1;
+    return anchor + n * interval;
   }
   const base = Date.now();
   const d = new Date(base);
