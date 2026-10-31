@@ -3,7 +3,7 @@
 
   const listEl = document.getElementById("task-list");
   const tabsEl = document.getElementById("task-tabs");
-  const listSelect = document.getElementById("list-select");
+  let listSelect;
   let activeTab = "highlight";
   const emptyHint = document.getElementById("empty-hint");
   const coinBalanceEl = document.getElementById("coin-balance");
@@ -20,7 +20,7 @@
   const form = document.getElementById("task-form");
   const taskInput = document.getElementById("task-input");
   let difficultySelect;
-  const repeatSelect = document.getElementById("repeat-select");
+  let repeatSelect;
   const deadlineInput = document.getElementById("deadline-input");
   const deadlineWrap = document.getElementById("deadline-wrap");
   const repeatTimeWrap = document.getElementById("repeat-time-wrap");
@@ -94,12 +94,21 @@
     [30, "30 min"],
     [60, "60 min"],
   ];
+  const LIST_OPTIONS = [
+    ["todo", "Todo"],
+    ["backlog", "Backlog"],
+    ["fun", "Fun"],
+  ];
 
-  difficultySelect = WheelSelect.createWheelSelect(DIFFICULTY_OPTIONS, {
-    selected: "easy",
-    label: "Difficulty",
-  });
-  document.getElementById("difficulty-wheel").appendChild(difficultySelect.el);
+  function buildWheel(containerId, options, selected, label, onChange) {
+    const wheel = WheelSelect.createWheelSelect(options, { selected, label, onChange });
+    document.getElementById(containerId).appendChild(wheel.el);
+    return wheel;
+  }
+
+  listSelect = buildWheel("list-wheel", LIST_OPTIONS, "todo", "List", updateCreateFormMode);
+  difficultySelect = buildWheel("difficulty-wheel", DIFFICULTY_OPTIONS, "easy", "Difficulty");
+  repeatSelect = buildWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
 
   function buildSelect(options, selected) {
     const select = document.createElement("select");
@@ -863,8 +872,6 @@
     render();
   });
 
-  repeatSelect.addEventListener("change", updateCreateFormMode);
-  listSelect.addEventListener("change", updateCreateFormMode);
   updateCreateFormMode();
 
   tabsEl.addEventListener("click", (e) => {
@@ -878,6 +885,7 @@
   });
 
   function updateCreateFormMode() {
+    if (!listSelect || !difficultySelect || !repeatSelect) return;
     const isFun = listSelect.value === "fun";
     difficultySelect.disabled = isFun;
     repeatSelect.disabled = isFun;

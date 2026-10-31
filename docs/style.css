@@ -574,7 +574,7 @@ body {
   font-size: 0.85rem;
 }
 
-#difficulty-wheel { flex: 1; min-width: 0; }
+.form-row > [id$="-wheel"] { flex: 1; min-width: 0; }
 
 .wheel-select {
   border: 1px solid #ddd8f0;
