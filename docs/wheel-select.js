@@ -37,31 +37,38 @@
       return i === -1 ? 0 : i;
     }
 
-    function emit() {
-      wrap.setAttribute("aria-activedescendant", items[indexOfValue(value)].id);
-      onChange?.(value);
-    }
-
     function scrollTopForIndex(i) {
       return i * ITEM_HEIGHT_PX;
+    }
+
+    function highlightIndex(i) {
+      i = Math.max(0, Math.min(options.length - 1, i));
+      items.forEach((el, idx) => el.classList.toggle("selected", idx === i));
+      wrap.setAttribute("aria-activedescendant", items[i].id);
     }
 
     function selectByIndex(i, scroll = true) {
       i = Math.max(0, Math.min(options.length - 1, i));
       value = String(options[i][0]);
-      items.forEach((el, idx) => el.classList.toggle("selected", idx === i));
+      highlightIndex(i);
       if (scroll) {
         suppressScroll = true;
         track.scrollTo({ top: scrollTopForIndex(i), behavior: "smooth" });
       }
-      emit();
+      onChange?.(value);
     }
 
     function itemIndexAtCenter() {
-      return Math.round(track.scrollTop / ITEM_HEIGHT_PX);
+      return Math.max(0, Math.min(options.length - 1, Math.round(track.scrollTop / ITEM_HEIGHT_PX)));
     }
 
+    track.addEventListener("pointerdown", () => {
+      suppressScroll = false;
+      clearTimeout(scrollTimer);
+    });
+
     track.addEventListener("scroll", () => {
+      highlightIndex(itemIndexAtCenter());
       if (suppressScroll) return;
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(() => {
