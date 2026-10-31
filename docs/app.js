@@ -792,6 +792,7 @@
       if (activeEdit && activeEdit.scope === node) activeEdit.input.focus();
     }
 
+    listEl.classList.toggle("editing", editingTaskId !== null || editingSubtaskKey !== null);
     emptyHint.classList.toggle("hidden", visible.length > 0);
     emptyHint.textContent = activeTab === "highlight"
       ? "Nothing to highlight — complete tasks to earn recommendations! 🎉"

@@ -326,7 +326,9 @@ body {
 
 #reset-btn:active { background: #ffe3e3; color: #c0392b; }
 
-.task-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.task-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+
+#task-list.editing input[type="checkbox"] { visibility: hidden; }
 
 .subtask-list {
   margin-top: 6px;
