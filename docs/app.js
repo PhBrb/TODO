@@ -21,10 +21,7 @@
   const taskInput = document.getElementById("task-input");
   let difficultySelect;
   let repeatSelect;
-  const deadlineInput = document.getElementById("deadline-input");
-  const deadlineWrap = document.getElementById("deadline-wrap");
-  const repeatTimeWrap = document.getElementById("repeat-time-wrap");
-  const repeatTimeInput = document.getElementById("repeat-time-input");
+  const scheduleContainer = document.getElementById("repeat-schedule");
   const toastEl = document.getElementById("toast");
 
   let toastTimer = null;
@@ -86,7 +83,16 @@
     ["weekly", "Weekly"],
     ["monthly", "Monthly"],
     ["every_5min", "Every 5 min (test)"],
+    ["custom", "Custom"],
   ];
+  const WEEKDAY_OPTIONS = [
+    [1, "Monday"], [2, "Tuesday"], [3, "Wednesday"], [4, "Thursday"],
+    [5, "Friday"], [6, "Saturday"], [0, "Sunday"],
+  ];
+  const DAY_OF_MONTH_OPTIONS = Array.from({ length: 31 }, (_, i) => [i + 1, String(i + 1)]);
+  const CUSTOM_DAYS_OPTIONS = Array.from({ length: 31 }, (_, i) => [i, i === 1 ? "1 day" : `${i} days`]);
+  const CUSTOM_HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => [i, i === 1 ? "1 hour" : `${i} hours`]);
+  const CUSTOM_MINUTES_OPTIONS = Array.from({ length: 60 }, (_, i) => [i, i === 1 ? "1 min" : `${i} min`]);
   const TIME_LIMIT_OPTIONS = [
     [0, "No time limit"],
     [5, "5 min"],
@@ -113,6 +119,78 @@
   listSelect = mountWheel("list-wheel", LIST_OPTIONS, "todo", "List", updateCreateFormMode);
   difficultySelect = mountWheel("difficulty-wheel", DIFFICULTY_OPTIONS, "easy", "Difficulty");
   repeatSelect = mountWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
+
+  function minutesToTimeValue(minutes) {
+    if (!Number.isFinite(minutes)) return "";
+    return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  }
+
+  function timeValueToMinutes(value) {
+    if (!value) return NaN;
+    const [h, m] = value.split(":").map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+
+  function buildScheduleControls(repeat, values = {}, compact = false) {
+    const wrap = document.createElement("div");
+    wrap.className = "repeat-schedule";
+    const read = {};
+    const addTimeOfDay = (minutes) => {
+      const label = document.createElement("label");
+      label.className = "deadline-label";
+      label.textContent = "🔔 Due at ";
+      const input = document.createElement("input");
+      input.type = "time";
+      input.value = minutesToTimeValue(minutes);
+      label.appendChild(input);
+      wrap.appendChild(label);
+      read.repeatTime = () => timeValueToMinutes(input.value);
+    };
+    if (repeat === "none") {
+      const label = document.createElement("label");
+      label.className = "deadline-label";
+      label.textContent = "📅 Deadline ";
+      const input = document.createElement("input");
+      input.type = "datetime-local";
+      if (values.deadline) input.value = deadlineInputValue({ deadline: values.deadline });
+      label.appendChild(input);
+      wrap.appendChild(label);
+      read.deadline = () => input.value;
+    } else if (repeat === "daily") {
+      addTimeOfDay(values.repeatTime);
+    } else if (repeat === "weekly") {
+      const wheel = createWheel(WEEKDAY_OPTIONS, values.repeatWeekday ?? 1, "Day of week", null, compact);
+      wrap.appendChild(wheel.el);
+      read.repeatWeekday = () => Number(wheel.value);
+      addTimeOfDay(values.repeatTime);
+    } else if (repeat === "monthly") {
+      const wheel = createWheel(DAY_OF_MONTH_OPTIONS, values.repeatDayOfMonth ?? 1, "Day of month", null, compact);
+      wrap.appendChild(wheel.el);
+      read.repeatDayOfMonth = () => Number(wheel.value);
+      addTimeOfDay(values.repeatTime);
+    } else if (repeat === "custom") {
+      const days = createWheel(CUSTOM_DAYS_OPTIONS, values.customDays ?? 1, "Days", null, compact);
+      const hours = createWheel(CUSTOM_HOURS_OPTIONS, values.customHours ?? 0, "Hours", null, compact);
+      const mins = createWheel(CUSTOM_MINUTES_OPTIONS, values.customMinutes ?? 0, "Minutes", null, compact);
+      wrap.appendChild(days.el);
+      wrap.appendChild(hours.el);
+      wrap.appendChild(mins.el);
+      const fromCompLabel = document.createElement("label");
+      fromCompLabel.className = "after-completion-label";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = values.repeatCustomFromCompletion === true;
+      const span = document.createElement("span");
+      span.textContent = "Start counting after completion";
+      fromCompLabel.appendChild(cb);
+      fromCompLabel.appendChild(span);
+      wrap.appendChild(fromCompLabel);
+      read.repeatCustomMs = () =>
+        (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
+      read.repeatCustomFromCompletion = () => cb.checked;
+    }
+    return { el: wrap, read };
+  }
 
   function buildSelect(options, selected) {
     const select = document.createElement("select");
@@ -740,27 +818,8 @@
       ? "Difficulty is derived from the most difficult sub-task"
       : "";
 
-    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", null, true);
-
-    const dl = document.createElement("input");
-    dl.type = "datetime-local";
-    dl.value = deadlineInputValue(task);
-    const dlWrap = document.createElement("label");
-    dlWrap.className = "deadline-label edit-deadline";
-    dlWrap.textContent = "📅 Deadline ";
-    dlWrap.appendChild(dl);
-
     const isRepeating = task.repeat !== "none" && task.repeat !== "every_5min";
-
-    const repTime = document.createElement("input");
-    repTime.type = "time";
-    if (Number.isFinite(task.repeatTime)) {
-      repTime.value = `${String(Math.floor(task.repeatTime / 60)).padStart(2, "0")}:${String(task.repeatTime % 60).padStart(2, "0")}`;
-    }
-    const repTimeWrap = document.createElement("label");
-    repTimeWrap.className = "deadline-label edit-deadline";
-    repTimeWrap.textContent = "🕐 Repeat due at ";
-    repTimeWrap.appendChild(repTime);
+    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", null, true);
 
     const timeLimit = createWheel(TIME_LIMIT_OPTIONS, task.timeLimit || 0, "Time limit", null, true);
     const timeLimitWrap = document.createElement("label");
@@ -778,9 +837,11 @@
     afterComp.appendChild(afterCompCb);
     afterComp.appendChild(afterCompText);
 
-    const controls = isRepeating
-      ? [diff.el, rep.el, repTimeWrap, afterComp, timeLimitWrap]
-      : [diff.el, rep.el, dlWrap, timeLimitWrap];
+    const schedule = buildScheduleControls(task.repeat, task, true);
+    schedule.el.classList.add("edit-schedule");
+
+    const controls = [diff.el, rep.el, schedule.el, timeLimitWrap];
+    if (isRepeating) controls.push(afterComp);
 
     clearEditing();
     editingTaskId = task.id;
@@ -792,19 +853,11 @@
           title,
           difficulty: diff.value,
           repeat: rep.value,
+          timeLimit: Number(timeLimit.value),
+          ...schedule.read,
         };
         if (isRepeating) {
-          updates.timeLimit = Number(timeLimit.value);
-          if (repTime.value) {
-            const [h, m] = repTime.value.split(":").map(Number);
-            updates.repeatTime = (h || 0) * 60 + (m || 0);
-          } else {
-            updates.repeatTime = NaN;
-          }
           updates.repeatAfterCompletion = afterCompCb.checked;
-        } else {
-          updates.deadline = dl.value;
-          updates.timeLimit = Number(timeLimit.value);
         }
         clearEditing();
         Game.editTask(task.id, updates);
@@ -928,31 +981,37 @@
     render();
   });
 
+  let scheduleControls = null;
+
   function updateCreateFormMode() {
     if (!listSelect || !difficultySelect || !repeatSelect) return;
     const isFun = listSelect.value === "fun";
     difficultySelect.disabled = isFun;
     repeatSelect.disabled = isFun;
-    deadlineWrap.classList.toggle("hidden", isFun || repeatSelect.value === "daily");
-    repeatTimeWrap.classList.toggle("hidden", isFun || repeatSelect.value !== "daily");
+    const repeat = isFun ? "none" : repeatSelect.value;
+    scheduleContainer.innerHTML = "";
+    scheduleControls = buildScheduleControls(repeat, {}, false);
+    scheduleContainer.appendChild(scheduleControls.el);
   }
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const title = taskInput.value.trim();
     if (!title) return;
-    if (listSelect.value === "fun") {
-      Game.addTask(title, null, "none", "", "fun");
-    } else if (repeatSelect.value === "daily" && repeatTimeInput.value) {
-      const [h, m] = repeatTimeInput.value.split(":").map(Number);
-      const t = Game.addTask(title, difficultySelect.value, repeatSelect.value, "", listSelect.value);
-      Game.editTask(t, { repeatTime: (h || 0) * 60 + (m || 0) });
-    } else {
-      Game.addTask(title, difficultySelect.value, repeatSelect.value, deadlineInput.value, listSelect.value);
+    const repeat = listSelect.value === "fun" ? "none" : repeatSelect.value;
+    const values = scheduleControls ? scheduleControls.read : {};
+    const taskId = Game.addTask(
+      title,
+      listSelect.value === "fun" ? null : difficultySelect.value,
+      repeat,
+      values.deadline || "",
+      listSelect.value
+    );
+    if (repeat !== "none" && repeat !== "every_5min") {
+      Game.editTask(taskId, values);
     }
     taskInput.value = "";
-    repeatTimeInput.value = "";
-    deadlineInput.value = "";
+    updateCreateFormMode();
     taskInput.focus();
   });
 
