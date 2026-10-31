@@ -920,9 +920,9 @@
     clearEditing();
     editingTaskId = task.id;
 
-    const listSel = createWheel(LIST_OPTIONS, task.list || "todo", "List", null, true);
+    const listSel = createWheel(LIST_OPTIONS, task.list || "todo", "List", onListChange, true);
     const diff = createWheel(DIFFICULTY_OPTIONS, task.difficulty ?? "easy", "Difficulty", null, true);
-    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", null, true);
+    const rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", applyRepeatChange, true);
     rep.el.title = task.list === "fun" ? "Fun tasks never repeat" : "";
 
     const selectors = document.createElement("div");
@@ -953,6 +953,11 @@
     afterComp.appendChild(afterCompCb);
     afterComp.appendChild(afterCompText);
 
+    function onListChange() {
+      updateWheelsEnabled();
+      applyRepeatChange();
+    }
+
     function effectiveRepeat() {
       return listSel.value === "fun" ? "none" : rep.value;
     }
@@ -975,12 +980,6 @@
       scheduleWrap.appendChild(schedule.el);
       afterComp.classList.toggle("hidden", !isRepeatingRepeat(repeat));
     }
-
-    listSel.el.addEventListener("wheelchange", () => {
-      updateWheelsEnabled();
-      applyRepeatChange();
-    });
-    rep.el.addEventListener("wheelchange", applyRepeatChange);
 
     updateWheelsEnabled();
     applyRepeatChange();
