@@ -328,7 +328,7 @@ body {
 
 .task-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
 
-#task-list.editing input[type="checkbox"] { visibility: hidden; }
+#task-list.editing input[type="checkbox"] { display: none; }
 
 .subtask-list {
   margin-top: 6px;
