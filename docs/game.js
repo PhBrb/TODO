@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.53.1";
+  const VERSION = "0.54.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -151,14 +151,13 @@
       bonus: raw.bonus === true,
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       repeatTime: num(raw.repeatTime, NaN),
-      repeatAfterCompletion: raw.repeatAfterCompletion === true,
+      repeatAfterCompletion: raw.repeatAfterCompletion === true || raw.repeatCustomFromCompletion === true,
       repeatWeekdays: normalizeWeekdays(raw.repeatWeekdays, raw.repeatWeekday),
       repeatMonthlyWeekday: raw.repeatMonthlyWeekday == null
         ? null
         : Math.min(6, Math.max(0, Math.floor(num(raw.repeatMonthlyWeekday, 0)))),
       repeatMonthlyFirst: raw.repeatMonthlyFirst === true,
       repeatCustomMs: Math.max(60000, num(raw.repeatCustomMs, CUSTOM_REPEAT_DEFAULT_MS)),
-      repeatCustomFromCompletion: raw.repeatCustomFromCompletion === true,
       chainedAfter: num(raw.chainedAfter, 0),
       timeLimit: num(raw.timeLimit, 0),
       startedAt: num(raw.startedAt, 0),
@@ -418,7 +417,7 @@
     if (repeat === "every_5min") return completedAt + 300000;
     if (repeat === "custom") {
       const interval = task.repeatCustomMs || CUSTOM_REPEAT_DEFAULT_MS;
-      return (task.repeatCustomFromCompletion ? completedAt : Date.now()) + interval;
+      return (task.repeatAfterCompletion ? completedAt : Date.now()) + interval;
     }
     const base = task.repeatAfterCompletion ? completedAt : Date.now();
     const d = new Date(base);
@@ -685,7 +684,6 @@
       repeatMonthlyWeekday: null,
       repeatMonthlyFirst: false,
       repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
-      repeatCustomFromCompletion: false,
       chainedAfter: 0,
       timeLimit: isFun ? 0 : (TIME_LIMIT_MINUTES.includes(timeLimit) ? timeLimit : 0),
       startedAt: 0,
@@ -1308,9 +1306,6 @@
     }
     if (updates.repeatCustomMs !== undefined) {
       task.repeatCustomMs = Math.max(60000, Math.floor(updates.repeatCustomMs));
-    }
-    if (updates.repeatCustomFromCompletion !== undefined) {
-      task.repeatCustomFromCompletion = updates.repeatCustomFromCompletion === true;
     }
     if (task.repeat !== "none" && !task.done) {
       const next = nextOccurrence(task, Date.now());
