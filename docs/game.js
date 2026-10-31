@@ -471,13 +471,15 @@
     return new Date(year, month, 1 + offset);
   }
 
+  function clampWeekdays(raw) {
+    if (!Array.isArray(raw)) return [];
+    return [...new Set(raw.map((d) => Math.floor(Number(d))).filter((d) => d >= 0 && d <= 6))]
+      .sort((a, b) => a - b);
+  }
+
   function normalizeWeekdays(raw, legacySingle) {
-    const fromArray = Array.isArray(raw)
-      ? raw.map((d) => Math.floor(Number(d))).filter((d) => d >= 0 && d <= 6)
-      : null;
-    if (fromArray && fromArray.length > 0) {
-      return [...new Set(fromArray)].sort((a, b) => a - b);
-    }
+    const fromArray = clampWeekdays(raw);
+    if (fromArray.length > 0) return fromArray;
     if (Number.isFinite(legacySingle)) {
       return [Math.min(6, Math.max(0, Math.floor(legacySingle)))];
     }
@@ -1284,10 +1286,7 @@
       task.repeatAfterCompletion = updates.repeatAfterCompletion === true;
     }
     if (updates.repeatWeekdays !== undefined) {
-      const raw = Array.isArray(updates.repeatWeekdays) ? updates.repeatWeekdays : [];
-      task.repeatWeekdays = [...new Set(raw
-        .map((d) => Math.floor(Number(d)))
-        .filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
+      task.repeatWeekdays = clampWeekdays(updates.repeatWeekdays);
     }
     if (updates.repeatMonthlyWeekday !== undefined) {
       task.repeatMonthlyWeekday = updates.repeatMonthlyWeekday === null
