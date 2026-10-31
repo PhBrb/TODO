@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.50.4";
+  const VERSION = "0.50.5";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -156,7 +156,7 @@
       repeatMonthlyWeekday: raw.repeatMonthlyWeekday == null
         ? null
         : Math.min(6, Math.max(0, Math.floor(num(raw.repeatMonthlyWeekday, 0)))),
-      repeatMonthlyFirst: raw.repeatMonthlyFirst !== false,
+      repeatMonthlyFirst: raw.repeatMonthlyFirst === true,
       repeatCustomMs: Math.max(60000, num(raw.repeatCustomMs, CUSTOM_REPEAT_DEFAULT_MS)),
       repeatCustomFromCompletion: raw.repeatCustomFromCompletion === true,
       chainedAfter: num(raw.chainedAfter, 0),
@@ -683,7 +683,7 @@
       repeatAfterCompletion: false,
       repeatWeekdays: [1],
       repeatMonthlyWeekday: null,
-      repeatMonthlyFirst: true,
+      repeatMonthlyFirst: false,
       repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
       repeatCustomFromCompletion: false,
       chainedAfter: 0,

@@ -924,8 +924,14 @@ body.actions-hidden .subtask-add { display: none; }
   gap: 4px;
 }
 
-.weekday-grid { grid-template-columns: repeat(8, 1fr); }
+.weekday-grid { grid-template-columns: repeat(7, 1fr); }
 .first-last-grid { grid-template-columns: repeat(2, 1fr); }
+
+.day-toggle:disabled,
+.day-toggle.disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 
 .day-toggle {
   border: 1px solid #ddd8f0;

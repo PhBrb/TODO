@@ -188,46 +188,51 @@
       const weekday = values.repeatMonthlyWeekday ?? null;
       const weekdayGroup = document.createElement("div");
       weekdayGroup.className = "day-toggle-grid weekday-grid";
-      const noneBtn = document.createElement("button");
-      noneBtn.type = "button";
-      noneBtn.className = "day-toggle" + (weekday === null ? " on" : "");
-      noneBtn.textContent = "1st";
-      noneBtn.title = "First day of the month";
-      noneBtn.setAttribute("aria-pressed", String(weekday === null));
-      const buttons = [{ btn: noneBtn, day: null }];
-      noneBtn.addEventListener("click", () => selectMonthly(null));
-      weekdayGroup.appendChild(noneBtn);
-      for (const [day, label] of WEEKDAY_CHECKBOXES) {
+      const buttons = WEEKDAY_CHECKBOXES.map(([day, label]) => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "day-toggle" + (weekday === day ? " on" : "");
         btn.textContent = label;
         btn.setAttribute("aria-pressed", String(weekday === day));
-        btn.addEventListener("click", () => selectMonthly(day));
+        btn.addEventListener("click", () => {
+          const on = !btn.classList.contains("on");
+          for (const b of buttons) {
+            b.btn.classList.remove("on");
+            b.btn.setAttribute("aria-pressed", "false");
+          }
+          if (on) {
+            btn.classList.add("on");
+            btn.setAttribute("aria-pressed", "true");
+          }
+          setFirstLastEnabled(on);
+        });
         weekdayGroup.appendChild(btn);
-        buttons.push({ btn, day });
-      }
-      function selectMonthly(day) {
-        for (const b of buttons) {
-          const on = b.day === day;
-          b.btn.classList.toggle("on", on);
-          b.btn.setAttribute("aria-pressed", String(on));
-        }
-      }
+        return { btn, day };
+      });
       wrap.appendChild(weekdayGroup);
 
       const firstLast = document.createElement("div");
       firstLast.className = "day-toggle-grid first-last-grid";
       const firstBtn = document.createElement("button");
       firstBtn.type = "button";
-      firstBtn.className = "day-toggle" + (values.repeatMonthlyFirst !== false ? " on" : "");
+      firstBtn.className = "day-toggle" + (weekday !== null && values.repeatMonthlyFirst !== false ? " on" : "");
       firstBtn.textContent = "First";
       const lastBtn = document.createElement("button");
       lastBtn.type = "button";
-      lastBtn.className = "day-toggle" + (values.repeatMonthlyFirst === false ? " on" : "");
+      lastBtn.className = "day-toggle" + (weekday !== null && values.repeatMonthlyFirst === false ? " on" : "");
       lastBtn.textContent = "Last";
-      firstBtn.setAttribute("aria-pressed", String(values.repeatMonthlyFirst !== false));
-      lastBtn.setAttribute("aria-pressed", String(values.repeatMonthlyFirst === false));
+      function setFirstLastEnabled(enabled) {
+        for (const b of [firstBtn, lastBtn]) {
+          b.disabled = !enabled;
+          b.classList.toggle("disabled", !enabled);
+          if (!enabled) {
+            b.classList.remove("on");
+            b.setAttribute("aria-pressed", "false");
+          }
+        }
+      }
+      firstBtn.setAttribute("aria-pressed", String(weekday !== null && values.repeatMonthlyFirst !== false));
+      lastBtn.setAttribute("aria-pressed", String(weekday !== null && values.repeatMonthlyFirst === false));
       firstBtn.addEventListener("click", () => setFirstLast(true));
       lastBtn.addEventListener("click", () => setFirstLast(false));
       function setFirstLast(first) {
@@ -236,6 +241,7 @@
         lastBtn.classList.toggle("on", !first);
         lastBtn.setAttribute("aria-pressed", String(!first));
       }
+      setFirstLastEnabled(weekday !== null);
       firstLast.appendChild(firstBtn);
       firstLast.appendChild(lastBtn);
       wrap.appendChild(firstLast);
