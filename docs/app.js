@@ -517,6 +517,7 @@
     }
   }, true);
 
+
   const RATING_OPTIONS = [
     { label: "😫 Harder", value: "harder" },
     { label: "👌 As expected", value: "ok" },
@@ -690,7 +691,8 @@
     const body = document.createElement("div");
     body.className = "task-body";
 
-    const editingThisTask = editingTaskId === task.id && pendingEdit && pendingEdit.kind === "task";
+    const editingThisTask = editingTaskId === task.id && pendingEdit && pendingEdit.kind === "task"
+      || (pendingEdit && pendingEdit.kind === "restore" && pendingEdit.taskId === task.id);
     let title;
     let titleInput = null;
     if (editingThisTask) {
@@ -782,7 +784,10 @@
             );
           }
         });
-        const editingThisSub = editingSubtaskOf(task) === st && pendingEdit && pendingEdit.kind === "subtask";
+        const restoreSub = pendingEdit && pendingEdit.kind === "restore" && pendingEdit.subKey
+          ? pendingEdit.subKey === task.id + ":" + st.id : false;
+        const editingThisSub = restoreSub
+          || (editingSubtaskOf(task) === st && pendingEdit && pendingEdit.kind === "subtask");
         const stTitle = editingThisSub ? buildTitleInput(st.title) : document.createElement("span");
         stTitle.className = editingThisSub ? "subtask-title title-input" : "subtask-title";
         if (!editingThisSub) stTitle.textContent = st.title;
@@ -1026,6 +1031,13 @@
   let render = function () {
     const visible = tasksForTab();
     const sorted = chainOrdered(visible, sortTasks(visible));
+    const openEdit = activeEdit && activeEdit.scope.isConnected ? activeEdit : null;
+    if (openEdit) {
+      pendingEdit = { kind: "restore", taskId: editingTaskId, subKey: editingSubtaskKey, controls: openEdit.controls, onSave: openEdit.onSave };
+      editingTaskId = null;
+      editingSubtaskKey = null;
+      activeEdit = null;
+    }
     listEl.innerHTML = "";
     if (activeEdit && !activeEdit.scope.isConnected) clearEditing();
     for (const task of sorted) {
