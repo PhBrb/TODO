@@ -344,15 +344,15 @@
     render();
   }
 
-  document.addEventListener("focusout", (e) => {
+  document.addEventListener("pointerdown", (e) => {
     if (!activeEdit) return;
-    if (e.relatedTarget && activeEdit.scope.contains(e.relatedTarget)) return;
+    if (activeEdit.scope.contains(e.target)) return;
     const current = editValues(activeEdit.input, activeEdit.controls);
     if (current.every((v, i) => v === activeEdit.initial[i])) {
       clearEditing();
       render();
     }
-  });
+  }, true);
 
   const RATING_OPTIONS = [
     { label: "😫 Harder", value: "harder" },
