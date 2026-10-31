@@ -238,6 +238,10 @@
       };
       read.repeatMonthlyFirst = () => firstBtn.classList.contains("on");
     } else if (repeat === "custom") {
+      const everyLabel = document.createElement("span");
+      everyLabel.className = "repeat-every-label";
+      everyLabel.textContent = "Repeat every";
+      wrap.appendChild(everyLabel);
       const days = createWheel(CUSTOM_DAYS_OPTIONS, values.customDays ?? 1, "Days", null, compact);
       const hours = createWheel(CUSTOM_HOURS_OPTIONS, values.customHours ?? 0, "Hours", null, compact);
       const mins = createWheel(CUSTOM_MINUTES_OPTIONS, values.customMinutes ?? 0, "Minutes", null, compact);
