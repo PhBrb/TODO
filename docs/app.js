@@ -24,6 +24,9 @@
   let timeLimitSelect;
   const scheduleContainer = document.getElementById("repeat-schedule");
   let scheduleControls = null;
+  const dueAtField = document.getElementById("due-at-field");
+  const dueAtWheelsEl = document.getElementById("due-at-wheels");
+  let dueAtWheelsControls = null;
   const toastEl = document.getElementById("toast");
 
   let toastTimer = null;
@@ -124,22 +127,18 @@
   repeatSelect = mountWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
   timeLimitSelect = mountWheel("time-limit-wheel", TIME_LIMIT_OPTIONS, 0, "Time limit");
 
+  function createDueAtWheels(minutes, compact = false) {
+    const m = Number.isFinite(minutes) ? minutes : 9 * 60;
+    const hour = createWheel(TIME_OF_DAY_HOURS_OPTIONS, Math.floor(m / 60), "Hour", null, compact);
+    const minute = createWheel(TIME_OF_DAY_MINUTES_OPTIONS, m % 60, "Minute", null, compact);
+    const read = () => Number(hour.value) * 60 + Number(minute.value);
+    return { els: [hour.el, minute.el], read };
+  }
+
   function buildScheduleControls(repeat, values = {}, compact = false) {
     const wrap = document.createElement("div");
     wrap.className = "repeat-schedule";
     const read = {};
-    const addTimeOfDay = (minutes) => {
-      const label = document.createElement("span");
-      label.className = "due-at-label";
-      label.textContent = "🔔 Due at ";
-      wrap.appendChild(label);
-      const m = Number.isFinite(minutes) ? minutes : 9 * 60;
-      const hour = createWheel(TIME_OF_DAY_HOURS_OPTIONS, Math.floor(m / 60), "Hour", null, compact);
-      const minute = createWheel(TIME_OF_DAY_MINUTES_OPTIONS, m % 60, "Minute", null, compact);
-      wrap.appendChild(hour.el);
-      wrap.appendChild(minute.el);
-      read.repeatTime = () => Number(hour.value) * 60 + Number(minute.value);
-    };
     if (repeat === "none") {
       const label = document.createElement("label");
       label.className = "deadline-label";
@@ -150,8 +149,6 @@
       label.appendChild(input);
       wrap.appendChild(label);
       read.deadline = () => input.value;
-    } else if (repeat === "daily") {
-      addTimeOfDay(values.repeatTime);
     } else if (repeat === "weekly") {
       const selected = values.repeatWeekdays || [1];
       const group = document.createElement("div");
@@ -173,7 +170,6 @@
       wrap.appendChild(group);
       read.repeatWeekdays = () =>
         buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
-      addTimeOfDay(values.repeatTime);
     } else if (repeat === "monthly") {
       const weekday = values.repeatMonthlyWeekday ?? null;
       const weekdayGroup = document.createElement("div");
@@ -241,7 +237,6 @@
         return on ? on.day : null;
       };
       read.repeatMonthlyFirst = () => firstBtn.classList.contains("on");
-      addTimeOfDay(values.repeatTime);
     } else if (repeat === "custom") {
       const days = createWheel(CUSTOM_DAYS_OPTIONS, values.customDays ?? 1, "Days", null, compact);
       const hours = createWheel(CUSTOM_HOURS_OPTIONS, values.customHours ?? 0, "Hours", null, compact);
@@ -910,6 +905,17 @@
     return repeat !== "none" && repeat !== "every_5min";
   }
 
+  function labeledField(labelText, els, hidden = false) {
+    const field = document.createElement("div");
+    field.className = "labeled-field" + (hidden ? " hidden" : "");
+    const label = document.createElement("span");
+    label.className = "field-label";
+    label.textContent = labelText;
+    field.appendChild(label);
+    for (const el of els) field.appendChild(el);
+    return field;
+  }
+
   function openEditRow(task) {
     clearEditing();
     editingTaskId = task.id;
@@ -920,10 +926,10 @@
     rep.el.title = task.list === "fun" ? "Fun tasks never repeat" : "";
 
     const selectors = document.createElement("div");
-    selectors.className = "edit-selectors";
-    selectors.appendChild(listSel.el);
-    selectors.appendChild(diff.el);
-    selectors.appendChild(rep.el);
+    selectors.className = "edit-selectors form-row-labeled";
+    selectors.appendChild(labeledField("Type", [listSel.el]));
+    selectors.appendChild(labeledField("Difficulty", [diff.el]));
+    selectors.appendChild(labeledField("Repeat", [rep.el]));
 
     const scheduleValues = scheduleValuesFromTask(task);
     const scheduleWrap = document.createElement("div");
@@ -931,11 +937,17 @@
     let schedule = buildScheduleControls(task.repeat, scheduleValues, true);
     scheduleWrap.appendChild(schedule.el);
 
+    const dueAtWheelsWrap = document.createElement("div");
+    dueAtWheelsWrap.className = "due-at-wheels";
+    const dueAtField = labeledField("🕔 Due at", [dueAtWheelsWrap], true);
+    let dueAt = null;
+
     const timeLimit = createWheel(TIME_LIMIT_OPTIONS, task.timeLimit || 0, "Time limit", null, true);
-    const timeLimitWrap = document.createElement("label");
-    timeLimitWrap.className = "deadline-label";
-    timeLimitWrap.textContent = "⏱️ Time limit ";
-    timeLimitWrap.appendChild(timeLimit.el);
+    const timeLimitField = labeledField("⏱️ Time limit", [timeLimit.el]);
+    const bottomRow = document.createElement("div");
+    bottomRow.className = "form-row form-row-labeled edit-bottom-row";
+    bottomRow.appendChild(dueAtField);
+    bottomRow.appendChild(timeLimitField);
 
     const afterComp = document.createElement("label");
     afterComp.className = "after-completion-label";
@@ -968,10 +980,21 @@
 
     function applyRepeatChange() {
       const repeat = effectiveRepeat();
+      if (dueAt) scheduleValues.repeatTime = dueAt.read();
       Object.assign(scheduleValues, readScheduleValues(schedule.read));
       scheduleWrap.innerHTML = "";
       schedule = buildScheduleControls(repeat, scheduleValues, true);
       scheduleWrap.appendChild(schedule.el);
+      scheduleWrap.classList.toggle("hidden", schedule.el.childElementCount === 0);
+      const showDueAt = scheduleShowsTimeOfDay(repeat);
+      dueAtWheelsWrap.innerHTML = "";
+      if (showDueAt) {
+        dueAt = createDueAtWheels(scheduleValues.repeatTime, true);
+        for (const el of dueAt.els) dueAtWheelsWrap.appendChild(el);
+      } else {
+        dueAt = null;
+      }
+      dueAtField.classList.toggle("hidden", !showDueAt);
       afterComp.classList.toggle("hidden", !isRepeatingRepeat(repeat));
     }
 
@@ -980,7 +1003,7 @@
 
     pendingEdit = {
       kind: "task",
-      controls: [selectors, scheduleWrap, timeLimitWrap, afterComp],
+      controls: [selectors, scheduleWrap, bottomRow, afterComp],
       onSave: (title) => {
         const isFun = listSel.value === "fun";
         const repeat = effectiveRepeat();
@@ -991,6 +1014,7 @@
           timeLimit: Number(timeLimit.value),
           ...readScheduleValues(schedule.read),
         };
+        if (dueAt) updates.repeatTime = dueAt.read();
         if (!isFun) updates.difficulty = diff.value;
         if (isRepeatingRepeat(repeat)) {
           updates.repeatAfterCompletion = afterCompCb.checked;
@@ -1117,6 +1141,10 @@
     render();
   });
 
+  function scheduleShowsTimeOfDay(repeat) {
+    return repeat === "daily" || repeat === "weekly" || repeat === "monthly";
+  }
+
   function updateCreateFormMode() {
     if (!listSelect || !difficultySelect || !repeatSelect || !timeLimitSelect) return;
     const isFun = listSelect.value === "fun";
@@ -1127,6 +1155,16 @@
     scheduleContainer.innerHTML = "";
     scheduleControls = buildScheduleControls(repeat, {}, false);
     scheduleContainer.appendChild(scheduleControls.el);
+    scheduleContainer.classList.toggle("hidden", scheduleControls.el.childElementCount === 0);
+    dueAtWheelsEl.innerHTML = "";
+    if (scheduleShowsTimeOfDay(repeat)) {
+      dueAtWheelsControls = createDueAtWheels(undefined, false);
+      for (const el of dueAtWheelsControls.els) dueAtWheelsEl.appendChild(el);
+      dueAtField.classList.remove("hidden");
+    } else {
+      dueAtWheelsControls = null;
+      dueAtField.classList.add("hidden");
+    }
   }
 
   form.addEventListener("submit", (e) => {
@@ -1135,6 +1173,7 @@
     if (!title) return;
     const repeat = listSelect.value === "fun" ? "none" : repeatSelect.value;
     const values = scheduleControls ? readScheduleValues(scheduleControls.read) : {};
+    if (dueAtWheelsControls) values.repeatTime = dueAtWheelsControls.read();
     const taskId = Game.addTask(
       title,
       listSelect.value === "fun" ? null : difficultySelect.value,
