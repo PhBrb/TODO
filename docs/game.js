@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.48.4";
+  const VERSION = "0.49.0";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -779,6 +779,13 @@
   function toggleSubtask(parent, subtask) {
     subtask.done = !subtask.done;
     if (subtask.done) {
+      if (subtasksLockedByChain(parent)) {
+        subtask.done = false;
+        showToast("🔗 Finish the chained predecessor task first");
+        saveState();
+        render();
+        return;
+      }
       if (!subtaskChainSatisfies(parent, subtask)) {
         subtask.done = false;
         const predecessor = subtaskPredecessor(parent, subtask);
@@ -955,6 +962,10 @@
 
   function chainSatisfiesDependency(task) {
     return chainSatisfiedIn(state.tasks, task);
+  }
+
+  function subtasksLockedByChain(task) {
+    return Boolean(task.chainedAfter) && !task.done && !chainSatisfiesDependency(task);
   }
 
   function chainTask(task, targetId) {
@@ -1422,6 +1433,7 @@
     timeBonusEarned,
     chainPredecessor,
     chainSatisfiesDependency,
+    subtasksLockedByChain,
     chainTask,
     unchainTask,
     subtaskPredecessor,

@@ -583,9 +583,10 @@
       body.appendChild(buildEditControlsRow());
     }
 
+    const parentLocked = Game.subtasksLockedByChain(task);
     if (task.subtasks.length > 0 || !task.done) {
       const sublist = document.createElement("div");
-      sublist.className = "subtask-list";
+      sublist.className = "subtask-list" + (parentLocked ? " chain-locked" : "");
       for (const st of chainOrdered(task.subtasks)) {
         if (st.chainedAfter) {
           sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
@@ -594,12 +595,16 @@
         row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
         row.dataset.parentId = task.id;
         row.dataset.subtaskId = st.id;
-        const stLocked = !Game.subtaskChainSatisfies(task, st) && !st.done;
+        const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
         const scb = document.createElement("input");
         scb.type = "checkbox";
         scb.checked = st.done;
         scb.disabled = stLocked;
-        if (stLocked) scb.title = "Complete the chained predecessor first";
+        if (stLocked) {
+          scb.title = parentLocked
+            ? "Finish the chained predecessor task first"
+            : "Complete the chained predecessor first";
+        }
         scb.addEventListener("change", () => {
           const origin = Confetti.originOf(row);
           Game.toggleSubtask(task, st);
@@ -641,7 +646,7 @@
           sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
         }
       }
-      if (!task.done) {
+      if (!task.done && !parentLocked) {
         const addRow = document.createElement("div");
         addRow.className = "subtask-add";
         const addInput = document.createElement("input");
