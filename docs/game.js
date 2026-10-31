@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.50.1";
+  const VERSION = "0.50.2";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -152,7 +152,7 @@
       deadline: typeof raw.deadline === "number" ? raw.deadline : null,
       repeatTime: num(raw.repeatTime, NaN),
       repeatAfterCompletion: raw.repeatAfterCompletion === true,
-      repeatWeekday: Math.min(6, Math.max(0, Math.floor(num(raw.repeatWeekday, 1)))),
+      repeatWeekdays: normalizeWeekdays(raw.repeatWeekdays, raw.repeatWeekday),
       repeatDayOfMonth: Math.min(31, Math.max(1, Math.floor(num(raw.repeatDayOfMonth, 1)))),
       repeatCustomMs: Math.max(60000, num(raw.repeatCustomMs, CUSTOM_REPEAT_DEFAULT_MS)),
       repeatCustomFromCompletion: raw.repeatCustomFromCompletion === true,
@@ -428,14 +428,18 @@
       return d.getTime();
     }
     if (repeat === "weekly") {
-      const target = ((task.repeatWeekday ?? 1) + 6) % 7;
-      let daysUntil = (target - d.getDay() + 7) % 7;
-      if (daysUntil === 0) daysUntil = 7;
-      d.setDate(d.getDate() + daysUntil);
-      d.setHours(0, 0, 0, 0);
-      d.setTime(d.getTime() + tod);
-      if (d.getTime() <= base) d.setTime(d.getTime() + 7 * 86400000);
-      return d.getTime();
+      const weekdays = (task.repeatWeekdays && task.repeatWeekdays.length > 0
+        ? task.repeatWeekdays
+        : [1]);
+      for (let offset = 1; offset <= 7; offset++) {
+        const candidate = new Date(base);
+        candidate.setDate(candidate.getDate() + offset);
+        if (!weekdays.includes(candidate.getDay())) continue;
+        candidate.setHours(0, 0, 0, 0);
+        candidate.setTime(candidate.getTime() + tod);
+        if (candidate.getTime() > base) return candidate.getTime();
+      }
+      return Infinity;
     }
     if (repeat === "monthly") {
       const dom = Math.min(31, Math.max(1, task.repeatDayOfMonth ?? 1));
@@ -454,6 +458,19 @@
 
   function daysInMonth(year, month) {
     return new Date(year, month + 1, 0).getDate();
+  }
+
+  function normalizeWeekdays(raw, legacySingle) {
+    const fromArray = Array.isArray(raw)
+      ? raw.map((d) => Math.floor(Number(d))).filter((d) => d >= 0 && d <= 6)
+      : null;
+    if (fromArray && fromArray.length > 0) {
+      return [...new Set(fromArray)].sort((a, b) => a - b);
+    }
+    if (Number.isFinite(legacySingle)) {
+      return [Math.min(6, Math.max(0, Math.floor(legacySingle)))];
+    }
+    return [1];
   }
 
   function streakHasFailed(task, now) {
@@ -651,7 +668,7 @@
       deadline: isFun ? null : (deadlineInput ? new Date(deadlineInput).getTime() : null),
       repeatTime: NaN,
       repeatAfterCompletion: false,
-      repeatWeekday: 1,
+      repeatWeekdays: [1],
       repeatDayOfMonth: 1,
       repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
       repeatCustomFromCompletion: false,
@@ -1254,8 +1271,8 @@
     if (updates.repeatAfterCompletion !== undefined) {
       task.repeatAfterCompletion = updates.repeatAfterCompletion === true;
     }
-    if (updates.repeatWeekday !== undefined) {
-      task.repeatWeekday = Math.min(6, Math.max(0, Math.floor(updates.repeatWeekday)));
+    if (updates.repeatWeekdays !== undefined) {
+      task.repeatWeekdays = normalizeWeekdays(updates.repeatWeekdays, null);
     }
     if (updates.repeatDayOfMonth !== undefined) {
       task.repeatDayOfMonth = Math.min(31, Math.max(1, Math.floor(updates.repeatDayOfMonth)));

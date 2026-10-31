@@ -86,9 +86,9 @@
     ["every_5min", "Every 5 min (test)"],
     ["custom", "Custom"],
   ];
-  const WEEKDAY_OPTIONS = [
-    [1, "Monday"], [2, "Tuesday"], [3, "Wednesday"], [4, "Thursday"],
-    [5, "Friday"], [6, "Saturday"], [0, "Sunday"],
+  const WEEKDAY_CHECKBOXES = [
+    [1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"],
+    [5, "Fri"], [6, "Sat"], [0, "Sun"],
   ];
   const DAY_OF_MONTH_OPTIONS = Array.from({ length: 31 }, (_, i) => [i + 1, String(i + 1)]);
   const CUSTOM_DAYS_OPTIONS = Array.from({ length: 31 }, (_, i) => [i, i === 1 ? "1 day" : `${i} days`]);
@@ -160,9 +160,28 @@
     } else if (repeat === "daily") {
       addTimeOfDay(values.repeatTime);
     } else if (repeat === "weekly") {
-      const wheel = createWheel(WEEKDAY_OPTIONS, values.repeatWeekday ?? 1, "Day of week", null, compact);
-      wrap.appendChild(wheel.el);
-      read.repeatWeekday = () => Number(wheel.value);
+      const selected = values.repeatWeekdays && values.repeatWeekdays.length > 0
+        ? values.repeatWeekdays
+        : [1];
+      const group = document.createElement("div");
+      group.className = "weekday-checks";
+      const boxes = WEEKDAY_CHECKBOXES.map(([day, label]) => {
+        const cbLabel = document.createElement("label");
+        cbLabel.className = "weekday-check";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = String(day);
+        cb.checked = selected.includes(day);
+        cbLabel.appendChild(cb);
+        cbLabel.appendChild(document.createTextNode(label));
+        group.appendChild(cbLabel);
+        return cb;
+      });
+      wrap.appendChild(group);
+      read.repeatWeekdays = () => {
+        const days = boxes.filter((b) => b.checked).map((b) => Number(b.value));
+        return days.length > 0 ? days : [1];
+      };
       addTimeOfDay(values.repeatTime);
     } else if (repeat === "monthly") {
       const wheel = createWheel(DAY_OF_MONTH_OPTIONS, values.repeatDayOfMonth ?? 1, "Day of month", null, compact);
