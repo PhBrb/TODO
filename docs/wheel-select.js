@@ -4,9 +4,8 @@
   // Wheel select: a scroll-snap list that acts like a picker wheel. Flick or
   // scroll with the mouse wheel to move, it snaps to the nearest option and
   // fires onChange. Keyboard arrows work when the wheel has focus.
-  const ITEM_HEIGHT_PX = 32;
-  const COMPACT_ITEM_HEIGHT_PX = 24;
-  const COMPACT_PEEK_PX = 8;
+  const ITEM_HEIGHT_PX = 28;
+  const COMPACT_ITEM_HEIGHT_PX = 20;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
     const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
