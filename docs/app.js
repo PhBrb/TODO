@@ -646,7 +646,7 @@
           sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
         }
       }
-      if (!task.done && !parentLocked) {
+      if (!task.done) {
         const addRow = document.createElement("div");
         addRow.className = "subtask-add";
         const addInput = document.createElement("input");
