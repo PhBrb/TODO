@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.50.3";
+  const VERSION = "0.50.4";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -153,7 +153,10 @@
       repeatTime: num(raw.repeatTime, NaN),
       repeatAfterCompletion: raw.repeatAfterCompletion === true,
       repeatWeekdays: normalizeWeekdays(raw.repeatWeekdays, raw.repeatWeekday),
-      repeatDayOfMonth: Math.min(31, Math.max(1, Math.floor(num(raw.repeatDayOfMonth, 1)))),
+      repeatMonthlyWeekday: raw.repeatMonthlyWeekday == null
+        ? null
+        : Math.min(6, Math.max(0, Math.floor(num(raw.repeatMonthlyWeekday, 0)))),
+      repeatMonthlyFirst: raw.repeatMonthlyFirst !== false,
       repeatCustomMs: Math.max(60000, num(raw.repeatCustomMs, CUSTOM_REPEAT_DEFAULT_MS)),
       repeatCustomFromCompletion: raw.repeatCustomFromCompletion === true,
       chainedAfter: num(raw.chainedAfter, 0),
@@ -442,22 +445,32 @@
       return Infinity;
     }
     if (repeat === "monthly") {
-      const dom = Math.min(31, Math.max(1, task.repeatDayOfMonth ?? 1));
-      let next = new Date(d.getFullYear(), d.getMonth() + 1, Math.min(dom, daysInMonth(d.getFullYear(), d.getMonth() + 1)));
-      next.setHours(0, 0, 0, 0);
-      next.setTime(next.getTime() + tod);
-      if (next.getTime() <= base) {
-        next = new Date(d.getFullYear(), d.getMonth() + 2, Math.min(dom, daysInMonth(d.getFullYear(), d.getMonth() + 2)));
+      for (let m = 1; m <= 2; m++) {
+        const next = nthWeekdayOfMonth(d.getFullYear(), d.getMonth() + m, task.repeatMonthlyWeekday, task.repeatMonthlyFirst !== false);
         next.setHours(0, 0, 0, 0);
         next.setTime(next.getTime() + tod);
+        if (next.getTime() > base) return next.getTime();
       }
-      return next.getTime();
+      return Infinity;
     }
     return Infinity;
   }
 
   function daysInMonth(year, month) {
     return new Date(year, month + 1, 0).getDate();
+  }
+
+  function nthWeekdayOfMonth(year, month, weekday, first) {
+    if (weekday === null || weekday === undefined) {
+      return new Date(year, month, 1);
+    }
+    if (first === false) {
+      const lastDay = daysInMonth(year, month);
+      const back = (new Date(year, month, lastDay).getDay() - weekday + 7) % 7;
+      return new Date(year, month, lastDay - back);
+    }
+    const offset = (weekday - new Date(year, month, 1).getDay() + 7) % 7;
+    return new Date(year, month, 1 + offset);
   }
 
   function normalizeWeekdays(raw, legacySingle) {
@@ -669,7 +682,8 @@
       repeatTime: NaN,
       repeatAfterCompletion: false,
       repeatWeekdays: [1],
-      repeatDayOfMonth: 1,
+      repeatMonthlyWeekday: null,
+      repeatMonthlyFirst: true,
       repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
       repeatCustomFromCompletion: false,
       chainedAfter: 0,
@@ -1274,8 +1288,13 @@
     if (updates.repeatWeekdays !== undefined) {
       task.repeatWeekdays = normalizeWeekdays(updates.repeatWeekdays, null);
     }
-    if (updates.repeatDayOfMonth !== undefined) {
-      task.repeatDayOfMonth = Math.min(31, Math.max(1, Math.floor(updates.repeatDayOfMonth)));
+    if (updates.repeatMonthlyWeekday !== undefined) {
+      task.repeatMonthlyWeekday = updates.repeatMonthlyWeekday === null
+        ? null
+        : Math.min(6, Math.max(0, Math.floor(updates.repeatMonthlyWeekday)));
+    }
+    if (updates.repeatMonthlyFirst !== undefined) {
+      task.repeatMonthlyFirst = updates.repeatMonthlyFirst === true;
     }
     if (updates.repeatCustomMs !== undefined) {
       task.repeatCustomMs = Math.max(60000, Math.floor(updates.repeatCustomMs));
