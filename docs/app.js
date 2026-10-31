@@ -1265,4 +1265,14 @@
   }
 
   initUiSheet();
+
+  const toggleActionsBtn = document.getElementById("toggle-actions-btn");
+  toggleActionsBtn.addEventListener("click", () => {
+    const hidden = document.body.classList.toggle("actions-hidden");
+    toggleActionsBtn.setAttribute("aria-pressed", String(!hidden));
+    toggleActionsBtn.setAttribute(
+      "aria-label",
+      hidden ? "Show edit and delete buttons" : "Hide edit and delete buttons"
+    );
+  });
 })();

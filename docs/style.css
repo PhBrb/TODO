@@ -58,7 +58,28 @@ body {
   padding: 10px 0 8px;
   cursor: grab;
   touch-action: none;
+  position: relative;
 }
+
+#toggle-actions-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  font-size: 1rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  touch-action: manipulation;
+}
+
+#toggle-actions-btn[aria-pressed="false"] { opacity: 0.35; }
+
+body.actions-hidden .task-actions,
+body.actions-hidden .subtask-edit,
+body.actions-hidden .subtask-delete { display: none; }
 
 .sheet-handle:active { cursor: grabbing; }
 
