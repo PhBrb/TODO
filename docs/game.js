@@ -2,7 +2,7 @@
   "use strict";
 
 
-  const VERSION = "0.49.4";
+  const VERSION = "0.49.5";
 
   const STORAGE_KEY = "todo-mwe-state";
   const SCHEMA_VERSION = 3;
@@ -431,6 +431,10 @@
         if (nextOccurrence(task.repeat, task.completedAt, task.repeatTime, task.repeatAfterCompletion) <= now) {
           task.done = false;
           task.completedAt = null;
+          for (const st of task.subtasks) {
+            st.done = false;
+            st.reward = null;
+          }
           if (Number.isFinite(task.repeatTime)) {
             task.deadline = nextTimeOfDay(task.repeatTime);
           }
