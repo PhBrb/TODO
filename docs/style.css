@@ -536,6 +536,52 @@ body {
   cursor: pointer;
 }
 
+.task-delete.armed {
+  color: #c0392b;
+  animation: delete-arm-fade 2s linear forwards;
+}
+
+@keyframes delete-arm-fade {
+  from { color: #c0392b; }
+  to { color: var(--muted); }
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(45, 42, 61, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.confirm-panel {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(45, 42, 61, 0.3);
+  padding: 18px 20px;
+  max-width: 320px;
+  width: 100%;
+}
+
+.confirm-message { margin: 0 0 14px; font-size: 0.9rem; }
+
+.confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.confirm-actions button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirm-cancel { background: #ece8ff; color: var(--accent); }
+.confirm-ok { background: #c0392b; color: #fff; }
+
 .empty-hint {
   text-align: center;
   color: var(--muted);
