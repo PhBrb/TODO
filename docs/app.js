@@ -255,7 +255,7 @@
       read.repeatCustomMs = () =>
         (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
     }
-    if (isRepeatingRepeat(repeat)) {
+    if (repeat === "custom") {
       const afterCompLabel = document.createElement("label");
       afterCompLabel.className = "after-completion-label";
       const cb = document.createElement("input");
@@ -507,8 +507,25 @@
     render();
   }
 
+  // A tap outside the edited row only ends editing if the pointer didn't move
+  // (i.e. the touch wasn't a scroll); track movement between down and up.
+  let outsideEditDown = null;
   document.addEventListener("pointerdown", (e) => {
     if (!activeEdit) return;
+    if (activeEdit.scope.contains(e.target)) return;
+    outsideEditDown = { x: e.clientX, y: e.clientY };
+  }, true);
+
+  document.addEventListener("pointermove", (e) => {
+    if (!outsideEditDown) return;
+    if (Math.abs(e.clientX - outsideEditDown.x) > 8 || Math.abs(e.clientY - outsideEditDown.y) > 8) {
+      outsideEditDown = null;
+    }
+  }, true);
+
+  document.addEventListener("pointerup", (e) => {
+    if (!activeEdit || !outsideEditDown) return;
+    outsideEditDown = null;
     if (activeEdit.scope.contains(e.target)) return;
     const current = editValues(activeEdit.input, activeEdit.controls);
     if (current.every((v, i) => v === activeEdit.initial[i])) {
@@ -516,6 +533,11 @@
       render();
     }
   }, true);
+
+  document.addEventListener("pointercancel", () => {
+    outsideEditDown = null;
+  }, true);
+
 
   const RATING_OPTIONS = [
     { label: "😫 Harder", value: "harder" },
@@ -690,7 +712,8 @@
     const body = document.createElement("div");
     body.className = "task-body";
 
-    const editingThisTask = editingTaskId === task.id && pendingEdit && pendingEdit.kind === "task";
+    const editingThisTask = editingTaskId === task.id && pendingEdit && pendingEdit.kind === "task"
+      || (pendingEdit && pendingEdit.kind === "restore" && pendingEdit.taskId === task.id);
     let title;
     let titleInput = null;
     if (editingThisTask) {
@@ -782,7 +805,10 @@
             );
           }
         });
-        const editingThisSub = editingSubtaskOf(task) === st && pendingEdit && pendingEdit.kind === "subtask";
+        const restoreSub = pendingEdit && pendingEdit.kind === "restore" && pendingEdit.subKey
+          ? pendingEdit.subKey === task.id + ":" + st.id : false;
+        const editingThisSub = restoreSub
+          || (editingSubtaskOf(task) === st && pendingEdit && pendingEdit.kind === "subtask");
         const stTitle = editingThisSub ? buildTitleInput(st.title) : document.createElement("span");
         stTitle.className = editingThisSub ? "subtask-title title-input" : "subtask-title";
         if (!editingThisSub) stTitle.textContent = st.title;
@@ -1026,6 +1052,13 @@
   let render = function () {
     const visible = tasksForTab();
     const sorted = chainOrdered(visible, sortTasks(visible));
+    const openEdit = activeEdit && activeEdit.scope.isConnected ? activeEdit : null;
+    if (openEdit) {
+      pendingEdit = { kind: "restore", taskId: editingTaskId, subKey: editingSubtaskKey, controls: openEdit.controls, onSave: openEdit.onSave };
+      editingTaskId = null;
+      editingSubtaskKey = null;
+      activeEdit = null;
+    }
     listEl.innerHTML = "";
     if (activeEdit && !activeEdit.scope.isConnected) clearEditing();
     for (const task of sorted) {
