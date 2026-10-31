@@ -7,7 +7,7 @@
   <title>TODO — MWE</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="actions-hidden">
   <div id="room-view"></div>
 
   <div class="daily-progress">
@@ -34,6 +34,7 @@
 
   <section id="ui-sheet" class="ui-sheet" aria-label="Task panel">
     <div id="sheet-handle" class="sheet-handle">
+      <button id="toggle-actions-btn" type="button" aria-label="Show edit and delete buttons" aria-pressed="false">✎</button>
       <span class="sheet-handle-bar"></span>
     </div>
     <div class="sheet-content">
@@ -128,6 +129,7 @@
   <script src="confetti.js"></script>
   <script src="reward-flight.js"></script>
   <script src="wheel-select.js"></script>
+  <script src="confirm-dialog.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

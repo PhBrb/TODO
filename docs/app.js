@@ -458,6 +458,41 @@
     return row;
   }
 
+  const DELETE_ARM_MS = 2000;
+
+  function armDeleteButton(btn, onConfirmDelete) {
+    let armTimer = null;
+    btn.addEventListener("click", () => {
+      if (armTimer) {
+        clearTimeout(armTimer);
+        armTimer = null;
+        btn.classList.remove("armed");
+        onConfirmDelete();
+        return;
+      }
+      btn.classList.add("armed");
+      armTimer = setTimeout(() => {
+        armTimer = null;
+        btn.classList.remove("armed");
+      }, DELETE_ARM_MS);
+    });
+  }
+
+  async function deleteTaskWithConfirm(task) {
+    const hasStreak = task.repeat !== "none" && task.streak > 0;
+    const hasSubtasks = task.subtasks.length > 0;
+    if (hasStreak || hasSubtasks) {
+      const reasons = [];
+      if (hasSubtasks) reasons.push(`${task.subtasks.length} subtask${task.subtasks.length === 1 ? "" : "s"}`);
+      if (hasStreak) reasons.push(`a ${task.streak}-day streak`);
+      const ok = await ConfirmDialog.confirm(
+        `Delete "${task.title}"? It has ${reasons.join(" and ")}.`
+      );
+      if (!ok) return;
+    }
+    Game.deleteTask(task.id);
+  }
+
   function taskNode(task) {
     const li = document.createElement("li");
     li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
@@ -593,7 +628,7 @@
         const stDel = document.createElement("button");
         stDel.className = "task-delete subtask-delete";
         stDel.textContent = "✕";
-        stDel.addEventListener("click", () => Game.deleteSubtask(task, st.id));
+        armDeleteButton(stDel, () => Game.deleteSubtask(task, st.id));
         subtaskDraggable(row, task, st);
         row.appendChild(scb);
         row.appendChild(stTitle);
@@ -655,7 +690,7 @@
     const del = document.createElement("button");
     del.className = "task-delete";
     del.textContent = "✕";
-    del.addEventListener("click", () => Game.deleteTask(task.id));
+    armDeleteButton(del, () => deleteTaskWithConfirm(task));
 
     const edit = document.createElement("button");
     edit.className = "task-edit";
@@ -792,6 +827,7 @@
       if (activeEdit && activeEdit.scope === node) activeEdit.input.focus();
     }
 
+    listEl.classList.toggle("editing", editingTaskId !== null || editingSubtaskKey !== null);
     emptyHint.classList.toggle("hidden", visible.length > 0);
     emptyHint.textContent = activeTab === "highlight"
       ? "Nothing to highlight — complete tasks to earn recommendations! 🎉"
@@ -1229,4 +1265,14 @@
   }
 
   initUiSheet();
+
+  const toggleActionsBtn = document.getElementById("toggle-actions-btn");
+  toggleActionsBtn.addEventListener("click", () => {
+    const hidden = document.body.classList.toggle("actions-hidden");
+    toggleActionsBtn.setAttribute("aria-pressed", String(!hidden));
+    toggleActionsBtn.setAttribute(
+      "aria-label",
+      hidden ? "Show edit and delete buttons" : "Hide edit and delete buttons"
+    );
+  });
 })();
