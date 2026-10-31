@@ -57,6 +57,7 @@
         programmaticUntil = performance.now() + 400;
         track.scrollTo({ top: scrollTopForIndex(i), behavior: "smooth" });
       }
+      wrap.dispatchEvent(new CustomEvent("wheelchange", { detail: value }));
       onChange?.(value);
     }
 
