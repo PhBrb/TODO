@@ -11,6 +11,7 @@
     #sidebar { width: 340px; min-width: 340px; display: flex; flex-direction: column; border-right: 1px solid #d9c3a5; background: #faf3e7; }
     #sidebar header { padding: 10px 12px; border-bottom: 1px solid #d9c3a5; }
     #sidebar h1 { font-size: 15px; margin: 0 0 8px; }
+    .page-version { font-size: 11px; color: #8a6f4d; font-family: ui-monospace, monospace; }
     #search { width: 100%; padding: 6px 8px; border: 1px solid #d9c3a5; border-radius: 8px; font-size: 13px; }
     #group-by-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8a6f4d; margin-bottom: 8px; }
     #group-by { flex: 1; padding: 5px 6px; border: 1px solid #d9c3a5; border-radius: 8px; font-size: 13px; background: #fff; }
@@ -48,6 +49,7 @@
 <body>
   <aside id="sidebar">
     <header>
+      <div id="page-version" class="page-version"></div>
       <h1>Kenney CC0 asset viewer</h1>
       <label id="group-by-label">Group by
         <select id="group-by">
@@ -75,6 +77,6 @@
   </div>
   <script src="./models/kenney/manifest.js?v=6"></script>
   <script src="./asset-classes.js"></script>
-  <script type="module" src="./asset-viewer.js?v=8"></script>
+  <script type="module" src="./asset-viewer.js?v=9"></script>
 </body>
 </html>

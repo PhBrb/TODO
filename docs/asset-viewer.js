@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { VERSION } from "./game-constants.js";
 
 (() => {
   "use strict";
@@ -229,6 +230,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     btn.textContent = "Copied!";
     setTimeout(() => { btn.textContent = "Copy exclusion list"; }, 1200);
   });
+
+  document.getElementById("page-version").textContent = "v" + VERSION;
 
   renderExclusionList();
   renderList();
