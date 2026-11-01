@@ -154,8 +154,9 @@ import { VERSION } from "./game-constants.js";
     });
   }
 
-  let groupMode = "kenney";
-  const collapsedKits = new Set(Object.keys(manifest));
+  let groupMode = document.getElementById("group-by").value || "kenney";
+  const collapsedKits = new Set();
+  for (const entry of visibleEntries(groupMode)) collapsedKits.add(groupKey(entry, groupMode));
 
   function renderList() {
     const filter = document.getElementById("search").value.trim().toLowerCase();
