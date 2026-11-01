@@ -59,12 +59,28 @@ function isRepeatingRepeat(repeat) {
   return repeat !== "none" && repeat !== "every_5min";
 }
 
+const END_OF_DAY_MINUTES = 23 * 60 + 59;
+
 function createDueAtWheels(minutes, compact = false) {
   const m = Number.isFinite(minutes) ? minutes : 9 * 60;
-  const hour = createWheel(TIME_OF_DAY_HOURS_OPTIONS, Math.floor(m / 60), "Hour", null, compact);
-  const minute = createWheel(TIME_OF_DAY_MINUTES_OPTIONS, m % 60, "Minute", null, compact);
+  const endOfDayBtn = document.createElement("button");
+  endOfDayBtn.type = "button";
+  endOfDayBtn.className = "end-of-day-btn";
+  endOfDayBtn.textContent = "End of day";
+  endOfDayBtn.title = "Set to 23:59";
+  const hour = createWheel(TIME_OF_DAY_HOURS_OPTIONS, Math.floor(m / 60), "Hour", updateEndOfDayBtn, compact);
+  const minute = createWheel(TIME_OF_DAY_MINUTES_OPTIONS, m % 60, "Minute", updateEndOfDayBtn, compact);
   const read = () => Number(hour.value) * 60 + Number(minute.value);
-  return { els: [hour.el, minute.el], read };
+  function updateEndOfDayBtn() {
+    endOfDayBtn.classList.toggle("on", read() === END_OF_DAY_MINUTES);
+  }
+  endOfDayBtn.addEventListener("click", () => {
+    hour.value = "23";
+    minute.value = "59";
+    updateEndOfDayBtn();
+  });
+  updateEndOfDayBtn();
+  return { els: [hour.el, minute.el], read, endOfDayBtn };
 }
 
 function readScheduleValues(read) {
@@ -200,13 +216,24 @@ function scheduleValuesFromTask(task) {
   };
 }
 
-function labeledField(labelText, els, hidden = false) {
+function labeledField(labelText, els, hidden = false, labelExtra = null) {
   const field = document.createElement("div");
   field.className = "labeled-field" + (hidden ? " hidden" : "");
-  const label = document.createElement("span");
-  label.className = "field-label";
-  label.textContent = labelText;
-  field.appendChild(label);
+  if (labelExtra) {
+    const labelRow = document.createElement("div");
+    labelRow.className = "field-label-row";
+    const label = document.createElement("span");
+    label.className = "field-label";
+    label.textContent = labelText;
+    labelRow.appendChild(label);
+    labelRow.appendChild(labelExtra);
+    field.appendChild(labelRow);
+  } else {
+    const label = document.createElement("span");
+    label.className = "field-label";
+    label.textContent = labelText;
+    field.appendChild(label);
+  }
   for (const el of els) field.appendChild(el);
   return field;
 }

@@ -215,12 +215,14 @@ function subtaskListNode(task, li) {
   if (task.subtasks.length === 0 && task.done) return null;
   const sublist = document.createElement("div");
   sublist.className = "subtask-list" + (parentLocked ? " chain-locked" : "");
+  let prevSub = null;
   for (const st of chainOrdered(task.subtasks)) {
-    if (st.chainedAfter) {
+    if (st.chainedAfter && prevSub && prevSub.id === st.chainedAfter) {
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
     }
     const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked);
     sublist.appendChild(row);
+    prevSub = st;
     if (editingThisSub) {
       activateEdit(li, stTitle, E.pending.controls, E.pending.onSave);
       sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
@@ -305,12 +307,14 @@ let render = function () {
   }
   AppUI.els.listEl.innerHTML = "";
   if (E.active && !E.active.scope.isConnected) clearEditing();
+  let prevTask = null;
   for (const task of sorted) {
-    if (task.chainedAfter) {
+    if (task.chainedAfter && prevTask && prevTask.id === task.chainedAfter) {
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
     }
     const node = taskNode(task);
     AppUI.els.listEl.appendChild(node);
+    prevTask = task;
   }
 
   AppUI.els.listEl.classList.toggle("editing", E.taskId !== null || E.subtaskKey !== null);
