@@ -6,10 +6,15 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   "use strict";
 
   const STORAGE_KEY = "todo-asset-viewer-exclusions";
+  const MANIFEST_VERSION = 2;
   const BG_COLOR = 0xf2e2cf;
   const GRID_COLOR = 0xd9c3a5;
 
   const manifest = window.KENNEY_MANIFEST || {};
+  if (Number(localStorage.getItem(STORAGE_KEY + "-mv")) !== MANIFEST_VERSION) {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(STORAGE_KEY + "-mv", String(MANIFEST_VERSION));
+  }
   const entries = [];
   for (const kit of Object.keys(manifest).sort()) {
     for (const file of manifest[kit]) {
