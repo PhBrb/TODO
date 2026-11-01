@@ -115,12 +115,19 @@ function timeLimitRemaining(task, now) {
 function formatDeadline(ts) {
   const diff = ts - Date.now();
   const abs = Math.abs(diff);
-  const mins = Math.round(abs / 60000);
+  if (diff < 0) {
+    const hours = Math.floor(abs / 3600000);
+    const days = Math.floor(abs / 86400000);
+    if (days >= 1) return `⏰ ${days}d overdue`;
+    if (hours >= 1) return `⏰ ${hours}h overdue`;
+    return `⏰ overdue`;
+  }
+  const mins = Math.round(diff / 60000);
   let tstr;
   if (mins < 60) tstr = `${mins}m`;
   else if (mins < 1440) tstr = `${Math.round(mins / 60)}h`;
   else tstr = `${Math.round(mins / 1440)}d`;
-  return diff >= 0 ? `⏰ ${tstr} left` : `⏰ ${tstr} overdue`;
+  return `⏰ ${tstr} left`;
 }
 
 function sortTasks(tasks) {
@@ -158,18 +165,20 @@ function chainOrdered(items, base) {
   return result;
 }
 
-function chainLinkNode(className, onUnlink) {
+function chainLinkNode(className, onUnlink, { withLine = true } = {}) {
   const row = document.createElement(className === "chain-link-row" ? "li" : "div");
-  row.className = className;
-  const line = document.createElement("span");
-  line.className = "chain-line";
+  row.className = className + (withLine ? "" : " chain-icon-only");
+  if (withLine) {
+    const line = document.createElement("span");
+    line.className = "chain-line";
+    row.appendChild(line);
+  }
   const unlink = document.createElement("button");
   unlink.type = "button";
   unlink.className = "chain-unlink";
   unlink.textContent = "🔗";
   unlink.title = "Chained \u2014 click to remove the link";
   unlink.addEventListener("click", onUnlink);
-  row.appendChild(line);
   row.appendChild(unlink);
   return row;
 }
