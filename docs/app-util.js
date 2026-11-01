@@ -114,13 +114,12 @@ function timeLimitRemaining(task, now) {
 
 function formatDeadline(ts) {
   const diff = ts - Date.now();
-  const abs = Math.abs(diff);
-  const mins = Math.round(abs / 60000);
+  const absHours = Math.floor(Math.abs(diff) / 3600000);
+  const absDays = Math.floor(Math.abs(diff) / 86400000);
   let tstr;
-  if (mins < 60) tstr = `${mins}m`;
-  else if (mins < 1440) tstr = `${Math.round(mins / 60)}h`;
-  else tstr = `${Math.round(mins / 1440)}d`;
-  return diff >= 0 ? `⏰ ${tstr} left` : `⏰ ${tstr} overdue`;
+  if (absDays >= 1) tstr = `${absDays}d`;
+  else tstr = `${absHours}h`;
+  return diff >= 0 ? `⏰ ${tstr} left` : `⏰ overdue`;
 }
 
 function sortTasks(tasks) {
