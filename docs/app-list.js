@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, formatDeadline, formatMinutesSeconds, sortTasks, timeLimitRemaining } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainCollapsed, chainLinkNode, chainMoreNode, chainOrdered, formatDeadline, formatMinutesSeconds, sortTasks, successorsOf, timeLimitRemaining } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -216,11 +216,17 @@ function subtaskListNode(task, li) {
   if (task.subtasks.length === 0 && task.done) return null;
   const sublist = document.createElement("div");
   sublist.className = "subtask-list" + (parentLocked ? " chain-locked" : "");
+  const editing = E.taskId !== null || E.subtaskKey !== null;
   let prevSub = null;
   for (const st of chainOrdered(task.subtasks)) {
-    if (st.chainedAfter) {
+    if (st.chainedAfter && !chainCollapsed(task.subtasks, prevSub, !editing)) {
       const adjacent = prevSub && prevSub.id === st.chainedAfter;
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine: adjacent }));
+    }
+    if (chainCollapsed(task.subtasks, prevSub, !editing)) {
+      sublist.appendChild(chainMoreNode("subtask-link-row"));
+      prevSub = null;
+      continue;
     }
     const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked);
     sublist.appendChild(row);
@@ -309,11 +315,17 @@ let render = function () {
   }
   AppUI.els.listEl.innerHTML = "";
   if (E.active && !E.active.scope.isConnected) clearEditing();
+  const editing = E.taskId !== null || E.subtaskKey !== null;
   let prevTask = null;
   for (const task of sorted) {
-    if (task.chainedAfter) {
+    if (task.chainedAfter && !chainCollapsed(visible, prevTask, !editing)) {
       const adjacent = prevTask && prevTask.id === task.chainedAfter;
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task), { withLine: adjacent }));
+    }
+    if (chainCollapsed(visible, prevTask, !editing)) {
+      AppUI.els.listEl.appendChild(chainMoreNode("chain-link-row"));
+      prevTask = null;
+      continue;
     }
     const node = taskNode(task);
     AppUI.els.listEl.appendChild(node);

@@ -165,6 +165,26 @@ function chainOrdered(items, base) {
   return result;
 }
 
+function successorsOf(items, item) {
+  return items.filter((it) => it.chainedAfter === item.id);
+}
+
+function chainCollapsed(items, item, collapsed) {
+  if (!collapsed || !item) return false;
+  return successorsOf(items, item).length > 1;
+}
+
+function chainMoreNode(className) {
+  const row = document.createElement(className === "chain-link-row" ? "li" : "div");
+  row.className = "chain-more-row";
+  const zigzag = document.createElement("span");
+  zigzag.className = "chain-zigzag";
+  zigzag.textContent = "〰";
+  zigzag.title = "More chained items hidden";
+  row.appendChild(zigzag);
+  return row;
+}
+
 function chainLinkNode(className, onUnlink, { withLine = true } = {}) {
   const row = document.createElement(className === "chain-link-row" ? "li" : "div");
   row.className = className + (withLine ? "" : " chain-icon-only");
@@ -247,4 +267,4 @@ function labeledField(labelText, els, hidden = false, labelExtra = null) {
   return field;
 }
 
-export { CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining };
+export { CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainCollapsed, chainLinkNode, chainMoreNode, chainOrdered, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, successorsOf, timeLimitRemaining };
