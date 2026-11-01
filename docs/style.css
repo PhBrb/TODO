@@ -274,6 +274,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: #8b5cf6;
   border-radius: 1px;
 }
+.chain-icon-only { justify-content: flex-end; height: 10px; margin: -1px 0 -1px 18px; }
 .chain-unlink {
   background: none;
   border: none;

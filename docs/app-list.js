@@ -82,6 +82,7 @@ function taskMetaNode(task) {
   if (task.deadline && !task.done) {
     const dl = document.createElement("span");
     dl.className = "badge deadline" + (task.deadline < Date.now() ? " overdue" : "");
+    dl.dataset.taskId = task.id;
     dl.textContent = formatDeadline(task.deadline);
     meta.appendChild(dl);
   }
@@ -217,8 +218,9 @@ function subtaskListNode(task, li) {
   sublist.className = "subtask-list" + (parentLocked ? " chain-locked" : "");
   let prevSub = null;
   for (const st of chainOrdered(task.subtasks)) {
-    if (st.chainedAfter && prevSub && prevSub.id === st.chainedAfter) {
-      sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
+    if (st.chainedAfter) {
+      const adjacent = prevSub && prevSub.id === st.chainedAfter;
+      sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine: adjacent }));
     }
     const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked);
     sublist.appendChild(row);
@@ -309,8 +311,9 @@ let render = function () {
   if (E.active && !E.active.scope.isConnected) clearEditing();
   let prevTask = null;
   for (const task of sorted) {
-    if (task.chainedAfter && prevTask && prevTask.id === task.chainedAfter) {
-      AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
+    if (task.chainedAfter) {
+      const adjacent = prevTask && prevTask.id === task.chainedAfter;
+      AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task), { withLine: adjacent }));
     }
     const node = taskNode(task);
     AppUI.els.listEl.appendChild(node);
@@ -373,6 +376,13 @@ function updateLiveClocks() {
     AppUI.els.boostTimerEl.textContent = formatMinutesSeconds(remaining);
   } else {
     AppUI.els.boostBannerEl.classList.add("hidden");
+  }
+
+  for (const node of AppUI.els.listEl.querySelectorAll(".badge.deadline")) {
+    const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
+    if (!task || task.done) continue;
+    node.textContent = formatDeadline(task.deadline);
+    node.classList.toggle("overdue", task.deadline < Date.now());
   }
 
   for (const node of AppUI.els.listEl.querySelectorAll(".badge.timer.running")) {

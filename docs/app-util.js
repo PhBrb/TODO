@@ -165,18 +165,20 @@ function chainOrdered(items, base) {
   return result;
 }
 
-function chainLinkNode(className, onUnlink) {
+function chainLinkNode(className, onUnlink, { withLine = true } = {}) {
   const row = document.createElement(className === "chain-link-row" ? "li" : "div");
-  row.className = className;
-  const line = document.createElement("span");
-  line.className = "chain-line";
+  row.className = className + (withLine ? "" : " chain-icon-only");
+  if (withLine) {
+    const line = document.createElement("span");
+    line.className = "chain-line";
+    row.appendChild(line);
+  }
   const unlink = document.createElement("button");
   unlink.type = "button";
   unlink.className = "chain-unlink";
   unlink.textContent = "🔗";
   unlink.title = "Chained \u2014 click to remove the link";
   unlink.addEventListener("click", onUnlink);
-  row.appendChild(line);
   row.appendChild(unlink);
   return row;
 }
