@@ -85,10 +85,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       current = gltf.scene;
       frameModel(current);
       scene.add(current);
-    }, undefined, () => {
+    }, undefined, (err) => {
       if (currentLabel === entry.label) {
         document.getElementById("preview-name").textContent = entry.label + " (failed to load)";
       }
+      console.error("Failed to load model:", entry.path, err);
     });
     markSelected(entry.label);
   }
@@ -165,6 +166,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       });
       row.append(name, btn);
       row.addEventListener("click", () => showModel(entry));
+      row.addEventListener("dblclick", () => toggleExclusion(entry.label));
       list.appendChild(row);
     }
   }
