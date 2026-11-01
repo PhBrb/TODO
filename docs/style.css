@@ -265,8 +265,8 @@ body.actions-hidden .subtask-add { display: none; }
 .chain-link-row {
   display: flex;
   align-items: center;
-  height: 14px;
-  margin: -2px 0 -2px 18px;
+  height: 10px;
+  margin: -3px 0 -3px 18px;
 }
 .chain-line {
   flex: 1;
@@ -274,7 +274,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: #8b5cf6;
   border-radius: 1px;
 }
-.chain-icon-only { justify-content: flex-end; height: 10px; margin: -1px 0 -1px 18px; }
+.chain-icon-only { justify-content: flex-end; height: 8px; margin: -2px 0 -2px 18px; }
 .chain-unlink {
   background: none;
   border: none;
@@ -292,8 +292,8 @@ body.actions-hidden .subtask-add { display: none; }
 .subtask-link-row {
   display: flex;
   align-items: center;
-  height: 12px;
-  margin: -2px 0 -2px 24px;
+  height: 8px;
+  margin: -3px 0 -3px 24px;
 }
 
 .deadline-label {
