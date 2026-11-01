@@ -136,12 +136,12 @@ function buildEditScheduleArea(task) {
   const scheduleValues = scheduleValuesFromTask(task);
   const scheduleWrap = document.createElement("div");
   scheduleWrap.className = "repeat-schedule edit-schedule";
-  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null };
+  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, endOfDayBtn: document.createElement("button") };
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
-  state.dueAtField = labeledField("\ud83d\udd54 Due at", [state.dueAtWheelsWrap], true);
+  state.dueAtField = labeledField("\ud83d\udd54 Due at", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
   return state;
 }
 
@@ -159,6 +159,8 @@ function refreshEditSchedule(task, edit) {
   if (showDueAt) {
     scheduleArea.dueAt = createDueAtWheels(scheduleArea.scheduleValues.repeatTime, true);
     for (const el of scheduleArea.dueAt.els) scheduleArea.dueAtWheelsWrap.appendChild(el);
+    scheduleArea.endOfDayBtn.replaceWith(scheduleArea.dueAt.endOfDayBtn);
+    scheduleArea.endOfDayBtn = scheduleArea.dueAt.endOfDayBtn;
   } else {
     scheduleArea.dueAt = null;
   }

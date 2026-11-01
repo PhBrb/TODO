@@ -663,6 +663,13 @@ body.actions-hidden .subtask-add { display: none; }
   white-space: nowrap;
 }
 
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
 #due-at-wheels,
 .due-at-wheels { display: flex; gap: 8px; }
 
@@ -670,9 +677,8 @@ body.actions-hidden .subtask-add { display: none; }
 .due-at-wheels .wheel-select { flex: 1; min-width: 0; }
 
 .end-of-day-btn {
-  align-self: center;
-  font-size: 0.68rem;
-  padding: 4px 6px;
+  font-size: 0.62rem;
+  padding: 2px 6px;
   border: 1px solid #ddd8f0;
   border-radius: 8px;
   background: #fff;
