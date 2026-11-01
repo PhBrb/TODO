@@ -6,7 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   "use strict";
 
   const STORAGE_KEY = "todo-asset-viewer-exclusions";
-  const MANIFEST_VERSION = 6;
+  const MANIFEST_VERSION = 7;
   const BG_COLOR = 0xf2e2cf;
   const GRID_COLOR = 0xd9c3a5;
 
@@ -26,8 +26,12 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
   function groupKey(entry, mode) {
     if (mode === "todo") return entry.cls;
-    if (mode === "not-todo") return entry.cls === "not-todo" ? "not-todo" : "todo";
     return entry.kit;
+  }
+
+  function visibleEntries(mode) {
+    if (mode === "not-todo") return entries.filter((e) => e.cls === "not-todo");
+    return entries;
   }
 
   const excluded = new Set(loadExclusions());
@@ -157,7 +161,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     const list = document.getElementById("model-list");
     list.textContent = "";
     const groups = new Map();
-    for (const entry of entries) {
+    for (const entry of visibleEntries(groupMode)) {
       const key = groupKey(entry, groupMode);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(entry);
@@ -203,7 +207,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   document.getElementById("group-by").addEventListener("change", (e) => {
     groupMode = e.target.value;
     collapsedKits.clear();
-    for (const entry of entries) collapsedKits.add(groupKey(entry, groupMode));
+    for (const entry of visibleEntries(groupMode)) collapsedKits.add(groupKey(entry, groupMode));
     renderList();
   });
   document.getElementById("preview-exclude").addEventListener("click", () => {
