@@ -661,6 +661,11 @@ body.actions-hidden .subtask-add { display: none; }
   color: var(--muted);
   padding-left: 2px;
   white-space: nowrap;
+  /* match the height of .field-label-row (label + end-of-day button) so
+     fields without a button in their label row align vertically */
+  display: inline-block;
+  min-height: 1.55em;
+  line-height: 1.55em;
 }
 
 .field-label-row {
@@ -668,6 +673,7 @@ body.actions-hidden .subtask-add { display: none; }
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  min-height: 1.55em;
 }
 
 #due-at-wheels,
