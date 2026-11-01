@@ -7,7 +7,7 @@ import { VERSION } from "./game-constants.js";
   "use strict";
 
   const STORAGE_KEY = "todo-asset-viewer-exclusions";
-  const MANIFEST_VERSION = 7;
+  const MANIFEST_VERSION = 8;
   const BG_COLOR = 0xf2e2cf;
   const GRID_COLOR = 0xd9c3a5;
 
