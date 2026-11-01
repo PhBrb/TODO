@@ -669,6 +669,26 @@ body.actions-hidden .subtask-add { display: none; }
 #due-at-wheels .wheel-select,
 .due-at-wheels .wheel-select { flex: 1; min-width: 0; }
 
+.end-of-day-btn {
+  align-self: center;
+  font-size: 0.68rem;
+  padding: 4px 6px;
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.55;
+}
+
+.end-of-day-btn.on {
+  opacity: 1;
+  color: #6c5ce7;
+  border-color: #6c5ce7;
+  background: #efedfd;
+}
+
 .wheel-select {
   --wheel-item-height: 28px;
   --wheel-peek: 32px;
