@@ -123,12 +123,14 @@ function promptDifficultyRating(task) {
   setTimeout(() => panel.remove(), Game.RATE_PROMPT_TIMEOUT);
 }
 
-function buildEditSelectors(task, listSel, diff, rep) {
+function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   const selectors = document.createElement("div");
   selectors.className = "edit-selectors form-row-labeled";
   selectors.appendChild(labeledField("Type", [listSel.el]));
   selectors.appendChild(labeledField("Difficulty", [diff.el]));
   selectors.appendChild(labeledField("Repeat", [rep.el]));
+  selectors.appendChild(scheduleArea.dueAtField);
+  selectors.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
   return selectors;
 }
 
@@ -177,15 +179,6 @@ function updateEditWheelsEnabled(task, edit) {
   edit.rep.el.title = isFun ? "Fun tasks never repeat" : "";
 }
 
-function buildEditBottomRow(scheduleArea, timeLimit) {
-  const timeLimitField = labeledField("\u23f1\ufe0f Time limit", [timeLimit.el]);
-  const bottomRow = document.createElement("div");
-  bottomRow.className = "form-row form-row-labeled edit-bottom-row";
-  bottomRow.appendChild(scheduleArea.dueAtField);
-  bottomRow.appendChild(timeLimitField);
-  return bottomRow;
-}
-
 function saveEditRow(task, edit) {
   const { listSel, rep, diff, timeLimit, scheduleArea } = edit;
   const isFun = listSel.value === "fun";
@@ -224,15 +217,14 @@ function openEditRow(task) {
   edit.rep = createWheel(REPEAT_OPTIONS, task.repeat, "Repeat", onChange, true);
   edit.scheduleArea = buildEditScheduleArea(task);
 
-  const selectors = buildEditSelectors(task, edit.listSel, edit.diff, edit.rep);
-  const bottomRow = buildEditBottomRow(edit.scheduleArea, edit.timeLimit);
+  const selectors = buildEditSelectors(task, edit.listSel, edit.diff, edit.rep, edit.scheduleArea, edit.timeLimit);
 
   updateEditWheelsEnabled(task, edit);
   refreshEditSchedule(task, edit);
 
   E.pending = {
     kind: "task",
-    controls: [selectors, edit.scheduleArea.scheduleWrap, bottomRow],
+    controls: [selectors, edit.scheduleArea.scheduleWrap],
     onSave: (title) => {
       edit.titleInput = { value: title };
       saveEditRow(task, edit);
@@ -241,4 +233,4 @@ function openEditRow(task) {
   render();
 }
 
-export { RATING_OPTIONS, activateEdit, buildEditBottomRow, buildEditControlsRow, buildEditScheduleArea, buildEditSelectors, buildTitleInput, clearEditing, editValues, editingSubtaskOf, openEditRow, openSubtaskEdit, outsideEditDown, promptDifficultyRating, refreshEditSchedule, saveEditRow, updateEditWheelsEnabled  };
+export { RATING_OPTIONS, activateEdit, buildEditControlsRow, buildEditScheduleArea, buildEditSelectors, buildTitleInput, clearEditing, editValues, editingSubtaskOf, openEditRow, openSubtaskEdit, outsideEditDown, promptDifficultyRating, refreshEditSchedule, saveEditRow, updateEditWheelsEnabled  };
