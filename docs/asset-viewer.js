@@ -6,7 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   "use strict";
 
   const STORAGE_KEY = "todo-asset-viewer-exclusions";
-  const MANIFEST_VERSION = 2;
+  const MANIFEST_VERSION = 3;
   const BG_COLOR = 0xf2e2cf;
   const GRID_COLOR = 0xd9c3a5;
 
@@ -141,38 +141,62 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     });
   }
 
+  const collapsedKits = new Set(loadCollapsed());
+
+  function loadCollapsed() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY + "-collapsed");
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveCollapsed() {
+    localStorage.setItem(STORAGE_KEY + "-collapsed", JSON.stringify([...collapsedKits]));
+  }
+
   function renderList() {
     const filter = document.getElementById("search").value.trim().toLowerCase();
     const list = document.getElementById("model-list");
     list.textContent = "";
-    let lastKit = null;
-    for (const entry of entries) {
-      if (filter && !entry.label.toLowerCase().includes(filter)) continue;
-      if (entry.kit !== lastKit) {
-        lastKit = entry.kit;
-        const h = document.createElement("div");
-        h.className = "kit-name";
-        h.textContent = `${entry.kit} (${manifest[entry.kit].length})`;
-        list.appendChild(h);
-      }
-      const row = document.createElement("div");
-      row.className = "model-row" + (excluded.has(entry.label) ? " excluded" : "");
-      row.dataset.label = entry.label;
-      const name = document.createElement("span");
-      name.textContent = entry.file;
-      const btn = document.createElement("button");
-      btn.className = "exclude-btn";
-      btn.type = "button";
-      btn.title = excluded.has(entry.label) ? "Include again" : "Exclude model";
-      btn.textContent = excluded.has(entry.label) ? "↩" : "✕";
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleExclusion(entry.label);
+    for (const kit of Object.keys(manifest).sort()) {
+      const kitEntries = entries.filter((e) => e.kit === kit);
+      const visible = filter ? kitEntries.filter((e) => e.label.toLowerCase().includes(filter)) : kitEntries;
+      if (!visible.length) continue;
+      const expanded = Boolean(filter) || !collapsedKits.has(kit);
+      const header = document.createElement("div");
+      header.className = "kit-name" + (expanded ? " expanded" : "");
+      header.textContent = `${expanded ? "▾" : "▸"} ${kit} (${visible.length})`;
+      header.addEventListener("click", () => {
+        if (collapsedKits.has(kit)) collapsedKits.delete(kit);
+        else collapsedKits.add(kit);
+        saveCollapsed();
+        renderList();
       });
-      row.append(name, btn);
-      row.addEventListener("click", () => showModel(entry));
-      row.addEventListener("dblclick", () => toggleExclusion(entry.label));
-      list.appendChild(row);
+      list.appendChild(header);
+      if (!expanded) continue;
+      for (const entry of visible) {
+        const row = document.createElement("div");
+        row.className = "model-row" + (excluded.has(entry.label) ? " excluded" : "");
+        row.dataset.label = entry.label;
+        const name = document.createElement("span");
+        name.textContent = entry.file;
+        const btn = document.createElement("button");
+        btn.className = "exclude-btn";
+        btn.type = "button";
+        btn.title = excluded.has(entry.label) ? "Include again" : "Exclude model";
+        btn.textContent = excluded.has(entry.label) ? "↩" : "✕";
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleExclusion(entry.label);
+        });
+        row.append(name, btn);
+        row.addEventListener("click", () => showModel(entry));
+        row.addEventListener("dblclick", () => toggleExclusion(entry.label));
+        list.appendChild(row);
+      }
     }
   }
 
