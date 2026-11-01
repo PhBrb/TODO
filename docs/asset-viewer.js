@@ -110,6 +110,7 @@ import { VERSION } from "./game-constants.js";
       console.error("Failed to load model:", entry.path, err);
     });
     markSelected(entry.label);
+    if (isMobile()) document.body.classList.add("sidebar-collapsed");
   }
 
   function loadExclusions() {
@@ -233,6 +234,15 @@ import { VERSION } from "./game-constants.js";
   });
 
   document.getElementById("page-version").textContent = "v" + VERSION;
+
+  const isMobile = () => window.matchMedia("(max-width: 768px)").matches;
+  if (isMobile()) document.body.classList.add("sidebar-collapsed");
+  document.getElementById("sidebar-toggle").addEventListener("click", () => {
+    document.body.classList.toggle("sidebar-collapsed");
+  });
+  window.matchMedia("(max-width: 768px)").addEventListener("change", (e) => {
+    document.body.classList.toggle("sidebar-collapsed", e.matches);
+  });
 
   renderExclusionList();
   renderList();
