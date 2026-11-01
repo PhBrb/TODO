@@ -6,7 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   "use strict";
 
   const STORAGE_KEY = "todo-asset-viewer-exclusions";
-  const MANIFEST_VERSION = 3;
+  const MANIFEST_VERSION = 4;
   const BG_COLOR = 0xf2e2cf;
   const GRID_COLOR = 0xd9c3a5;
 
@@ -141,21 +141,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     });
   }
 
-  const collapsedKits = new Set(loadCollapsed());
-
-  function loadCollapsed() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY + "-collapsed");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveCollapsed() {
-    localStorage.setItem(STORAGE_KEY + "-collapsed", JSON.stringify([...collapsedKits]));
-  }
+  const collapsedKits = new Set(Object.keys(manifest));
 
   function renderList() {
     const filter = document.getElementById("search").value.trim().toLowerCase();
@@ -172,7 +158,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
       header.addEventListener("click", () => {
         if (collapsedKits.has(kit)) collapsedKits.delete(kit);
         else collapsedKits.add(kit);
-        saveCollapsed();
         renderList();
       });
       list.appendChild(header);
