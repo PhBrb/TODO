@@ -6,7 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   "use strict";
 
   const STORAGE_KEY = "todo-asset-viewer-exclusions";
-  const MANIFEST_VERSION = 4;
+  const MANIFEST_VERSION = 5;
   const BG_COLOR = 0xf2e2cf;
   const GRID_COLOR = 0xd9c3a5;
 
