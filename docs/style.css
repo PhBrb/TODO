@@ -360,17 +360,17 @@ body.actions-hidden .subtask-add { display: none; }
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
 
 .subtask-list {
-  margin-top: 6px;
+  margin-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .subtask {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0 0 0;
+  padding: 2px 0 0 0;
   font-size: 0.85rem;
 }
 
