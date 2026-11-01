@@ -114,7 +114,14 @@ function timeLimitRemaining(task, now) {
 
 function formatDeadline(ts) {
   const diff = ts - Date.now();
-  if (diff < 0) return `⏰ overdue`;
+  const abs = Math.abs(diff);
+  if (diff < 0) {
+    const hours = Math.floor(abs / 3600000);
+    const days = Math.floor(abs / 86400000);
+    if (days >= 1) return `⏰ ${days}d overdue`;
+    if (hours >= 1) return `⏰ ${hours}h overdue`;
+    return `⏰ overdue`;
+  }
   const mins = Math.round(diff / 60000);
   let tstr;
   if (mins < 60) tstr = `${mins}m`;
