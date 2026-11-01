@@ -275,6 +275,15 @@ body.actions-hidden .subtask-add { display: none; }
   border-radius: 1px;
 }
 .chain-icon-only { justify-content: flex-end; height: 8px; margin: -2px 0 -2px 18px; }
+.chain-more-row {
+  display: flex;
+  align-items: center;
+  height: 8px;
+  margin: -3px 0 -3px 18px;
+  color: #8b5cf6;
+}
+.subtask-list .chain-more-row { height: 6px; margin: -3px 0 -3px 16px; }
+.chain-zigzag { font-size: 0.7rem; line-height: 1; opacity: 0.8; }
 .chain-unlink {
   background: none;
   border: none;
