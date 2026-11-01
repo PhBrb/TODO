@@ -15,11 +15,19 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     localStorage.removeItem(STORAGE_KEY);
     localStorage.setItem(STORAGE_KEY + "-mv", String(MANIFEST_VERSION));
   }
+  const classes = window.ASSET_CLASSES || {};
   const entries = [];
   for (const kit of Object.keys(manifest).sort()) {
     for (const file of manifest[kit]) {
-      entries.push({ kit, file, path: `models/kenney/${kit}/${file}`, label: `${kit}/${file}` });
+      const label = `${kit}/${file}`;
+      entries.push({ kit, file, path: `models/kenney/${kit}/${file}`, label, cls: classes[label] || "not-todo" });
     }
+  }
+
+  function groupKey(entry, mode) {
+    if (mode === "todo") return entry.cls;
+    if (mode === "not-todo") return entry.cls === "not-todo" ? "not-todo" : "todo";
+    return entry.kit;
   }
 
   const excluded = new Set(loadExclusions());
@@ -141,23 +149,29 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     });
   }
 
+  let groupMode = "kenney";
   const collapsedKits = new Set(Object.keys(manifest));
 
   function renderList() {
     const filter = document.getElementById("search").value.trim().toLowerCase();
     const list = document.getElementById("model-list");
     list.textContent = "";
-    for (const kit of Object.keys(manifest).sort()) {
-      const kitEntries = entries.filter((e) => e.kit === kit);
-      const visible = filter ? kitEntries.filter((e) => e.label.toLowerCase().includes(filter)) : kitEntries;
+    const groups = new Map();
+    for (const entry of entries) {
+      const key = groupKey(entry, groupMode);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(entry);
+    }
+    for (const [group, groupEntries] of [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const visible = filter ? groupEntries.filter((e) => e.label.toLowerCase().includes(filter)) : groupEntries;
       if (!visible.length) continue;
-      const expanded = Boolean(filter) || !collapsedKits.has(kit);
+      const expanded = Boolean(filter) || !collapsedKits.has(group);
       const header = document.createElement("div");
       header.className = "kit-name" + (expanded ? " expanded" : "");
-      header.textContent = `${expanded ? "▾" : "▸"} ${kit} (${visible.length})`;
+      header.textContent = `${expanded ? "▾" : "▸"} ${group} (${visible.length})`;
       header.addEventListener("click", () => {
-        if (collapsedKits.has(kit)) collapsedKits.delete(kit);
-        else collapsedKits.add(kit);
+        if (collapsedKits.has(group)) collapsedKits.delete(group);
+        else collapsedKits.add(group);
         renderList();
       });
       list.appendChild(header);
@@ -186,6 +200,12 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
   }
 
   document.getElementById("search").addEventListener("input", renderList);
+  document.getElementById("group-by").addEventListener("change", (e) => {
+    groupMode = e.target.value;
+    collapsedKits.clear();
+    for (const entry of entries) collapsedKits.add(groupKey(entry, groupMode));
+    renderList();
+  });
   document.getElementById("preview-exclude").addEventListener("click", () => {
     if (currentLabel) toggleExclusion(currentLabel);
   });
