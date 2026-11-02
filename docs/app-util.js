@@ -261,7 +261,7 @@ function zigzagNode(className) {
   svg.setAttribute("viewBox", "0 0 60 8");
   svg.setAttribute("preserveAspectRatio", "none");
   const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-  line.setAttribute("points", "0,6 7.5,2 15,6 22.5,2 30,6 37.5,2 45,6 52.5,2 60,6");
+  line.setAttribute("points", "0,6 3.75,2 7.5,6 11.25,2 15,6 18.75,2 22.5,6 26.25,2 30,6 33.75,2 37.5,6 41.25,2 45,6 48.75,2 52.5,6 56.25,2 60,6");
   svg.appendChild(line);
   row.appendChild(svg);
   return row;
