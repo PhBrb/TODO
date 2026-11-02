@@ -307,7 +307,7 @@ function tasksForTab() {
 let render = function () {
   const visible = tasksForTab();
   const sorted = chainOrdered(visible, sortTasks(visible));
-  const chainVis = chainVisibility(sorted, isGlobalEditMode());
+  const chainVis = chainVisibility(Game.state.tasks, isGlobalEditMode());
   const shown = sorted.filter((t) => !chainVis.get(t.id).hidden);
   const openEdit = E.active && E.active.scope.isConnected ? E.active : null;
   if (openEdit) {

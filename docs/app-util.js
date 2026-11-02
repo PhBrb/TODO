@@ -230,7 +230,7 @@ function chainVisibility(items, showAll) {
       if (cur.done) {
         v.hidden = true;
         uncheckedRun = 0;
-      } else if (chained.has(cur.id)) {
+      } else {
         uncheckedRun += 1;
         if (uncheckedRun > CHAIN_VISIBLE_UNCHECKED) v.hidden = true;
       }
