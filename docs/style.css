@@ -257,6 +257,7 @@ body.actions-hidden .subtask-add { display: none; }
 .badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
 .task-start { font-size: 0.75rem; padding: 2px 8px; margin-right: 4px; }
 .badge.chain { background: #f3e8ff; color: #8b5cf6; margin-left: 4px; cursor: pointer; }
+.badge.pinned { background: #e8f0ff; color: #3f6ab5; margin-left: 4px; }
 .task { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .task.drag-ready { outline: 2px dashed #8b5cf6; outline-offset: 2px; }
 .task.dragging { opacity: 0.45; }
@@ -604,6 +605,30 @@ body.actions-hidden .subtask-add { display: none; }
   color: #c0392b;
   animation: delete-arm-fade 2s linear forwards;
 }
+
+.task-pin {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 4px 6px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.task-pin.pinned { color: var(--accent); opacity: 1; }
+
+#buy-streak-freeze-btn {
+  border: 1px solid #ddd8f0;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+#buy-streak-freeze-btn:active { background: #e8f0ff; }
 
 @keyframes delete-arm-fade {
   from { color: #c0392b; }

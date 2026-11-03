@@ -133,6 +133,7 @@ function formatDeadline(ts) {
 function sortTasks(tasks) {
   const rank = { too_easy: 0, easy: 1, medium: 2, hard: 3 };
   return [...tasks].sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     if (a.done !== b.done) return a.done ? 1 : -1;
     const aDue = a.deadline && !a.done ? a.deadline : Infinity;
     const bDue = b.deadline && !b.done ? b.deadline : Infinity;

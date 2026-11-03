@@ -71,6 +71,12 @@ function taskTitleNode(task, editingThisTask, chainInfo = null) {
 function taskMetaNode(task) {
   const meta = document.createElement("div");
   meta.className = "task-meta";
+  if (task.pinned) {
+    const pin = document.createElement("span");
+    pin.className = "badge pinned";
+    pin.textContent = "\ud83d\udccc pinned";
+    meta.appendChild(pin);
+  }
   if (task.repeat !== "none") {
     const rep = document.createElement("span");
     rep.className = "badge repeat";
@@ -257,6 +263,13 @@ function subtaskListNode(task, li, chainInfo = null) {
 }
 
 function taskActionsNode(task) {
+  const pin = document.createElement("button");
+  pin.type = "button";
+  pin.className = "task-pin" + (task.pinned ? " pinned" : "");
+  pin.textContent = "\ud83d\udccc";
+  pin.title = task.pinned ? "Unpin task" : "Pin task \u2014 always in Highlight, first in other lists";
+  pin.addEventListener("click", () => Game.editTask(task.id, { pinned: !task.pinned }));
+
   const del = document.createElement("button");
   del.className = "task-delete";
   del.textContent = "\u2715";
@@ -270,6 +283,7 @@ function taskActionsNode(task) {
   const actions = document.createElement("div");
   const editingThis = E.taskId === task.id || editingSubtaskOf(task);
   actions.className = "task-actions" + (editingThis ? " hidden" : "");
+  actions.appendChild(pin);
   actions.appendChild(edit);
   actions.appendChild(del);
 

@@ -183,12 +183,23 @@ function initOverlays() {
     if (e.target === els.shopOverlay) closeShop();
   });
 
-  const openSettings = () => els.settingsOverlay.classList.remove("hidden");
+  const refreshStreakFreeze = () => {
+    els.streakFreezeCount.textContent = String(Game.state.streakFreezes);
+  };
+  const openSettings = () => {
+    refreshStreakFreeze();
+    els.settingsOverlay.classList.remove("hidden");
+  };
   const closeSettings = () => els.settingsOverlay.classList.add("hidden");
   els.settingsBtn.addEventListener("click", openSettings);
   els.settingsClose.addEventListener("click", closeSettings);
   els.settingsOverlay.addEventListener("click", (e) => {
     if (e.target === els.settingsOverlay) closeSettings();
+  });
+  els.buyStreakFreezeBtn.addEventListener("click", () => {
+    const res = Game.buyStreakFreeze();
+    if (!res.ok) showToast("Not enough gems \ud83d\udc94");
+    refreshStreakFreeze();
   });
 
   els.tabShop.addEventListener("click", () => setShopTab(ctx, "shop"));
