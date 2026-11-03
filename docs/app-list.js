@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -229,19 +229,16 @@ function subtaskListNode(task, li, chainInfo = null) {
   const subs = chainOrdered(task.subtasks);
   const chainVis = chainVisibility(subs, isGlobalEditMode());
   const subInfo = chainInfo && chainInfo.subtasks ? chainInfo.subtasks.get(task.id) : null;
-  let prevSub = null;
   for (const st of subs) {
     const v = chainVis.get(st.id);
     if (v.hidden) continue;
     if (v.zigzagAbove) {
       sublist.appendChild(zigzagNode("subtask-zigzag-row"));
     } else if (st.chainedAfter) {
-      const withLine = chainSplitLine(task.subtasks, prevSub, st);
-      sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine }));
+      sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
     }
     const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo);
     sublist.appendChild(row);
-    prevSub = st;
     if (editingThisSub) {
       activateEdit(li, stTitle, E.pending.controls, E.pending.onSave);
       sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
@@ -332,19 +329,16 @@ let render = function () {
   }
   AppUI.els.listEl.innerHTML = "";
   if (E.active && !E.active.scope.isConnected) clearEditing();
-  let prevTask = null;
   for (const task of shown) {
     const v = chainVis.get(task.id);
     if (v.zigzagAbove) {
       AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
     } else if (task.chainedAfter) {
-      const withLine = chainSplitLine(Game.state.tasks, prevTask, task);
-      AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task), { withLine }));
+      AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
     }
     const node = taskNode(task, chainInfo);
     AppUI.els.listEl.appendChild(node);
     if (v.zigzagBelow) AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
-    prevTask = task;
   }
 
   AppUI.els.listEl.classList.toggle("editing", E.taskId !== null || E.subtaskKey !== null);

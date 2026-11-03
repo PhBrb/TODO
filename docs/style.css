@@ -265,16 +265,10 @@ body.actions-hidden .subtask-add { display: none; }
 .chain-link-row {
   display: flex;
   align-items: center;
-  height: 6px;
-  margin: -5px 0 -5px 18px;
+  justify-content: flex-end;
+  height: 5px;
+  margin: -4px 0 -4px 18px;
 }
-.chain-line {
-  flex: 1;
-  height: 2px;
-  background: #8b5cf6;
-  border-radius: 1px;
-}
-.chain-icon-only { justify-content: flex-end; height: 5px; margin: -4px 0 -4px 18px; }
 .chain-unlink {
   background: none;
   border: none;
@@ -332,6 +326,7 @@ body.actions-hidden .subtask-add { display: none; }
 .subtask-link-row {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 4px;
   margin: -5px 0 -5px 16px;
 }

@@ -165,14 +165,9 @@ function chainOrdered(items, base) {
   return result;
 }
 
-function chainLinkNode(className, onUnlink, { withLine = true } = {}) {
+function chainLinkNode(className, onUnlink) {
   const row = document.createElement(className === "chain-link-row" ? "li" : "div");
-  row.className = className + (withLine ? "" : " chain-icon-only");
-  if (withLine) {
-    const line = document.createElement("span");
-    line.className = "chain-line";
-    row.appendChild(line);
-  }
+  row.className = className;
   const unlink = document.createElement("button");
   unlink.type = "button";
   unlink.className = "chain-unlink";
@@ -251,14 +246,6 @@ function chainVisibility(items, showAll) {
     }
   }
   return vis;
-}
-
-function chainSplitLine(siblings, prev, item) {
-  return Boolean(
-    prev &&
-    prev.id !== item.chainedAfter &&
-    chainHead(siblings, prev) === chainHead(siblings, item)
-  );
 }
 
 const CHAIN_PALETTE = [
@@ -407,4 +394,4 @@ function labeledField(labelText, els, hidden = false, labelExtra = null) {
   return field;
 }
 
-export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildChainColorInfo, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
+export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildChainColorInfo, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
