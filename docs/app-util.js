@@ -266,7 +266,7 @@ const CHAIN_PALETTE = [
   "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
 ];
 
-function chainColorInfo(items) {
+function chainColorInfo(items, startIndex = 0) {
   const byId = new Map(items.map((it) => [it.id, it]));
   const indexOf = new Map(items.map((it, i) => [it.id, i]));
   const successors = new Map();
@@ -279,7 +279,7 @@ function chainColorInfo(items) {
   const branchDots = new Map();
   const splitDots = new Map();
   const assigned = new Set();
-  let colorIndex = 0;
+  let colorIndex = startIndex;
   for (const it of items) {
     const chained = Boolean(it.chainedAfter && byId.has(it.chainedAfter));
     if (!chained && !(successors.get(it.id) || []).length) continue;
@@ -306,7 +306,20 @@ function chainColorInfo(items) {
       }
     }
   }
-  return { branchDots, splitDots };
+  return { branchDots, splitDots, nextIndex: colorIndex };
+}
+
+function buildChainColorInfo(tasks) {
+  const taskLevel = chainColorInfo(tasks, 0);
+  const subtasks = new Map();
+  let nextIndex = taskLevel.nextIndex;
+  for (const task of tasks) {
+    if (!task.subtasks || task.subtasks.length === 0) continue;
+    const info = chainColorInfo(task.subtasks, nextIndex);
+    nextIndex = info.nextIndex;
+    subtasks.set(task.id, { branchDots: info.branchDots, splitDots: info.splitDots });
+  }
+  return { branchDots: taskLevel.branchDots, splitDots: taskLevel.splitDots, subtasks };
 }
 
 function chainDot(className, color) {
@@ -394,4 +407,4 @@ function labeledField(labelText, els, hidden = false, labelExtra = null) {
   return field;
 }
 
-export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
+export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildChainColorInfo, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };

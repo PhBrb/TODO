@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -221,14 +221,14 @@ function subtaskAddRow(task) {
   return addRow;
 }
 
-function subtaskListNode(task, li) {
+function subtaskListNode(task, li, chainInfo = null) {
   const parentLocked = Game.subtasksLockedByChain(task);
   if (task.subtasks.length === 0 && task.done) return null;
   const sublist = document.createElement("div");
   sublist.className = "subtask-list" + (parentLocked ? " chain-locked" : "");
   const subs = chainOrdered(task.subtasks);
   const chainVis = chainVisibility(subs, isGlobalEditMode());
-  const chainInfo = chainColorInfo(task.subtasks);
+  const subInfo = chainInfo && chainInfo.subtasks ? chainInfo.subtasks.get(task.id) : null;
   let prevSub = null;
   for (const st of subs) {
     const v = chainVis.get(st.id);
@@ -239,7 +239,7 @@ function subtaskListNode(task, li) {
       const withLine = chainSplitLine(task.subtasks, prevSub, st);
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine }));
     }
-    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, chainInfo);
+    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo);
     sublist.appendChild(row);
     prevSub = st;
     if (editingThisSub) {
@@ -301,7 +301,7 @@ function taskNode(task, chainInfo = null) {
     activateEdit(li, titleInput, E.pending.controls, E.pending.onSave);
     body.appendChild(buildEditControlsRow());
   }
-  const sublist = subtaskListNode(task, li);
+  const sublist = subtaskListNode(task, li, chainInfo);
   if (sublist) body.appendChild(sublist);
 
   taskDraggable(li, task);
@@ -321,7 +321,7 @@ let render = function () {
   const visible = tasksForTab();
   const sorted = chainOrdered(visible, sortTasks(visible));
   const chainVis = chainVisibility(Game.state.tasks, isGlobalEditMode() || AppUI.activeTab === "highlight");
-  const chainInfo = chainColorInfo(Game.state.tasks);
+  const chainInfo = buildChainColorInfo(Game.state.tasks);
   const shown = sorted.filter((t) => !chainVis.get(t.id).hidden);
   const openEdit = E.active && E.active.scope.isConnected ? E.active : null;
   if (openEdit) {

@@ -305,6 +305,7 @@ body.actions-hidden .subtask-add { display: none; }
   border-radius: 50%;
   pointer-events: none;
 }
+.subtask .chain-corner-dot { top: -2px; left: -2px; }
 .chain-split-dot {
   display: inline-block;
   width: 8px;
