@@ -298,14 +298,15 @@ body.actions-hidden .subtask-add { display: none; }
 }
 .chain-corner-dot {
   position: absolute;
-  top: 3px;
+  top: 50%;
   left: 3px;
+  transform: translateY(-50%);
   width: 6px;
   height: 6px;
   border-radius: 50%;
   pointer-events: none;
 }
-.subtask .chain-corner-dot { top: -2px; left: -2px; }
+.subtask .chain-corner-dot { left: -2px; }
 .chain-split-dot {
   display: inline-block;
   width: 8px;
