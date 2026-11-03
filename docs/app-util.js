@@ -268,12 +268,14 @@ const CHAIN_PALETTE = [
 
 function chainColorInfo(items) {
   const byId = new Map(items.map((it) => [it.id, it]));
+  const indexOf = new Map(items.map((it, i) => [it.id, i]));
   const successors = new Map();
   for (const it of items) {
     if (!it.chainedAfter || !byId.has(it.chainedAfter)) continue;
     if (!successors.has(it.chainedAfter)) successors.set(it.chainedAfter, []);
     successors.get(it.chainedAfter).push(it);
   }
+  for (const list of successors.values()) list.sort((a, b) => indexOf.get(a.id) - indexOf.get(b.id));
   const colors = new Map();
   const splits = new Set();
   const assigned = new Set();
@@ -285,21 +287,19 @@ function chainColorInfo(items) {
     while (head.chainedAfter && byId.has(head.chainedAfter)) head = byId.get(head.chainedAfter);
     if (assigned.has(head.id)) continue;
     assigned.add(head.id);
-    const component = [];
-    const stack = [head];
-    const seen = new Set();
-    while (stack.length) {
-      const cur = stack.pop();
-      if (seen.has(cur.id)) continue;
-      seen.add(cur.id);
-      component.push(cur);
-      for (const s of successors.get(cur.id) || []) stack.push(s);
-    }
-    if (!component.some((c) => (successors.get(c.id) || []).length > 1)) continue;
-    const color = CHAIN_PALETTE[colorIndex % CHAIN_PALETTE.length];
-    colorIndex += 1;
-    for (const c of component) {
-      colors.set(c.id, color);
+    const ordered = [];
+    const emitted = new Set();
+    const emit = (item) => {
+      if (emitted.has(item.id)) return;
+      emitted.add(item.id);
+      ordered.push(item);
+      for (const s of successors.get(item.id) || []) emit(s);
+    };
+    emit(head);
+    if (!ordered.some((c) => (successors.get(c.id) || []).length > 1)) continue;
+    for (const c of ordered) {
+      colors.set(c.id, CHAIN_PALETTE[colorIndex % CHAIN_PALETTE.length]);
+      colorIndex += 1;
       if ((successors.get(c.id) || []).length > 1) splits.add(c.id);
     }
   }
