@@ -253,6 +253,14 @@ function chainVisibility(items, showAll) {
   return vis;
 }
 
+function chainSplitLine(siblings, prev, item) {
+  return Boolean(
+    prev &&
+    prev.id !== item.chainedAfter &&
+    chainHead(siblings, prev) === chainHead(siblings, item)
+  );
+}
+
 function zigzagNode(className) {
   const row = document.createElement(className === "chain-zigzag-row" ? "li" : "div");
   row.className = className;
@@ -331,4 +339,4 @@ function labeledField(labelText, els, hidden = false, labelExtra = null) {
   return field;
 }
 
-export { CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
+export { CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };

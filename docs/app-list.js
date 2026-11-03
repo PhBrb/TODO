@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -225,8 +225,8 @@ function subtaskListNode(task, li) {
     if (v.zigzagAbove) {
       sublist.appendChild(zigzagNode("subtask-zigzag-row"));
     } else if (st.chainedAfter) {
-      const adjacent = prevSub && prevSub.id === st.chainedAfter;
-      sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine: adjacent }));
+      const withLine = chainSplitLine(task.subtasks, prevSub, st);
+      sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine }));
     }
     const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked);
     sublist.appendChild(row);
@@ -324,8 +324,8 @@ let render = function () {
     if (v.zigzagAbove) {
       AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
     } else if (task.chainedAfter) {
-      const adjacent = prevTask && prevTask.id === task.chainedAfter;
-      AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task), { withLine: adjacent }));
+      const withLine = chainSplitLine(Game.state.tasks, prevTask, task);
+      AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task), { withLine }));
     }
     const node = taskNode(task);
     AppUI.els.listEl.appendChild(node);
