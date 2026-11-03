@@ -2,7 +2,7 @@ import * as Game from "./game.js";
 import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
-import { renderBalances } from "./app-ui.js";
+import { renderBalances, vibrateForReward } from "./app-ui.js";
 import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainInlineSymbol, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
 
 const E = AppUI.edit;
@@ -42,6 +42,7 @@ function taskCheckbox(li, task) {
           AppUI.els.coinBalanceEl,
           AppUI.els.gemBalanceEl
         );
+        vibrateForReward(task.reward);
       }
     } else {
       Game.uncompleteTask(task);
@@ -131,6 +132,7 @@ function subtaskCheckbox(row, task, st, stLocked, parentLocked) {
         AppUI.els.coinBalanceEl,
         AppUI.els.gemBalanceEl
       );
+      vibrateForReward(st.reward);
     }
   });
   return scb;
