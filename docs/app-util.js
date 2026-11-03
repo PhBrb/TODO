@@ -309,6 +309,16 @@ function buildChainColorInfo(tasks) {
   return { branchDots: taskLevel.branchDots, splitDots: taskLevel.splitDots, subtasks };
 }
 
+function chainInlineSymbol(onUnlink) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "chain-unlink chain-inline-symbol";
+  btn.textContent = "\ud83d\udd17";
+  btn.title = "Chained \u2014 click to remove the link";
+  btn.addEventListener("click", onUnlink);
+  return btn;
+}
+
 function chainDot(className, color) {
   const dot = document.createElement("span");
   dot.className = className;
@@ -394,4 +404,4 @@ function labeledField(labelText, els, hidden = false, labelExtra = null) {
   return field;
 }
 
-export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildChainColorInfo, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
+export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildChainColorInfo, buildSelect, chainColorInfo, chainDot, chainInlineSymbol, chainLinkNode, chainOrdered, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };

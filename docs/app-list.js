@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainInlineSymbol, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -136,13 +136,14 @@ function subtaskCheckbox(row, task, st, stLocked, parentLocked) {
   return scb;
 }
 
-function subtaskRow(task, st, parentLocked, chainInfo = null) {
+function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false) {
   const row = document.createElement("div");
   row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
   row.dataset.parentId = task.id;
   row.dataset.subtaskId = st.id;
   const rowColor = chainInfo ? chainInfo.branchDots.get(st.id) : null;
   if (rowColor) row.appendChild(chainDot("chain-corner-dot", rowColor));
+  if (inlineLink) row.appendChild(chainInlineSymbol(() => Game.unchainSubtask(task, st)));
   const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
   const restoreSub = E.pending && E.pending.kind === "restore" && E.pending.subKey
     ? E.pending.subKey === task.id + ":" + st.id : false;
@@ -229,16 +230,20 @@ function subtaskListNode(task, li, chainInfo = null) {
   const subs = chainOrdered(task.subtasks);
   const chainVis = chainVisibility(subs, isGlobalEditMode());
   const subInfo = chainInfo && chainInfo.subtasks ? chainInfo.subtasks.get(task.id) : null;
+  let prevSub = null;
   for (const st of subs) {
     const v = chainVis.get(st.id);
     if (v.hidden) continue;
+    const prevIsPredecessor = prevSub && prevSub.id === st.chainedAfter;
+    const inlineLink = Boolean(st.chainedAfter) && !v.zigzagAbove && !prevIsPredecessor;
     if (v.zigzagAbove) {
       sublist.appendChild(zigzagNode("subtask-zigzag-row"));
-    } else if (st.chainedAfter) {
+    } else if (prevIsPredecessor) {
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
     }
-    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo);
+    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo, inlineLink);
     sublist.appendChild(row);
+    prevSub = st;
     if (editingThisSub) {
       activateEdit(li, stTitle, E.pending.controls, E.pending.onSave);
       sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
@@ -278,13 +283,14 @@ function taskActionsNode(task) {
   return actions;
 }
 
-function taskNode(task, chainInfo = null) {
+function taskNode(task, chainInfo = null, inlineLink = false) {
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
   const liColor = chainInfo ? chainInfo.branchDots.get(task.id) : null;
   if (liColor) li.appendChild(chainDot("chain-corner-dot", liColor));
+  if (inlineLink) li.appendChild(chainInlineSymbol(() => Game.unchainTask(task)));
 
   const editingThisTask = E.taskId === task.id && E.pending && E.pending.kind === "task"
     || (E.pending && E.pending.kind === "restore" && E.pending.taskId === task.id);
@@ -329,16 +335,20 @@ let render = function () {
   }
   AppUI.els.listEl.innerHTML = "";
   if (E.active && !E.active.scope.isConnected) clearEditing();
+  let prevTask = null;
   for (const task of shown) {
     const v = chainVis.get(task.id);
+    const prevIsPredecessor = prevTask && prevTask.id === task.chainedAfter;
+    const inlineLink = Boolean(task.chainedAfter) && !v.zigzagAbove && !prevIsPredecessor;
     if (v.zigzagAbove) {
       AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
-    } else if (task.chainedAfter) {
+    } else if (prevIsPredecessor) {
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
     }
-    const node = taskNode(task, chainInfo);
+    const node = taskNode(task, chainInfo, inlineLink);
     AppUI.els.listEl.appendChild(node);
     if (v.zigzagBelow) AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
+    prevTask = task;
   }
 
   AppUI.els.listEl.classList.toggle("editing", E.taskId !== null || E.subtaskKey !== null);
