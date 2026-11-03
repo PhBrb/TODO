@@ -197,7 +197,7 @@ Curated from 2_EngagemetFeatures.md
 - F76: Needs (very little) care
 
 #### Transparency
-- F77: Psychological mechanics that can be used to improve real life task completion should be taught
+- ~~F77: Psychological mechanics that can be used to improve real life task completion should be taught~~ (info page via the ℹ️ button explains usage, features and the psychology behind them)
   - Eg. habit building or breaking down big tasks
 
 
