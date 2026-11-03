@@ -55,8 +55,8 @@ function taskTitleNode(task, editingThisTask, chainInfo = null) {
     const title = document.createElement("div");
     title.className = "task-title";
     title.textContent = task.title;
-    if (chainInfo && chainInfo.splits.has(task.id)) {
-      title.appendChild(chainDot("chain-split-dot", chainInfo.colors.get(task.id)));
+    if (chainInfo && chainInfo.splitDots.has(task.id)) {
+      title.appendChild(chainDot("chain-split-dot", chainInfo.splitDots.get(task.id)));
     }
     return { node: title, input: null };
   }
@@ -141,7 +141,7 @@ function subtaskRow(task, st, parentLocked, chainInfo = null) {
   row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
   row.dataset.parentId = task.id;
   row.dataset.subtaskId = st.id;
-  const rowColor = chainInfo ? chainInfo.colors.get(st.id) : null;
+  const rowColor = chainInfo ? chainInfo.branchDots.get(st.id) : null;
   if (rowColor) row.appendChild(chainDot("chain-corner-dot", rowColor));
   const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
   const restoreSub = E.pending && E.pending.kind === "restore" && E.pending.subKey
@@ -152,8 +152,8 @@ function subtaskRow(task, st, parentLocked, chainInfo = null) {
   stTitle.className = editingThisSub ? "subtask-title title-input" : "subtask-title";
   if (!editingThisSub) {
     stTitle.textContent = st.title;
-    if (chainInfo && chainInfo.splits.has(st.id)) {
-      stTitle.appendChild(chainDot("chain-split-dot", chainInfo.colors.get(st.id)));
+    if (chainInfo && chainInfo.splitDots.has(st.id)) {
+      stTitle.appendChild(chainDot("chain-split-dot", chainInfo.splitDots.get(st.id)));
     }
   }
   const stEdit = document.createElement("button");
@@ -286,7 +286,7 @@ function taskNode(task, chainInfo = null) {
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
-  const liColor = chainInfo ? chainInfo.colors.get(task.id) : null;
+  const liColor = chainInfo ? chainInfo.branchDots.get(task.id) : null;
   if (liColor) li.appendChild(chainDot("chain-corner-dot", liColor));
 
   const editingThisTask = E.taskId === task.id && E.pending && E.pending.kind === "task"

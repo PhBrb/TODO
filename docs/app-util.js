@@ -276,8 +276,8 @@ function chainColorInfo(items) {
     successors.get(it.chainedAfter).push(it);
   }
   for (const list of successors.values()) list.sort((a, b) => indexOf.get(a.id) - indexOf.get(b.id));
-  const colors = new Map();
-  const splits = new Set();
+  const branchDots = new Map();
+  const splitDots = new Map();
   const assigned = new Set();
   let colorIndex = 0;
   for (const it of items) {
@@ -296,14 +296,17 @@ function chainColorInfo(items) {
       for (const s of successors.get(item.id) || []) emit(s);
     };
     emit(head);
-    if (!ordered.some((c) => (successors.get(c.id) || []).length > 1)) continue;
     for (const c of ordered) {
-      colors.set(c.id, CHAIN_PALETTE[colorIndex % CHAIN_PALETTE.length]);
-      colorIndex += 1;
-      if ((successors.get(c.id) || []).length > 1) splits.add(c.id);
+      const succ = successors.get(c.id) || [];
+      if (succ.length > 1) {
+        const color = CHAIN_PALETTE[colorIndex % CHAIN_PALETTE.length];
+        colorIndex += 1;
+        splitDots.set(c.id, color);
+        for (const s of succ) branchDots.set(s.id, color);
+      }
     }
   }
-  return { colors, splits };
+  return { branchDots, splitDots };
 }
 
 function chainDot(className, color) {
