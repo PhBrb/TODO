@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -50,11 +50,14 @@ function taskCheckbox(li, task) {
   return cb;
 }
 
-function taskTitleNode(task, editingThisTask) {
+function taskTitleNode(task, editingThisTask, chainInfo = null) {
   if (!editingThisTask) {
     const title = document.createElement("div");
     title.className = "task-title";
     title.textContent = task.title;
+    if (chainInfo && chainInfo.splits.has(task.id)) {
+      title.appendChild(chainDot("chain-split-dot", chainInfo.colors.get(task.id)));
+    }
     return { node: title, input: null };
   }
   const input = buildTitleInput(task.title);
@@ -133,11 +136,13 @@ function subtaskCheckbox(row, task, st, stLocked, parentLocked) {
   return scb;
 }
 
-function subtaskRow(task, st, parentLocked) {
+function subtaskRow(task, st, parentLocked, chainInfo = null) {
   const row = document.createElement("div");
   row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
   row.dataset.parentId = task.id;
   row.dataset.subtaskId = st.id;
+  const rowColor = chainInfo ? chainInfo.colors.get(st.id) : null;
+  if (rowColor) row.appendChild(chainDot("chain-corner-dot", rowColor));
   const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
   const restoreSub = E.pending && E.pending.kind === "restore" && E.pending.subKey
     ? E.pending.subKey === task.id + ":" + st.id : false;
@@ -145,7 +150,12 @@ function subtaskRow(task, st, parentLocked) {
     || (editingSubtaskOf(task) === st && E.pending && E.pending.kind === "subtask");
   const stTitle = editingThisSub ? buildTitleInput(st.title) : document.createElement("span");
   stTitle.className = editingThisSub ? "subtask-title title-input" : "subtask-title";
-  if (!editingThisSub) stTitle.textContent = st.title;
+  if (!editingThisSub) {
+    stTitle.textContent = st.title;
+    if (chainInfo && chainInfo.splits.has(st.id)) {
+      stTitle.appendChild(chainDot("chain-split-dot", chainInfo.colors.get(st.id)));
+    }
+  }
   const stEdit = document.createElement("button");
   stEdit.className = "task-edit subtask-edit";
   stEdit.textContent = "\u270e";
@@ -218,6 +228,7 @@ function subtaskListNode(task, li) {
   sublist.className = "subtask-list" + (parentLocked ? " chain-locked" : "");
   const subs = chainOrdered(task.subtasks);
   const chainVis = chainVisibility(subs, isGlobalEditMode());
+  const chainInfo = chainColorInfo(task.subtasks);
   let prevSub = null;
   for (const st of subs) {
     const v = chainVis.get(st.id);
@@ -228,7 +239,7 @@ function subtaskListNode(task, li) {
       const withLine = chainSplitLine(task.subtasks, prevSub, st);
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st), { withLine }));
     }
-    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked);
+    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, chainInfo);
     sublist.appendChild(row);
     prevSub = st;
     if (editingThisSub) {
@@ -270,18 +281,20 @@ function taskActionsNode(task) {
   return actions;
 }
 
-function taskNode(task) {
+function taskNode(task, chainInfo = null) {
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
+  const liColor = chainInfo ? chainInfo.colors.get(task.id) : null;
+  if (liColor) li.appendChild(chainDot("chain-corner-dot", liColor));
 
   const editingThisTask = E.taskId === task.id && E.pending && E.pending.kind === "task"
     || (E.pending && E.pending.kind === "restore" && E.pending.taskId === task.id);
 
   const body = document.createElement("div");
   body.className = "task-body";
-  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask);
+  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, chainInfo);
   body.appendChild(title);
   body.appendChild(taskMetaNode(task));
   if (editingThisTask) {
@@ -308,6 +321,7 @@ let render = function () {
   const visible = tasksForTab();
   const sorted = chainOrdered(visible, sortTasks(visible));
   const chainVis = chainVisibility(Game.state.tasks, isGlobalEditMode() || AppUI.activeTab === "highlight");
+  const chainInfo = chainColorInfo(Game.state.tasks);
   const shown = sorted.filter((t) => !chainVis.get(t.id).hidden);
   const openEdit = E.active && E.active.scope.isConnected ? E.active : null;
   if (openEdit) {
@@ -327,7 +341,7 @@ let render = function () {
       const withLine = chainSplitLine(Game.state.tasks, prevTask, task);
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task), { withLine }));
     }
-    const node = taskNode(task);
+    const node = taskNode(task, chainInfo);
     AppUI.els.listEl.appendChild(node);
     if (v.zigzagBelow) AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
     prevTask = task;

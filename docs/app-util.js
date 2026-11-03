@@ -261,6 +261,58 @@ function chainSplitLine(siblings, prev, item) {
   );
 }
 
+const CHAIN_PALETTE = [
+  "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+  "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+];
+
+function chainColorInfo(items) {
+  const byId = new Map(items.map((it) => [it.id, it]));
+  const successors = new Map();
+  for (const it of items) {
+    if (!it.chainedAfter || !byId.has(it.chainedAfter)) continue;
+    if (!successors.has(it.chainedAfter)) successors.set(it.chainedAfter, []);
+    successors.get(it.chainedAfter).push(it);
+  }
+  const colors = new Map();
+  const splits = new Set();
+  const assigned = new Set();
+  let colorIndex = 0;
+  for (const it of items) {
+    const chained = Boolean(it.chainedAfter && byId.has(it.chainedAfter));
+    if (!chained && !(successors.get(it.id) || []).length) continue;
+    let head = it;
+    while (head.chainedAfter && byId.has(head.chainedAfter)) head = byId.get(head.chainedAfter);
+    if (assigned.has(head.id)) continue;
+    assigned.add(head.id);
+    const component = [];
+    const stack = [head];
+    const seen = new Set();
+    while (stack.length) {
+      const cur = stack.pop();
+      if (seen.has(cur.id)) continue;
+      seen.add(cur.id);
+      component.push(cur);
+      for (const s of successors.get(cur.id) || []) stack.push(s);
+    }
+    if (!component.some((c) => (successors.get(c.id) || []).length > 1)) continue;
+    const color = CHAIN_PALETTE[colorIndex % CHAIN_PALETTE.length];
+    colorIndex += 1;
+    for (const c of component) {
+      colors.set(c.id, color);
+      if ((successors.get(c.id) || []).length > 1) splits.add(c.id);
+    }
+  }
+  return { colors, splits };
+}
+
+function chainDot(className, color) {
+  const dot = document.createElement("span");
+  dot.className = className;
+  dot.style.background = color;
+  return dot;
+}
+
 function zigzagNode(className) {
   const row = document.createElement(className === "chain-zigzag-row" ? "li" : "div");
   row.className = className;
@@ -339,4 +391,4 @@ function labeledField(labelText, els, hidden = false, labelExtra = null) {
   return field;
 }
 
-export { CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
+export { CHAIN_PALETTE, CHAIN_VISIBLE_UNCHECKED, CUSTOM_DAYS_OPTIONS, DELETE_ARM_MS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, TIME_OF_DAY_HOURS_OPTIONS, TIME_OF_DAY_MINUTES_OPTIONS, WEEKDAY_CHECKBOXES, armDeleteButton, buildSelect, chainColorInfo, chainDot, chainLinkNode, chainOrdered, chainSplitLine, chainVisibility, createDueAtWheels, createWheel, deadlineInputValue, formatDeadline, formatMinutesSeconds, isGlobalEditMode, isRepeatingRepeat, labeledField, mountWheel, readScheduleValues, scheduleValuesFromTask, sortTasks, timeLimitRemaining, zigzagNode };
