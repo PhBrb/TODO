@@ -618,18 +618,6 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-pin.pinned { color: var(--accent); opacity: 1; }
 
-#buy-streak-freeze-btn {
-  border: 1px solid #ddd8f0;
-  background: #fff;
-  border-radius: 10px;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  margin-left: auto;
-}
-
-#buy-streak-freeze-btn:active { background: #e8f0ff; }
-
 @keyframes delete-arm-fade {
   from { color: #c0392b; }
   to { color: var(--muted); }

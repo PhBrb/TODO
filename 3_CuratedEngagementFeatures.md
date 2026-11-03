@@ -110,8 +110,8 @@ Curated from 2_EngagemetFeatures.md
 
 
 #### Streak freeze
-- ~~F37: protects a streak for a day~~ (streak freeze bought with gems in settings; auto-used when a streak would fail)
-- ~~F38: Can be bought with gems to protect one streak, all streaks or all streaks for a user specified time (eg. for when the user is on vacation)~~ (one freeze protects one streak for one missed period)
+- ~~F37: protects a streak for a day~~ (streak freeze bought with gems in the shop; auto-used when a streak would fail)
+- ~~F38: Can be bought with gems to protect one streak, all streaks or all streaks for a user specified time (eg. for when the user is on vacation)~~ (one freeze protects one streak for one missed period; bought in the shop)
   - Notification when multi day freeze is over
 - ~~F39: Option to automaticly freeze a streak if it would have been lost~~
 

@@ -40,8 +40,6 @@ export const AppUI = {
     infoOverlay: $("info-overlay"),
     infoClose: $("info-close"),
     infoContent: $("info-content"),
-    streakFreezeCount: $("streak-freeze-count"),
-    buyStreakFreezeBtn: $("buy-streak-freeze-btn"),
     dayStartSelect: $("day-start-select"),
     uiSheetEl: $("ui-sheet"),
     sheetHandleEl: $("sheet-handle"),
