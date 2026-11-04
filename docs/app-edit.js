@@ -126,11 +126,17 @@ function promptDifficultyRating(task) {
 function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   const selectors = document.createElement("div");
   selectors.className = "edit-selectors form-row-labeled";
-  selectors.appendChild(labeledField("Type", [listSel.el]));
-  selectors.appendChild(labeledField("Difficulty", [diff.el]));
-  selectors.appendChild(labeledField("Repeat", [rep.el]));
-  selectors.appendChild(scheduleArea.dueAtField);
-  selectors.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
+  const mainRow = document.createElement("div");
+  mainRow.className = "edit-selectors-row";
+  mainRow.appendChild(labeledField("Type", [listSel.el]));
+  mainRow.appendChild(labeledField("Difficulty", [diff.el]));
+  mainRow.appendChild(labeledField("Repeat", [rep.el]));
+  const timeRow = document.createElement("div");
+  timeRow.className = "edit-selectors-row";
+  timeRow.appendChild(scheduleArea.dueAtField);
+  timeRow.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
+  selectors.appendChild(mainRow);
+  selectors.appendChild(timeRow);
   return selectors;
 }
 
