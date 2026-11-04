@@ -146,7 +146,8 @@ function subtaskCheckbox(row, task, st, stLocked, parentLocked) {
 
 function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false) {
   const row = document.createElement("div");
-  row.className = "subtask subtask-row-" + st.id + (st.done ? " done" : "");
+  row.className = "subtask subtask-row-" + st.id + " diff-" + st.difficulty + (st.done ? " done" : "");
+  row.title = "Difficulty: " + st.difficulty.replace("_", " ");
   row.dataset.parentId = task.id;
   row.dataset.subtaskId = st.id;
   const rowColor = chainInfo ? chainInfo.branchDots.get(st.id) : null;
@@ -169,9 +170,6 @@ function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false
   stEdit.className = "task-edit subtask-edit";
   stEdit.textContent = "\u270e";
   stEdit.addEventListener("click", () => openSubtaskEdit(task, st));
-  const stBadge = document.createElement("span");
-  stBadge.className = "subtask-difficulty-dot " + st.difficulty;
-  stBadge.title = st.difficulty.replace("_", " ");
   const stDel = document.createElement("button");
   stDel.className = "task-delete subtask-delete";
   stDel.textContent = "\u2715";
@@ -179,7 +177,6 @@ function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false
   subtaskDraggable(row, task, st);
   row.appendChild(subtaskCheckbox(row, task, st, stLocked, parentLocked));
   row.appendChild(stTitle);
-  row.appendChild(stBadge);
   row.appendChild(stEdit);
   row.appendChild(stDel);
   return { row, editingThisSub, stTitle };
