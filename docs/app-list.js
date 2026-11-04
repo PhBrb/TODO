@@ -144,14 +144,14 @@ function subtaskCheckbox(row, task, st, stLocked, parentLocked) {
   return scb;
 }
 
-function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false) {
+function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false, zigzagAbove = false) {
   const row = document.createElement("div");
   row.className = "subtask subtask-row-" + st.id + " diff-" + st.difficulty + (st.done ? " done" : "");
   row.title = "Difficulty: " + st.difficulty.replace("_", " ");
   row.dataset.parentId = task.id;
   row.dataset.subtaskId = st.id;
   const rowColor = chainInfo ? chainInfo.branchDots.get(st.id) : null;
-  if (rowColor) row.appendChild(chainDot("chain-corner-dot", rowColor));
+  if (rowColor && (inlineLink || zigzagAbove)) row.appendChild(chainDot("chain-corner-dot", rowColor));
   if (inlineLink) row.appendChild(chainInlineSymbol(() => Game.unchainSubtask(task, st)));
   const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
   const restoreSub = E.pending && E.pending.kind === "restore" && E.pending.subKey
@@ -246,7 +246,7 @@ function subtaskListNode(task, li, chainInfo = null) {
     } else if (prevIsPredecessor) {
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
     }
-    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo, inlineLink);
+    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo, inlineLink, v.zigzagAbove);
     sublist.appendChild(row);
     prevSub = st;
     if (editingThisSub) {
@@ -296,13 +296,13 @@ function taskActionsNode(task) {
   return actions;
 }
 
-function taskNode(task, chainInfo = null, inlineLink = false) {
+function taskNode(task, chainInfo = null, inlineLink = false, zigzagAbove = false) {
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
   const liColor = chainInfo ? chainInfo.branchDots.get(task.id) : null;
-  if (liColor) li.appendChild(chainDot("chain-corner-dot", liColor));
+  if (liColor && (inlineLink || zigzagAbove)) li.appendChild(chainDot("chain-corner-dot", liColor));
   if (inlineLink) li.appendChild(chainInlineSymbol(() => Game.unchainTask(task)));
 
   const editingThisTask = E.taskId === task.id && E.pending && E.pending.kind === "task"
@@ -358,7 +358,7 @@ let render = function () {
     } else if (prevIsPredecessor) {
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
     }
-    const node = taskNode(task, chainInfo, inlineLink);
+    const node = taskNode(task, chainInfo, inlineLink, v.zigzagAbove);
     AppUI.els.listEl.appendChild(node);
     if (v.zigzagBelow) AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
     prevTask = task;
