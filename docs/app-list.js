@@ -3,7 +3,7 @@ import { subtaskDraggable, taskDraggable } from "./app-drag.js";
 import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, editingSubtaskOf, openEditRow, openSubtaskEdit } from "./app-edit.js";
 import { AppUI } from "./app-state.js";
 import { renderBalances, vibrateForReward } from "./app-ui.js";
-import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainInlineSymbol, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagNode } from "./app-util.js";
+import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainInlineSymbol, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagEdgeNode } from "./app-util.js";
 
 const E = AppUI.edit;
 
@@ -144,15 +144,19 @@ function subtaskCheckbox(row, task, st, stLocked, parentLocked) {
   return scb;
 }
 
-function subtaskRow(task, st, parentLocked, chainInfo = null, inlineLink = false, zigzagAbove = false) {
+function subtaskRow(task, st, parentLocked, chainInfo = null, chainUi = null) {
   const row = document.createElement("div");
   row.className = "subtask subtask-row-" + st.id + " diff-" + st.difficulty + (st.done ? " done" : "");
   row.title = "Difficulty: " + st.difficulty.replace("_", " ");
   row.dataset.parentId = task.id;
   row.dataset.subtaskId = st.id;
   const rowColor = chainInfo ? chainInfo.branchDots.get(st.id) : null;
-  if (rowColor && (inlineLink || zigzagAbove)) row.appendChild(chainDot("chain-corner-dot", rowColor));
-  if (inlineLink) row.appendChild(chainInlineSymbol(() => Game.unchainSubtask(task, st)));
+  if (rowColor && chainUi && (chainUi.inlineLink || chainUi.zigzagAbove)) {
+    row.appendChild(chainDot("chain-corner-dot", rowColor));
+  }
+  if (chainUi && chainUi.inlineLink) row.appendChild(chainInlineSymbol(() => Game.unchainSubtask(task, st)));
+  if (chainUi && chainUi.zigzagAbove) row.appendChild(zigzagEdgeNode(true));
+  if (chainUi && chainUi.zigzagBelow) row.appendChild(zigzagEdgeNode(false));
   const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
   const restoreSub = E.pending && E.pending.kind === "restore" && E.pending.subKey
     ? E.pending.subKey === task.id + ":" + st.id : false;
@@ -240,20 +244,21 @@ function subtaskListNode(task, li, chainInfo = null) {
     const v = chainVis.get(st.id);
     if (v.hidden) continue;
     const prevIsPredecessor = prevSub && prevSub.id === st.chainedAfter;
-    const inlineLink = Boolean(st.chainedAfter) && !v.zigzagAbove && !prevIsPredecessor;
-    if (v.zigzagAbove) {
-      sublist.appendChild(zigzagNode("subtask-zigzag-row"));
-    } else if (prevIsPredecessor) {
+    const chainUi = {
+      inlineLink: Boolean(st.chainedAfter) && !v.zigzagAbove && !prevIsPredecessor,
+      zigzagAbove: v.zigzagAbove,
+      zigzagBelow: v.zigzagBelow,
+    };
+    if (!v.zigzagAbove && prevIsPredecessor) {
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
     }
-    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo, inlineLink, v.zigzagAbove);
+    const { row, editingThisSub, stTitle } = subtaskRow(task, st, parentLocked, subInfo, chainUi);
     sublist.appendChild(row);
     prevSub = st;
     if (editingThisSub) {
       activateEdit(li, stTitle, E.pending.controls, E.pending.onSave);
       sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
     }
-    if (v.zigzagBelow) sublist.appendChild(zigzagNode("subtask-zigzag-row"));
   }
   if (!task.done) sublist.appendChild(subtaskAddRow(task));
   return sublist;
@@ -296,14 +301,18 @@ function taskActionsNode(task) {
   return actions;
 }
 
-function taskNode(task, chainInfo = null, inlineLink = false, zigzagAbove = false) {
+function taskNode(task, chainInfo = null, chainUi = null) {
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
   const liColor = chainInfo ? chainInfo.branchDots.get(task.id) : null;
-  if (liColor && (inlineLink || zigzagAbove)) li.appendChild(chainDot("chain-corner-dot", liColor));
-  if (inlineLink) li.appendChild(chainInlineSymbol(() => Game.unchainTask(task)));
+  if (liColor && chainUi && (chainUi.inlineLink || chainUi.zigzagAbove)) {
+    li.appendChild(chainDot("chain-corner-dot", liColor));
+  }
+  if (chainUi && chainUi.inlineLink) li.appendChild(chainInlineSymbol(() => Game.unchainTask(task)));
+  if (chainUi && chainUi.zigzagAbove) li.appendChild(zigzagEdgeNode(true));
+  if (chainUi && chainUi.zigzagBelow) li.appendChild(zigzagEdgeNode(false));
 
   const editingThisTask = E.taskId === task.id && E.pending && E.pending.kind === "task"
     || (E.pending && E.pending.kind === "restore" && E.pending.taskId === task.id);
@@ -352,15 +361,16 @@ let render = function () {
   for (const task of shown) {
     const v = chainVis.get(task.id);
     const prevIsPredecessor = prevTask && prevTask.id === task.chainedAfter;
-    const inlineLink = Boolean(task.chainedAfter) && !v.zigzagAbove && !prevIsPredecessor;
-    if (v.zigzagAbove) {
-      AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
-    } else if (prevIsPredecessor) {
+    const chainUi = {
+      inlineLink: Boolean(task.chainedAfter) && !v.zigzagAbove && !prevIsPredecessor,
+      zigzagAbove: v.zigzagAbove,
+      zigzagBelow: v.zigzagBelow,
+    };
+    if (!v.zigzagAbove && prevIsPredecessor) {
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
     }
-    const node = taskNode(task, chainInfo, inlineLink, v.zigzagAbove);
+    const node = taskNode(task, chainInfo, chainUi);
     AppUI.els.listEl.appendChild(node);
-    if (v.zigzagBelow) AppUI.els.listEl.appendChild(zigzagNode("chain-zigzag-row"));
     prevTask = task;
   }
 
