@@ -520,7 +520,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: none;
   color: var(--muted);
   font-size: 1rem;
-  padding: 4px 6px;
+  padding: 4px 3px;
   cursor: pointer;
 }
 
@@ -617,7 +617,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: none;
   color: var(--muted);
   font-size: 1rem;
-  padding: 4px 6px;
+  padding: 4px 3px;
   cursor: pointer;
 }
 
@@ -631,7 +631,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: none;
   color: var(--muted);
   font-size: 1rem;
-  padding: 4px 6px;
+  padding: 4px 3px;
   cursor: pointer;
   opacity: 0.6;
 }
