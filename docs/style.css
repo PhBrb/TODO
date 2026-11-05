@@ -1126,8 +1126,8 @@ body.actions-hidden .subtask-add { display: none; }
 .edit-selectors-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
 .edit-selectors .labeled-field { flex: 1 1 30%; min-width: 92px; }
 .edit-selectors .labeled-field:has(.due-at-wheels) { flex: 2 1 40%; min-width: 190px; }
-.edit-selectors .deadline-slot { flex: 2 1 40%; min-width: 190px; }
-#deadline-slot { flex: 3 2 0%; min-width: 190px; }
+.edit-selectors .deadline-slot { flex: 2 1 0%; min-width: 190px; }
+#deadline-slot { flex: 2 1 0%; min-width: 190px; }
 
 .edit-schedule { margin-top: 6px; flex: 1 1 100%; }
 .edit-schedule .wheel-select { flex: 1 1 30%; }
