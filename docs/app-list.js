@@ -154,10 +154,7 @@ function subtaskRow(task, st, parentLocked, chainInfo = null, chainUi = null) {
   if (rowColor && chainUi && (chainUi.inlineLink || chainUi.zigzagAbove)) {
     row.appendChild(chainDot("chain-corner-dot", rowColor));
   }
-  if (chainUi && chainUi.inlineLink) {
-    row.classList.add("has-chain-link");
-    row.appendChild(chainInlineSymbol(() => Game.unchainSubtask(task, st)));
-  }
+  if (chainUi && chainUi.inlineLink) row.appendChild(chainInlineSymbol(() => Game.unchainSubtask(task, st)));
   if (chainUi && chainUi.zigzagAbove) row.appendChild(zigzagEdgeNode(true));
   if (chainUi && chainUi.zigzagBelow) row.appendChild(zigzagEdgeNode(false));
   const stLocked = parentLocked || (!Game.subtaskChainSatisfies(task, st) && !st.done);
