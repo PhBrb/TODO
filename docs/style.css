@@ -1120,7 +1120,7 @@ body.actions-hidden .subtask-add { display: none; }
   color: #fff;
 }
 
-.edit-selectors { display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%; }
+.edit-selectors { display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%; align-items: stretch; }
 .edit-selectors-row { display: flex; gap: 8px; align-items: flex-start; }
 .edit-selectors .labeled-field { flex: 1; min-width: 0; }
 .edit-selectors .labeled-field:has(.due-at-wheels) { flex: 2 1 0%; }
