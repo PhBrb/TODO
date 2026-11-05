@@ -463,6 +463,8 @@ body.actions-hidden .subtask-add { display: none; }
 
 .subtask-edit, .subtask-delete { flex-shrink: 0; }
 
+.subtask.has-chain-link { padding-right: 30px; }
+
 .subtask-delete { font-size: 0.75rem; padding: 2px 4px; }
 
 .subtask-add {
