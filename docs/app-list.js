@@ -240,6 +240,7 @@ function subtaskListNode(task, li, chainInfo = null) {
   const chainVis = chainVisibility(subs, isGlobalEditMode());
   const subInfo = chainInfo && chainInfo.subtasks ? chainInfo.subtasks.get(task.id) : null;
   let prevSub = null;
+  let anyInlineLink = false;
   for (const st of subs) {
     const v = chainVis.get(st.id);
     if (v.hidden) continue;
@@ -249,6 +250,7 @@ function subtaskListNode(task, li, chainInfo = null) {
       zigzagAbove: v.zigzagAbove,
       zigzagBelow: v.zigzagBelow,
     };
+    anyInlineLink = anyInlineLink || chainUi.inlineLink;
     if (!v.zigzagAbove && prevIsPredecessor) {
       sublist.appendChild(chainLinkNode("subtask-link-row", () => Game.unchainSubtask(task, st)));
     }
@@ -260,6 +262,7 @@ function subtaskListNode(task, li, chainInfo = null) {
       sublist.insertBefore(buildEditControlsRow(), row.nextSibling);
     }
   }
+  sublist.classList.toggle("has-chain-link", anyInlineLink);
   if (!task.done) sublist.appendChild(subtaskAddRow(task));
   return sublist;
 }

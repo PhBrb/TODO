@@ -418,6 +418,8 @@ body.actions-hidden .subtask-add { display: none; }
 
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
 
+.subtask-list.has-chain-link .subtask { padding-right: 30px; }
+
 .subtask-list {
   margin-top: 2px;
   display: flex;
@@ -429,7 +431,7 @@ body.actions-hidden .subtask-add { display: none; }
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 1px 30px 0 0;
+  padding: 1px 6px 0 0;
   font-size: 0.85rem;
   position: relative;
 }
@@ -520,7 +522,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: none;
   color: var(--muted);
   font-size: 1rem;
-  padding: 4px 3px;
+  padding: 4px 1px;
   cursor: pointer;
 }
 
@@ -617,7 +619,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: none;
   color: var(--muted);
   font-size: 1rem;
-  padding: 4px 3px;
+  padding: 4px 1px;
   cursor: pointer;
 }
 
@@ -631,7 +633,7 @@ body.actions-hidden .subtask-add { display: none; }
   background: none;
   color: var(--muted);
   font-size: 1rem;
-  padding: 4px 3px;
+  padding: 4px 1px;
   cursor: pointer;
   opacity: 0.6;
 }
