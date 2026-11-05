@@ -125,17 +125,23 @@ function iceAgeNode(ctx) {
     const active = document.createElement("div");
     active.className = "item-lock";
     card.appendChild(active);
-    const tick = () => {
+    const update = () => {
       const left = Game.state.iceAgeUntil - Date.now();
-      if (left <= 0 || !card.isConnected) {
+      if (left <= 0) {
         clearInterval(timer);
         if (card.isConnected) renderShop(ctx);
         return;
       }
       active.textContent = `\u2744\ufe0f Active \u2014 ${formatIceAgeRemaining(left)}`;
     };
-    const timer = setInterval(tick, 1000);
-    tick();
+    const timer = setInterval(() => {
+      if (!card.isConnected) {
+        clearInterval(timer);
+        return;
+      }
+      update();
+    }, 1000);
+    update();
     return card;
   }
   const duration = buildSelect(
