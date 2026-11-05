@@ -1043,6 +1043,15 @@ body.actions-hidden .subtask-add { display: none; }
 
 .shop-item.locked { opacity: 0.55; }
 .shop-item .item-lock { font-size: 0.75rem; color: var(--muted); }
+.shop-item .ice-age-duration {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  color: var(--text);
+}
 
 .shop-empty {
   width: 100%;
