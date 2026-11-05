@@ -1084,8 +1084,6 @@ body.actions-hidden .subtask-add { display: none; }
 
 .repeat-schedule .repeat-every-label { flex: 1 1 100%; font-size: 0.85rem; color: var(--muted); }
 .repeat-schedule .wheel-select { flex: 1; min-width: 0; }
-.repeat-schedule .due-at-hour,
-.repeat-schedule .due-at-minute { flex: 0 1 22%; }
 
 .day-toggle-grid {
   flex: 1 1 100%;
@@ -1123,14 +1121,14 @@ body.actions-hidden .subtask-add { display: none; }
 }
 
 .edit-selectors { display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%; }
-.edit-selectors-row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
-.edit-selectors .labeled-field { flex: 1 1 30%; min-width: 92px; }
-.edit-selectors .labeled-field:has(.due-at-wheels) { flex: 2 1 40%; min-width: 190px; }
+.edit-selectors-row { display: flex; gap: 8px; align-items: flex-start; }
+.edit-selectors .labeled-field { flex: 1; min-width: 0; }
+.edit-selectors .labeled-field:has(.due-at-wheels) { flex: 2 1 0%; }
 .edit-selectors .deadline-slot { flex: 2 1 0%; min-width: 190px; }
 #deadline-slot { flex: 2 1 0%; min-width: 190px; }
+#due-at-field { flex: 2 1 0%; }
 
 .edit-schedule { margin-top: 6px; flex: 1 1 100%; }
-.edit-schedule .wheel-select { flex: 1 1 30%; }
 
 .after-completion-label {
   display: flex;
