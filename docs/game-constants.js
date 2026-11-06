@@ -1,5 +1,5 @@
 
-const VERSION = "0.68.12";
+const VERSION = "0.68.13";
 
 const STORAGE_KEY = "todo-mwe-state";
 
