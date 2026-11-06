@@ -19,7 +19,7 @@ import { VERSION } from "./game-constants.js";
   const classes = window.ASSET_CLASSES || {};
   const sources = [
     { manifest: window.KENNEY_MANIFEST || {}, base: "models/kenney" },
-    { manifest: window.SOOAHS_MANIFEST || {}, base: "models/sooahs" },
+    { manifest: window.SOOAHS_MANIFEST || {}, base: "models" },
   ];
   const entries = [];
   for (const { manifest, base } of sources) {
