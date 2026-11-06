@@ -1129,6 +1129,7 @@ body.actions-hidden .subtask-add { display: none; }
 #due-at-field { flex: 2 1 0%; }
 
 .edit-schedule { margin-top: 6px; flex: 1 1 100%; }
+.edit-schedule > .repeat-schedule { flex: 1 1 100%; }
 
 .after-completion-label {
   display: flex;
