@@ -445,3 +445,7 @@ window.ASSET_CLASSES["sooahs/books.gltf"] = "furniture";
 window.ASSET_CLASSES["sooahs/chair-seat.gltf"] = "furniture";
 window.ASSET_CLASSES["sooahs/boxes.gltf"] = "furniture";
 window.ASSET_CLASSES["sooahs/fish.gltf"] = "pets";
+window.ASSET_CLASSES["sooahs/clock.gltf"] = "furniture";
+window.ASSET_CLASSES["sooahs/window.gltf"] = "walls";
+window.ASSET_CLASSES["sooahs/floor.gltf"] = "ground";
+window.ASSET_CLASSES["sooahs/fish-bowl.gltf"] = "pets";

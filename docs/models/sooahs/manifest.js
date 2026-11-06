@@ -4,6 +4,7 @@
 window.SOOAHS_MANIFEST = {
   "sooahs": [
     "boba-plushie.gltf",
+    "clock.gltf",
     "books.gltf",
     "boxes.gltf",
     "bulbs.gltf",
@@ -13,6 +14,8 @@ window.SOOAHS_MANIFEST = {
     "desk-lamp.gltf",
     "eggs.gltf",
     "fish.gltf",
+    "fish-bowl.gltf",
+    "floor.gltf",
     "flower-basket.gltf",
     "flowers.gltf",
     "headphones.gltf",
@@ -22,5 +25,6 @@ window.SOOAHS_MANIFEST = {
     "rocks.gltf",
     "seaweed.gltf",
     "slippers.gltf",
+    "window.gltf",
   ],
 };

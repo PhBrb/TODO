@@ -1,0 +1,194 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "name": "fish-bowl-pos-0",
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 2208,
+   "max": [
+    0.5241313576698303,
+    0.8485022187232971,
+    0.5241313576698303
+   ],
+   "min": [
+    -0.5241313576698303,
+    0,
+    -0.5241313576698303
+   ],
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "name": "fish-bowl-nor-0",
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 2208,
+   "bufferView": 0,
+   "byteOffset": 12
+  },
+  {
+   "name": "fish-bowl-uv-0",
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 2208,
+   "bufferView": 0,
+   "byteOffset": 24
+  },
+  {
+   "name": "fish-bowl-idx-0",
+   "type": "SCALAR",
+   "componentType": 5125,
+   "count": 2208,
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "name": "fish-bowl-idx-1",
+   "type": "SCALAR",
+   "componentType": 5125,
+   "count": 576,
+   "bufferView": 1,
+   "byteOffset": 8832
+  },
+  {
+   "name": "fish-bowl-pos-1",
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 576,
+   "max": [
+    0.44453975558280945,
+    0.7559158205986023,
+    0.44453975558280945
+   ],
+   "min": [
+    -0.44453975558280945,
+    0.08526670932769775,
+    -0.44453975558280945
+   ],
+   "bufferView": 2,
+   "byteOffset": 0
+  },
+  {
+   "name": "fish-bowl-nor-1",
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 576,
+   "bufferView": 2,
+   "byteOffset": 12
+  },
+  {
+   "name": "fish-bowl-uv-1",
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 576,
+   "bufferView": 2,
+   "byteOffset": 24
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 70656,
+   "byteStride": 32,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 70656,
+   "byteLength": 11136,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 81792,
+   "byteLength": 18432,
+   "byteStride": 32,
+   "target": 34962
+  }
+ ],
+ "buffers": [
+  {
+   "name": "fish-bowl-buffer",
+   "uri": "fish-bowl.bin",
+   "byteLength": 100224
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_fish-bowl_0",
+   "alphaMode": "BLEND",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.98,
+     0.98,
+     0.98,
+     0.25
+    ],
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0
+   }
+  },
+  {
+   "name": "mat_fish-bowl_1",
+   "alphaMode": "BLEND",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.33,
+     0.55,
+     0.78,
+     0.4
+    ],
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "fish-bowl",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 3
+    },
+    {
+     "attributes": {
+      "POSITION": 5,
+      "NORMAL": 6,
+      "TEXCOORD_0": 7
+     },
+     "mode": 4,
+     "material": 1,
+     "indices": 4
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "fish-bowl",
+   "mesh": 0
+  }
+ ],
+ "scenes": [
+  {
+   "nodes": [
+    0
+   ]
+  }
+ ],
+ "extensionsUsed": []
+}

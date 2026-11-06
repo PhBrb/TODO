@@ -1,0 +1,137 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "name": "clock-pos-0",
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 8232,
+   "max": [
+    0.05723342299461365,
+    0.7110986709594727,
+    0.3555490970611572
+   ],
+   "min": [
+    -0.05723342299461365,
+    0,
+    -0.3555490970611572
+   ],
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "name": "clock-nor-0",
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 8232,
+   "bufferView": 0,
+   "byteOffset": 12
+  },
+  {
+   "name": "clock-uv-0",
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 8232,
+   "bufferView": 0,
+   "byteOffset": 24
+  },
+  {
+   "name": "clock-idx-0",
+   "type": "SCALAR",
+   "componentType": 5125,
+   "count": 8232,
+   "bufferView": 1,
+   "byteOffset": 0
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 263424,
+   "byteStride": 32,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 263424,
+   "byteLength": 32928,
+   "target": 34963
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "atlas_clock_0",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_first.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "name": "clock-buffer",
+   "uri": "clock.bin",
+   "byteLength": 296352
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_clock_0",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "clock",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 3
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "clock",
+   "mesh": 0
+  }
+ ],
+ "scenes": [
+  {
+   "nodes": [
+    0
+   ]
+  }
+ ],
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}
