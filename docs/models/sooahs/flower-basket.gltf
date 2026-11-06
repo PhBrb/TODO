@@ -1,0 +1,159 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 91440,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 17055,
+   "max": [
+    0.3316742777824402,
+    0.8035178184509277,
+    0.31884491443634033
+   ],
+   "min": [
+    -0.3316928744316101,
+    -0.005289554595947266,
+    -0.3188505172729492
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 17055,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 17055,
+   "bufferView": 1,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 17055,
+   "normalized": true,
+   "bufferView": 1,
+   "byteOffset": 32
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 182880,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 182880,
+   "byteLength": 682200,
+   "byteStride": 40,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_fourth",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_fourth.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "flower-basket.bin",
+   "byteLength": 865080
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_flower-basket.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Plane.069",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 1,
+      "NORMAL": 2,
+      "TEXCOORD_0": 3,
+      "COLOR_0": 4
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Flower_Basket_Raycaster_Hover_Fourth",
+   "translation": [
+    -2.1736931800842285,
+    2.2833681106567383,
+    1.1141393184661865
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "flower-basket",
+   "translation": [
+    2.1737024784088135,
+    -2.278078556060791,
+    -1.114136517047882
+   ],
+   "children": [
+    0
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    1
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

@@ -1,0 +1,159 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 6228,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 1480,
+   "max": [
+    0.2766340970993042,
+    0.19055113196372986,
+    0.19806325435638428
+   ],
+   "min": [
+    -0.2766340970993042,
+    -0.1905531883239746,
+    -0.19806909561157227
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 1480,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 1480,
+   "bufferView": 1,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 1480,
+   "normalized": true,
+   "bufferView": 1,
+   "byteOffset": 32
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 12456,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 12456,
+   "byteLength": 59200,
+   "byteStride": 40,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_fourth",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_fourth.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "fish.bin",
+   "byteLength": 71656
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_fish.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Plane.007",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 1,
+      "NORMAL": 2,
+      "TEXCOORD_0": 3,
+      "COLOR_0": 4
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Fish_Fourth_Hover_Raycaster",
+   "translation": [
+    -0.7588298320770264,
+    1.6547446250915527,
+    1.1837499141693115
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "fish",
+   "translation": [
+    0.7588298320770264,
+    -1.4641914367675781,
+    -1.1837469935417175
+   ],
+   "children": [
+    0
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    1
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

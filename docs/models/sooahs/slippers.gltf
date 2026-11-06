@@ -1,0 +1,238 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 4128,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 3888,
+   "bufferView": 0,
+   "byteOffset": 8256
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 839,
+   "max": [
+    0.47510695457458496,
+    0.31332075595855713,
+    0.300234854221344
+   ],
+   "min": [
+    -0.3854621648788452,
+    0.0018286705017089844,
+    -0.32007038593292236
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 839,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 839,
+   "bufferView": 1,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 839,
+   "normalized": true,
+   "bufferView": 1,
+   "byteOffset": 32
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 797,
+   "max": [
+    0.46474236249923706,
+    0.3154507577419281,
+    0.32641375064849854
+   ],
+   "min": [
+    -0.39360934495925903,
+    0.003975391387939453,
+    -0.2985802888870239
+   ],
+   "bufferView": 2,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 797,
+   "bufferView": 2,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 797,
+   "bufferView": 2,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 797,
+   "normalized": true,
+   "bufferView": 2,
+   "byteOffset": 32
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 16032,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 16032,
+   "byteLength": 33560,
+   "byteStride": 40,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 49592,
+   "byteLength": 31880,
+   "byteStride": 40,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_fourth",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_fourth.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "slippers.bin",
+   "byteLength": 81472
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_slippers.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Plane.150",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 2,
+      "NORMAL": 3,
+      "TEXCOORD_0": 4,
+      "COLOR_0": 5
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  },
+  {
+   "name": "Plane.151",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 6,
+      "NORMAL": 7,
+      "TEXCOORD_0": 8,
+      "COLOR_0": 9
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 1
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Slipper_1_Fourth_Hover_Raycaster",
+   "translation": [
+    -2.116384506225586,
+    0.525822639465332,
+    -1.6377650499343872
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "Slipper_2_Fourth_Hover_Raycaster",
+   "translation": [
+    -2.7326161861419678,
+    0.5236759185791016,
+    -2.420043468475342
+   ],
+   "mesh": 1
+  },
+  {
+   "name": "slippers",
+   "translation": [
+    2.383751541376114,
+    -0.527651309967041,
+    2.0280769765377045
+   ],
+   "children": [
+    0,
+    1
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    2
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

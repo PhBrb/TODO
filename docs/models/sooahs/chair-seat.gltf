@@ -1,0 +1,150 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 8724,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 1857,
+   "max": [
+    0.8030714988708496,
+    2.059509515762329,
+    0.7660708427429199
+   ],
+   "min": [
+    -0.7544772624969482,
+    0,
+    -0.7660845518112183
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 1857,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 1857,
+   "bufferView": 1,
+   "byteOffset": 24
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 17448,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 17448,
+   "byteLength": 59424,
+   "byteStride": 32,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_fourth",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_fourth.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "chair-seat.bin",
+   "byteLength": 76872
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_chair-seat.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Cube.038",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 1,
+      "NORMAL": 2,
+      "TEXCOORD_0": 3
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Chair_Top_Fourth",
+   "translation": [
+    -0.8156225681304932,
+    1.8063297271728516,
+    -1.8196930885314941
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "chair-seat",
+   "translation": [
+    0.7913254499435425,
+    -1.8063297271728516,
+    1.8196999430656433
+   ],
+   "children": [
+    0
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    1
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

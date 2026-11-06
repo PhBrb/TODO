@@ -1,0 +1,150 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 5172,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 1330,
+   "max": [
+    0.16716492176055908,
+    0.6232297420501709,
+    0.16716325283050537
+   ],
+   "min": [
+    -0.16717958450317383,
+    0,
+    -0.20689630508422852
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 1330,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 1330,
+   "bufferView": 1,
+   "byteOffset": 24
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 10344,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 10344,
+   "byteLength": 42560,
+   "byteStride": 32,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_third",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_third.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "microphone.bin",
+   "byteLength": 52904
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_microphone.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Plane.033",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 1,
+      "NORMAL": 2,
+      "TEXCOORD_0": 3
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Microphone_Hover_Third_Raycaster",
+   "translation": [
+    2.3530526161193848,
+    2.836702585220337,
+    -3.8365683555603027
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "microphone",
+   "translation": [
+    -2.3530452847480774,
+    -2.836702585220337,
+    3.8564348816871643
+   ],
+   "children": [
+    0
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    1
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

@@ -41,7 +41,7 @@ window.RoomConfig = {
     },
     mug: {
       type: "top",
-      url: "models/mug.gltf",
+      url: "models/sooahs/coffee-mug.gltf",
       scale: 1.5,
       baseY: 0,
       providesSurface: false,
@@ -49,7 +49,7 @@ window.RoomConfig = {
     },
     cactus: {
       type: "top",
-      url: "models/cactus.gltf",
+      url: "models/sooahs/cactus.gltf",
       scale: 2,
       baseY: 0,
       providesSurface: false,
@@ -57,7 +57,7 @@ window.RoomConfig = {
     },
     books: {
       type: "top",
-      url: "models/books.gltf",
+      url: "models/sooahs/books.gltf",
       scale: 1,
       baseY: 0,
       providesSurface: false,
@@ -65,7 +65,7 @@ window.RoomConfig = {
     },
     boba: {
       type: "top",
-      url: "models/boba.gltf",
+      url: "models/sooahs/boba-plushie.gltf",
       scale: 1,
       baseY: 0,
       providesSurface: false,
@@ -73,7 +73,7 @@ window.RoomConfig = {
     },
     headphones: {
       type: "top",
-      url: "models/headphones.gltf",
+      url: "models/sooahs/headphones.gltf",
       scale: 0.5,
       baseY: 0,
       providesSurface: false,

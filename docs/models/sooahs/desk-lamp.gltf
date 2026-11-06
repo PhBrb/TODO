@@ -1,0 +1,150 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 2592,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 632,
+   "max": [
+    0.43392476439476013,
+    1.149261474609375,
+    0.4325304627418518
+   ],
+   "min": [
+    -0.4301682412624359,
+    -0.024669647216796875,
+    -0.43156254291534424
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 632,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 632,
+   "bufferView": 1,
+   "byteOffset": 24
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 5184,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 5184,
+   "byteLength": 20224,
+   "byteStride": 32,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_first",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_first.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "desk-lamp.bin",
+   "byteLength": 25408
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_desk-lamp.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Cube.005",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 1,
+      "NORMAL": 2,
+      "TEXCOORD_0": 3
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Lamp_First_Hover_Raycaster",
+   "translation": [
+    -0.7746963500976562,
+    0.525822639465332,
+    -3.1963257789611816
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "desk-lamp",
+   "translation": [
+    0.7728180885314941,
+    -0.5011529922485352,
+    3.195841819047928
+   ],
+   "children": [
+    0
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    1
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

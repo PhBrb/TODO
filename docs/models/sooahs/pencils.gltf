@@ -1,0 +1,317 @@
+{
+ "asset": {
+  "generator": "glTF-Transform v4.5.1",
+  "version": "2.0"
+ },
+ "accessors": [
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 168,
+   "bufferView": 0,
+   "byteOffset": 0
+  },
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 168,
+   "bufferView": 0,
+   "byteOffset": 336
+  },
+  {
+   "type": "SCALAR",
+   "componentType": 5123,
+   "count": 168,
+   "bufferView": 0,
+   "byteOffset": 672
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 98,
+   "max": [
+    0.02178223431110382,
+    0.3160656690597534,
+    0.03183087706565857
+   ],
+   "min": [
+    -0.06527245044708252,
+    -0.0034273862838745117,
+    -0.02203226089477539
+   ],
+   "bufferView": 1,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 98,
+   "bufferView": 1,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 98,
+   "bufferView": 1,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 98,
+   "normalized": true,
+   "bufferView": 1,
+   "byteOffset": 32
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 102,
+   "max": [
+    0.022984974086284637,
+    0.3249654769897461,
+    0.028311915695667267
+   ],
+   "min": [
+    -0.023148953914642334,
+    0.003480076789855957,
+    -0.022904396057128906
+   ],
+   "bufferView": 2,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 102,
+   "bufferView": 2,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 102,
+   "bufferView": 2,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 102,
+   "normalized": true,
+   "bufferView": 2,
+   "byteOffset": 32
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 98,
+   "max": [
+    0.02261805534362793,
+    0.31675732135772705,
+    0.022924065589904785
+   ],
+   "min": [
+    -0.062097370624542236,
+    -0.003920316696166992,
+    -0.035405874252319336
+   ],
+   "bufferView": 3,
+   "byteOffset": 0
+  },
+  {
+   "type": "VEC3",
+   "componentType": 5126,
+   "count": 98,
+   "bufferView": 3,
+   "byteOffset": 12
+  },
+  {
+   "type": "VEC2",
+   "componentType": 5126,
+   "count": 98,
+   "bufferView": 3,
+   "byteOffset": 24
+  },
+  {
+   "type": "VEC4",
+   "componentType": 5123,
+   "count": 98,
+   "normalized": true,
+   "bufferView": 3,
+   "byteOffset": 32
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 1008,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 1008,
+   "byteLength": 3920,
+   "byteStride": 40,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 4928,
+   "byteLength": 4080,
+   "byteStride": 40,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 9008,
+   "byteLength": 3920,
+   "byteStride": 40,
+   "target": 34962
+  }
+ ],
+ "samplers": [
+  {
+   "wrapS": 10497,
+   "wrapT": 10497
+  }
+ ],
+ "textures": [
+  {
+   "source": 0,
+   "sampler": 0
+  }
+ ],
+ "images": [
+  {
+   "name": "sooahs_atlas_fourth",
+   "mimeType": "image/webp",
+   "uri": "../textures/sooahs_atlas_fourth.webp"
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "pencils.bin",
+   "byteLength": 12928
+  }
+ ],
+ "materials": [
+  {
+   "name": "mat_pencils.gltf",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "roughnessFactor": 0.9,
+    "metallicFactor": 0,
+    "baseColorTexture": {
+     "index": 0
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Plane.061",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 3,
+      "NORMAL": 4,
+      "TEXCOORD_0": 5,
+      "COLOR_0": 6
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 0
+    }
+   ]
+  },
+  {
+   "name": "Plane.062",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 7,
+      "NORMAL": 8,
+      "TEXCOORD_0": 9,
+      "COLOR_0": 10
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 1
+    }
+   ]
+  },
+  {
+   "name": "Plane.063",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 11,
+      "NORMAL": 12,
+      "TEXCOORD_0": 13,
+      "COLOR_0": 14
+     },
+     "mode": 4,
+     "material": 0,
+     "indices": 2
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Pencil_1_Fourth_Hover_Raycaster",
+   "translation": [
+    -2.677374839782715,
+    2.8640429973602295,
+    1.6113746166229248
+   ],
+   "mesh": 0
+  },
+  {
+   "name": "Pencil_2_Fourth_Hover_Raycaster",
+   "translation": [
+    -2.7118799686431885,
+    2.8584201335906982,
+    1.5681464672088623
+   ],
+   "mesh": 1
+  },
+  {
+   "name": "Pencil_3_Fourth_Hover_Raycaster",
+   "translation": [
+    -2.6531877517700195,
+    2.8623275756835938,
+    1.5403709411621094
+   ],
+   "mesh": 2
+  },
+  {
+   "name": "pencils",
+   "translation": [
+    2.6866084933280945,
+    -2.8584072589874268,
+    -1.5740852802991867
+   ],
+   "children": [
+    0,
+    1,
+    2
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    3
+   ]
+  }
+ ],
+ "scene": 0,
+ "extensionsUsed": [
+  "EXT_texture_webp"
+ ]
+}

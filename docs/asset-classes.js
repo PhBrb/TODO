@@ -434,3 +434,14 @@ window.ASSET_CLASSES = {
   "furniture/washer.glb": "furniture",
   "furniture/washerDryerStacked.glb": "furniture",
 };
+
+// sooahs-room-folio models (MIT) — grouped extractions from Room_Portfolio.glb
+window.ASSET_CLASSES["sooahs/cactus.gltf"] = "plants";
+window.ASSET_CLASSES["sooahs/flowers.gltf"] = "plants";
+window.ASSET_CLASSES["sooahs/flower-basket.gltf"] = "plants";
+window.ASSET_CLASSES["sooahs/seaweed.gltf"] = "plants";
+window.ASSET_CLASSES["sooahs/desk-lamp.gltf"] = "furniture";
+window.ASSET_CLASSES["sooahs/books.gltf"] = "furniture";
+window.ASSET_CLASSES["sooahs/chair-seat.gltf"] = "furniture";
+window.ASSET_CLASSES["sooahs/boxes.gltf"] = "furniture";
+window.ASSET_CLASSES["sooahs/fish.gltf"] = "pets";

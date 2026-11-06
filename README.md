@@ -4,4 +4,4 @@
 
 ## Credits
 
-- Room decoration models (`docs/models/boba.gltf`, `mug.gltf`, `headphones.gltf`, `cactus.gltf`, `books.gltf` and the shared `docs/models/textures/room_atlas_day.webp` atlas) were extracted from [sooahs-room-folio](https://github.com/andrewwoan/sooahs-room-folio) (MIT License).
+- Room decoration models in `docs/models/sooahs/` (and the shared day-bake atlases in `docs/models/textures/`) were extracted from [sooahs-room-folio](https://github.com/andrewwoan/sooahs-room-folio) (MIT License).
