@@ -461,6 +461,11 @@ function setUiSheetHeightVh(vh) {
   saveState();
 }
 
+function setRoomEnabled(enabled) {
+  state.roomEnabled = !!enabled;
+  saveState();
+}
+
 function maybeSuggestDifficultyReduction(task) {
   if (task.difficultySuggested) return;
   if (task.streak < DIFFICULTY_SUGGESTION_STREAK) return;
@@ -547,4 +552,4 @@ function editTask(id, updates) {
   emitRender();
 }
 
-export { EDIT_UPDATERS, addSubtask, addTask, chainHead, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, editSubtask, editTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
+export { EDIT_UPDATERS, addSubtask, addTask, chainHead, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, editSubtask, editTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };

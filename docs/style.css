@@ -37,6 +37,8 @@ body {
 
 #room-view canvas { display: block; touch-action: none; }
 
+body.room-disabled #room-view { display: none; }
+
 .ui-sheet {
   position: fixed;
   left: 50%;

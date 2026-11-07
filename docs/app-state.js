@@ -42,6 +42,7 @@ export const AppUI = {
     infoClose: $("info-close"),
     infoContent: $("info-content"),
     dayStartSelect: $("day-start-select"),
+    roomEnabledCheck: $("room-enabled-check"),
     uiSheetEl: $("ui-sheet"),
     sheetHandleEl: $("sheet-handle"),
     topProgressEl: document.querySelector(".daily-progress"),

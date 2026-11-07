@@ -32,8 +32,13 @@ function applySheetHeightVh(vh) {
   if (roomApi) roomApi.setVisibleHeightRatio(Math.max(0, 1 - clamped / 100));
 }
 
+function getInitialSheetVh() {
+  if (Game.state.roomEnabled === false) return getSheetMaxVh();
+  return Game.state.uiSheetHeightVh || SHEET_MIN_VH;
+}
+
 function initUiSheet() {
-  applySheetHeightVh(Game.state.uiSheetHeightVh || SHEET_MIN_VH);
+  applySheetHeightVh(getInitialSheetVh());
   window.addEventListener("room-ready", () => {
     applySheetHeightVh(parseFloat(AppUI.els.uiSheetEl.style.height) || SHEET_MIN_VH);
   });

@@ -40,6 +40,7 @@ function defaultState() {
     achievements: { unlocked: [], stats: defaultAchievementStats() },
     dayStartHour: 0,
     uiSheetHeightVh: 0,
+    roomEnabled: true,
     streakFreezes: 0,
     iceAgeUntil: 0,
   };
@@ -236,6 +237,7 @@ function migrateState(raw) {
     achievements: migrateAchievements(raw.achievements),
     dayStartHour: Math.min(23, Math.max(0, Math.floor(num(raw.dayStartHour, 0)))),
     uiSheetHeightVh: Math.min(95, Math.max(0, num(raw.uiSheetHeightVh, 0))),
+    roomEnabled: raw.roomEnabled !== false,
     streakFreezes: num(raw.streakFreezes, 0),
     iceAgeUntil: Math.max(0, num(raw.iceAgeUntil, 0)),
   };

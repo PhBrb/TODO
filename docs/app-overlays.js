@@ -309,6 +309,12 @@ function initOverlays() {
     Game.setDayStartHour(Number(els.dayStartSelect.value));
     showToast(`\ud83c\udf05 Your day now starts at ${els.dayStartSelect.value.padStart(2, "0")}:00`);
   });
+
+  els.roomEnabledCheck.checked = Game.state.roomEnabled !== false;
+  els.roomEnabledCheck.addEventListener("change", () => {
+    Game.setRoomEnabled(els.roomEnabledCheck.checked);
+    window.location.reload();
+  });
 }
 
 export { ACHIEVEMENT_STAT_KEYS, achievementNode, achievementProgressValue, initOverlays, itemCostLabel, renderAchievements, renderShop, setShopTab, shopItemNode, streakFreezeNode };
