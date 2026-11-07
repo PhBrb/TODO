@@ -413,6 +413,25 @@ body.actions-hidden .subtask-add { display: none; }
 
 #reset-btn:active { background: #ffe3e3; color: #c0392b; }
 
+.settings-backup {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+}
+
+.settings-backup button {
+  flex: 1;
+  border: 1px solid #ddd8f0;
+  background: none;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+}
+
+.settings-backup button:active { background: var(--bg); }
+
 .task-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
 
 #task-list.editing > .task > input[type="checkbox"],

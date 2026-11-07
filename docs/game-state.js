@@ -258,6 +258,19 @@ function loadState() {
   }
 }
 
+function exportState() {
+  return JSON.stringify({ schemaVersion: SCHEMA_VERSION, state }, null, 2);
+}
+
+function importState(data) {
+  if (!isRecord(data) || data.schemaVersion > SCHEMA_VERSION) return false;
+  const migrated = migrateState(data.state);
+  if (!migrated) return false;
+  Object.assign(state, migrated);
+  saveState();
+  return true;
+}
+
 function resetState() {
   Object.assign(state, defaultState());
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
@@ -306,4 +319,4 @@ function itemIsOwned(id) {
   return state.ownedItems.includes(id);
 }
 
-export { clampWeekdays, defaultAchievementStats, defaultState, emitPromptDifficultyRating, emitRender, emitToast, isRecord, itemIsOwned, loadState, migrateAchievements, migratePlacedItems, migrateState, migrateTask, normalizePlaced, normalizeWeekdays, num, ownedItemIds, resetState, saveState, state, str, ui };
+export { clampWeekdays, defaultAchievementStats, exportState, importState, defaultState, emitPromptDifficultyRating, emitRender, emitToast, isRecord, itemIsOwned, loadState, migrateAchievements, migratePlacedItems, migrateState, migrateTask, normalizePlaced, normalizeWeekdays, num, ownedItemIds, resetState, saveState, state, str, ui };
