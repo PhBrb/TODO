@@ -29,7 +29,8 @@ function weekdayToggleGrid(selected) {
     btn.setAttribute("aria-pressed", String(selected.includes(day)));
     btn.classList.toggle("on", selected.includes(day));
     btn.addEventListener("click", () => {
-      if (!btn.classList.contains("on") && buttons.every((b) => !b.btn.classList.contains("on"))) return;
+      const othersOn = buttons.some((b) => b.btn !== btn && b.btn.classList.contains("on"));
+      if (btn.classList.contains("on") && !othersOn) return;
       const on = btn.classList.toggle("on");
       btn.setAttribute("aria-pressed", String(on));
     });
