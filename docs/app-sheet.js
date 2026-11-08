@@ -32,19 +32,24 @@ function applySheetHeightVh(vh) {
   if (roomApi) roomApi.setVisibleHeightRatio(Math.max(0, 1 - clamped / 100));
 }
 
-function getInitialSheetVh() {
-  if (Game.state.roomEnabled === false) return getSheetMaxVh();
-  return Game.state.uiSheetHeightVh || SHEET_MIN_VH;
+function roomHidden() {
+  return Game.state.roomEnabled === false;
+}
+
+function currentSheetVh() {
+  if (roomHidden()) return getSheetMaxVh();
+  return parseFloat(AppUI.els.uiSheetEl.style.height) || SHEET_MIN_VH;
 }
 
 function initUiSheet() {
-  applySheetHeightVh(getInitialSheetVh());
+  applySheetHeightVh(roomHidden() ? getSheetMaxVh() : (Game.state.uiSheetHeightVh || SHEET_MIN_VH));
   window.addEventListener("room-ready", () => {
-    applySheetHeightVh(parseFloat(AppUI.els.uiSheetEl.style.height) || SHEET_MIN_VH);
+    applySheetHeightVh(currentSheetVh());
   });
   window.addEventListener("resize", () => {
-    applySheetHeightVh(parseFloat(AppUI.els.uiSheetEl.style.height) || SHEET_MIN_VH);
+    applySheetHeightVh(currentSheetVh());
   });
+  if (roomHidden()) return;
 
   let dragging = false;
   let startY = 0;

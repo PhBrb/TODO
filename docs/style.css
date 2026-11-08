@@ -39,6 +39,8 @@ body {
 
 body.room-disabled #room-view { display: none; }
 
+body.room-disabled .sheet-handle { cursor: default; touch-action: auto; }
+
 .ui-sheet {
   position: fixed;
   left: 50%;
