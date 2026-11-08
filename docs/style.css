@@ -408,7 +408,8 @@ body.actions-hidden .subtask-add { display: none; }
 
 #reset-btn {
   display: block;
-  margin: 20px auto 0;
+  width: 100%;
+  margin: 20px 0 0;
   border: 1px solid #ddd8f0;
   background: none;
   color: var(--muted);
