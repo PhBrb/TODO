@@ -137,6 +137,7 @@ function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   timeRow.appendChild(scheduleArea.deadlineSlot);
   timeRow.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
   selectors.appendChild(mainRow);
+  selectors.appendChild(scheduleArea.scheduleWrap);
   selectors.appendChild(timeRow);
   return selectors;
 }
@@ -267,7 +268,7 @@ function openEditRow(task) {
 
   E.pending = {
     kind: "task",
-    controls: [selectors, edit.scheduleArea.scheduleWrap],
+    controls: [selectors],
     onSave: (title) => {
       edit.titleInput = { value: title };
       saveEditRow(task, edit);
