@@ -39,7 +39,7 @@ body {
 
 body.room-disabled #room-view { display: none; }
 
-body.room-disabled .sheet-handle { cursor: default; touch-action: auto; padding: 8px 0 4px; }
+body.room-disabled .sheet-handle { cursor: default; touch-action: auto; padding: 12px 0 6px; }
 
 body.room-disabled .sheet-handle-bar { display: none; }
 
