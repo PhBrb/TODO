@@ -65,6 +65,7 @@ function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) 
     streakDayKeys: [],
     bonus: isBonus,
     deadline: isFun ? null : (deadlineInput ? new Date(deadlineInput).getTime() : null),
+    deadlineEnabled: true,
     repeatTime: NaN,
     repeatAfterCompletion: false,
     repeatWeekdays: [1],
@@ -534,6 +535,9 @@ const EDIT_UPDATERS = {
     task.repeatTime = Number.isFinite(v)
       ? Math.min(1439, Math.max(0, Math.floor(v)))
       : NaN;
+  },
+  deadlineEnabled(task, v) {
+    task.deadlineEnabled = v !== false;
   },
 };
 

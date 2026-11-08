@@ -1,6 +1,6 @@
 import * as Game from "./game.js";
 import { AppUI } from "./app-state.js";
-import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, WEEKDAY_CHECKBOXES, createDueAtWheels, createWheel, deadlineInputValue, isRepeatingRepeat, labeledField, readScheduleValues } from "./app-util.js";
+import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, WEEKDAY_CHECKBOXES, createDeadlineToggle, createDueAtWheels, createWheel, deadlineInputValue, isRepeatingRepeat, labeledField, readScheduleValues } from "./app-util.js";
 
 const W = AppUI.wheels;
 
@@ -181,16 +181,26 @@ function updateCreateFormMode() {
   }
   AppUI.els.scheduleContainer.classList.toggle("hidden", AppUI.scheduleControls.el.childElementCount === 0);
   AppUI.els.dueAtWheelsEl.innerHTML = "";
-  AppUI.els.dueAtLabelRow.querySelectorAll(".end-of-day-btn").forEach((b) => b.remove());
+  AppUI.els.dueAtLabelRow.querySelectorAll(".end-of-day-btn, .deadline-toggle-btn").forEach((b) => b.remove());
   if (scheduleShowsTimeOfDay(repeat)) {
     AppUI.dueAtWheelsControls = createDueAtWheels(undefined, false);
     for (const el of AppUI.dueAtWheelsControls.els) AppUI.els.dueAtWheelsEl.appendChild(el);
+    AppUI.els.dueAtLabelRow.appendChild(createDeadlineToggle(AppUI.createDeadlineEnabled, (on) => {
+      AppUI.createDeadlineEnabled = on;
+      syncDueAtLabel();
+    }));
     AppUI.els.dueAtLabelRow.appendChild(AppUI.dueAtWheelsControls.endOfDayBtn);
     AppUI.els.dueAtField.classList.remove("hidden");
   } else {
     AppUI.dueAtWheelsControls = null;
     AppUI.els.dueAtField.classList.add("hidden");
   }
+  syncDueAtLabel();
+}
+
+function syncDueAtLabel() {
+  if (!AppUI.els.dueAtLabel) return;
+  AppUI.els.dueAtLabel.textContent = AppUI.createDeadlineEnabled ? "🕔 Due at" : "🕔 Resets at";
 }
 
 function initForm() {
@@ -200,7 +210,10 @@ function initForm() {
     if (!title) return;
     const repeat = W.list.value === "fun" ? "none" : W.repeat.value;
     const values = AppUI.scheduleControls ? readScheduleValues(AppUI.scheduleControls.read) : {};
-    if (AppUI.dueAtWheelsControls) values.repeatTime = AppUI.dueAtWheelsControls.read();
+    if (AppUI.dueAtWheelsControls) {
+      values.repeatTime = AppUI.dueAtWheelsControls.read();
+      values.deadlineEnabled = AppUI.createDeadlineEnabled;
+    }
     const taskId = Game.addTask(
       title,
       W.list.value === "fun" ? null : W.diff.value,

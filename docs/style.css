@@ -260,6 +260,7 @@ body.actions-hidden .subtask-add { display: none; }
 .badge.bonus    { background: #fffbe0; color: #b8860b; margin-left: 4px; }
 .badge.deadline { background: #e0f2f1; color: #00897b; margin-left: 4px; }
 .badge.deadline.overdue { background: #f8e9ee; color: #9d585e; }
+.badge.deadline.reset { background: #eeeef4; color: var(--muted); }
 .badge.timer { background: #e8f0ff; color: #3f6ab5; margin-left: 4px; }
 .badge.timer.running { background: #dcebff; color: #23509c; font-variant-numeric: tabular-nums; }
 .badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
@@ -790,7 +791,8 @@ body.actions-hidden .subtask-add { display: none; }
 #due-at-wheels .wheel-select,
 .due-at-wheels .wheel-select { flex: 1; min-width: 0; }
 
-.end-of-day-btn {
+.end-of-day-btn,
+.deadline-toggle-btn {
   font-size: 0.62rem;
   padding: 2px 6px;
   border: 1px solid #ddd8f0;
@@ -802,7 +804,8 @@ body.actions-hidden .subtask-add { display: none; }
   opacity: 0.55;
 }
 
-.end-of-day-btn.on {
+.end-of-day-btn.on,
+.deadline-toggle-btn.on {
   opacity: 1;
   color: #6c5ce7;
   border-color: #6c5ce7;

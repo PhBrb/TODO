@@ -104,6 +104,7 @@ const TASK_FIELD_MIGRATORS = {
       : [],
   bonus: (raw) => raw.bonus === true,
   deadline: (raw) => (typeof raw.deadline === "number" ? raw.deadline : null),
+  deadlineEnabled: (raw) => raw.deadlineEnabled !== false,
   repeatTime: (raw) => num(raw.repeatTime, NaN),
   repeatAfterCompletion: (raw) =>
     raw.repeatAfterCompletion === true || raw.repeatCustomFromCompletion === true,
