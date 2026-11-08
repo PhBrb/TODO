@@ -1,8 +1,9 @@
 const SWEEP_BURSTS = 5;
-const SWEEP_STAGGER_MS = 130;
+const SWEEP_STAGGER_MS = 250;
 const SWEEP_PIECES = 8;
 const FULL_PIECES = 24;
-const FINISH_EXTRA_MS = 600;
+const TOTAL_MS = 2000;
+const PIECE_OPTS = { vyMin: -30, vyMax: -90, vx: 25, gravity: 450, lifetimeMs: TOTAL_MS };
 
 function barOrigin(barEl) {
   const rect = barEl.getBoundingClientRect();
@@ -28,14 +29,14 @@ function celebrateGoal(barEl, onDone) {
         y: origin.y,
         width: 0,
         height: origin.height,
-      }, SWEEP_PIECES);
+      }, SWEEP_PIECES, PIECE_OPTS);
     }, i * SWEEP_STAGGER_MS);
   }
   const sweepMs = (SWEEP_BURSTS - 1) * SWEEP_STAGGER_MS;
   setTimeout(() => {
-    confetti.burstAt(origin, FULL_PIECES);
+    confetti.burstAt(origin, FULL_PIECES, PIECE_OPTS);
   }, sweepMs);
-  setTimeout(onDone, sweepMs + FINISH_EXTRA_MS);
+  setTimeout(onDone, TOTAL_MS);
 }
 
 export { celebrateGoal };
