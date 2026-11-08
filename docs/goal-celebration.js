@@ -1,8 +1,8 @@
-const SWEEP_BURSTS = 5;
-const SWEEP_STAGGER_MS = 250;
-const SWEEP_PIECES = 8;
+const SWEEP_BURSTS = 25;
+const SWEEP_STAGGER_MS = 60;
+const SWEEP_PIECES = 2;
 const FULL_PIECES = 24;
-const TOTAL_MS = 2000;
+const TOTAL_MS = 3000;
 const PIECE_OPTS = { vyMin: -30, vyMax: -90, vx: 25, gravity: 450, lifetimeMs: TOTAL_MS };
 
 function barOrigin(barEl) {
