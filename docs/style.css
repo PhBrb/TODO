@@ -39,7 +39,9 @@ body {
 
 body.room-disabled #room-view { display: none; }
 
-body.room-disabled .sheet-handle { cursor: default; touch-action: auto; }
+body.room-disabled .sheet-handle { cursor: default; touch-action: auto; padding: 4px 0 2px; }
+
+body.room-disabled .sheet-handle-bar { display: none; }
 
 .ui-sheet {
   position: fixed;

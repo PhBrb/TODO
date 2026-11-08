@@ -20,7 +20,8 @@ function getVhPx() {
 
 function getSheetMaxVh() {
   const topUiBottom = AppUI.els.topProgressEl ? AppUI.els.topProgressEl.getBoundingClientRect().bottom : 0;
-  const availablePx = Math.max(0, window.innerHeight - topUiBottom - SHEET_TOP_GAP_PX);
+  const gap = roomHidden() ? 0 : SHEET_TOP_GAP_PX;
+  const availablePx = Math.max(0, window.innerHeight - topUiBottom - gap);
   const maxVh = (availablePx / getVhPx()) * 100;
   return Math.max(SHEET_MIN_VH, maxVh);
 }
