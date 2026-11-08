@@ -1,7 +1,7 @@
 import * as Game from "./game.js";
 import { buildScheduleControls, scheduleShowsTimeOfDay } from "./app-form.js";
 import { AppUI } from "./app-state.js";
-import { DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, buildSelect, createDeadlineToggle, createDueAtWheels, createWheel, labeledField, readScheduleValues, scheduleValuesFromTask } from "./app-util.js";
+import { DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, buildSelect, createDueAtWheels, createFieldToggle, createWheel, labeledField, readScheduleValues, scheduleValuesFromTask } from "./app-util.js";
 import { showToast } from "./app-ui.js";
 import { render } from "./app-list.js";
 
@@ -188,11 +188,11 @@ function refreshEditSchedule(task, edit) {
     scheduleArea.dueAt = createDueAtWheels(scheduleArea.scheduleValues.repeatTime, true);
     for (const el of scheduleArea.dueAt.els) scheduleArea.dueAtWheelsWrap.appendChild(el);
     const labelRow = scheduleArea.dueAtField.querySelector(".field-label-row");
-    labelRow.querySelectorAll(".deadline-toggle-btn").forEach((b) => b.remove());
-    const toggle = createDeadlineToggle(scheduleArea.deadlineEnabled, (on) => {
+    labelRow.querySelectorAll(".field-toggle-btn").forEach((b) => b.remove());
+    const toggle = createFieldToggle(scheduleArea.deadlineEnabled, (on) => {
       scheduleArea.deadlineEnabled = on;
       syncEditDueAtLabel(scheduleArea);
-    });
+    }, "Deadline", "Toggle deadline urgency");
     labelRow.insertBefore(toggle, scheduleArea.endOfDayBtn);
     scheduleArea.endOfDayBtn.replaceWith(scheduleArea.dueAt.endOfDayBtn);
     scheduleArea.endOfDayBtn = scheduleArea.dueAt.endOfDayBtn;

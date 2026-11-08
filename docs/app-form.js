@@ -1,6 +1,6 @@
 import * as Game from "./game.js";
 import { AppUI } from "./app-state.js";
-import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, WEEKDAY_CHECKBOXES, createDeadlineToggle, createDueAtWheels, createWheel, deadlineInputValue, isRepeatingRepeat, labeledField, readScheduleValues } from "./app-util.js";
+import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, WEEKDAY_CHECKBOXES, createDueAtWheels, createFieldToggle, createWheel, deadlineInputValue, isRepeatingRepeat, labeledField, readScheduleValues } from "./app-util.js";
 
 const W = AppUI.wheels;
 
@@ -117,10 +117,20 @@ function monthlySchedule(wrap, values, read) {
 }
 
 function customSchedule(wrap, values, read, compact) {
+  const everyRow = document.createElement("div");
+  everyRow.className = "repeat-every-row";
   const everyLabel = document.createElement("span");
   everyLabel.className = "repeat-every-label";
   everyLabel.textContent = "Repeat every";
-  wrap.appendChild(everyLabel);
+  everyRow.appendChild(everyLabel);
+  let afterCompletion = values.repeatAfterCompletion === true;
+  everyRow.appendChild(createFieldToggle(
+    afterCompletion,
+    (on) => { afterCompletion = on; },
+    "After completion",
+    "Start counting after completion"
+  ));
+  wrap.appendChild(everyRow);
   const days = createWheel(CUSTOM_DAYS_OPTIONS, values.customDays ?? 1, "Days", null, compact);
   const hours = createWheel(CUSTOM_HOURS_OPTIONS, values.customHours ?? 0, "Hours", null, compact);
   const mins = createWheel(CUSTOM_MINUTES_OPTIONS, values.customMinutes ?? 0, "Minutes", null, compact);
@@ -130,17 +140,7 @@ function customSchedule(wrap, values, read, compact) {
   read.repeatCustomMs = () =>
     (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
 
-  const afterCompLabel = document.createElement("label");
-  afterCompLabel.className = "after-completion-label";
-  const cb = document.createElement("input");
-  cb.type = "checkbox";
-  cb.checked = values.repeatAfterCompletion === true;
-  const span = document.createElement("span");
-  span.textContent = "Start counting after completion";
-  afterCompLabel.appendChild(cb);
-  afterCompLabel.appendChild(span);
-  wrap.appendChild(afterCompLabel);
-  read.repeatAfterCompletion = () => cb.checked;
+  read.repeatAfterCompletion = () => afterCompletion;
 }
 
 const SCHEDULE_BUILDERS = {
@@ -183,14 +183,14 @@ function updateCreateFormMode() {
   }
   AppUI.els.scheduleContainer.classList.toggle("hidden", AppUI.scheduleControls.el.childElementCount === 0);
   AppUI.els.dueAtWheelsEl.innerHTML = "";
-  AppUI.els.dueAtLabelRow.querySelectorAll(".end-of-day-btn, .deadline-toggle-btn").forEach((b) => b.remove());
+  AppUI.els.dueAtLabelRow.querySelectorAll(".end-of-day-btn, .field-toggle-btn").forEach((b) => b.remove());
   if (scheduleShowsTimeOfDay(repeat)) {
     AppUI.dueAtWheelsControls = createDueAtWheels(undefined, false);
     for (const el of AppUI.dueAtWheelsControls.els) AppUI.els.dueAtWheelsEl.appendChild(el);
-    AppUI.els.dueAtLabelRow.appendChild(createDeadlineToggle(AppUI.createDeadlineEnabled, (on) => {
+    AppUI.els.dueAtLabelRow.appendChild(createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
       AppUI.createDeadlineEnabled = on;
       syncDueAtLabel();
-    }));
+    }, "Deadline", "Toggle deadline urgency"));
     AppUI.els.dueAtLabelRow.appendChild(AppUI.dueAtWheelsControls.endOfDayBtn);
     AppUI.els.dueAtField.classList.remove("hidden");
   } else {
