@@ -66,6 +66,7 @@ function monthlySchedule(wrap, values, read) {
         btn.setAttribute("aria-pressed", "true");
       }
       setFirstLastEnabled(on);
+      if (on) setFirstLast(true);
     });
     weekdayGroup.appendChild(btn);
     return { btn, day };
