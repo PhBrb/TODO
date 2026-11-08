@@ -35,8 +35,8 @@ function celebrateGoal(barEl, onDone) {
   const sweepMs = (SWEEP_BURSTS - 1) * SWEEP_STAGGER_MS;
   setTimeout(() => {
     confetti.burstAt(origin, FULL_PIECES, PIECE_OPTS);
+    onDone();
   }, sweepMs);
-  setTimeout(onDone, TOTAL_MS);
 }
 
 export { celebrateGoal };
