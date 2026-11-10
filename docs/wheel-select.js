@@ -133,6 +133,7 @@
     });
 
     track.addEventListener("scrollend", () => {
+      if (dragging) return;
       if (performance.now() < programmaticUntil) return;
       clearTimeout(scrollTimer);
       selectByIndex(itemIndexAtCenter(), true);
