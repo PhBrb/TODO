@@ -9,7 +9,7 @@
   const SNAP_MS_PER_ITEM = 30;
   const DRAG_RAMP_START_ITEMS = 3.5;
   const DRAG_RAMP_FACTOR = 1.2;
-  const DRAG_RAMP_MAX_ITEMS = 30;
+  const DRAG_RAMP_MAX_GAIN = 80;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
     const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
@@ -136,7 +136,7 @@
       const items = Math.floor(Math.abs(dragRamp));
       const gain = items <= DRAG_RAMP_START_ITEMS
         ? 1
-        : Math.pow(DRAG_RAMP_FACTOR, Math.min(items, DRAG_RAMP_MAX_ITEMS) - DRAG_RAMP_START_ITEMS);
+        : Math.min(DRAG_RAMP_MAX_GAIN, Math.pow(DRAG_RAMP_FACTOR, items - DRAG_RAMP_START_ITEMS));
       dragOffset += dy * gain;
       const maxScroll = track.scrollHeight - track.clientHeight;
       dragOffset = Math.max(-dragStartScroll, Math.min(maxScroll - dragStartScroll, dragOffset));
