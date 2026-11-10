@@ -53,11 +53,39 @@
       i = Math.max(0, Math.min(options.length - 1, i));
       value = String(options[i][0]);
       highlightIndex(i);
-      if (scroll) {
-        programmaticUntil = performance.now() + 400;
-        track.scrollTo({ top: scrollTopForIndex(i), behavior: "smooth" });
-      }
+      if (scroll) tweenToIndex(i);
       onChange?.(value);
+    }
+
+    let tweenToken = 0;
+    let tweenRaf = 0;
+
+    function cancelTween() {
+      tweenToken += 1;
+      cancelAnimationFrame(tweenRaf);
+    }
+
+    function tweenToIndex(i) {
+      cancelTween();
+      const token = tweenToken;
+      const start = track.scrollTop;
+      const target = scrollTopForIndex(i);
+      const dist = Math.abs(target - start);
+      programmaticUntil = performance.now() + Math.min(400, 150 + (dist / itemHeight) * 30);
+      if (dist < 0.5) {
+        track.scrollTop = target;
+        return;
+      }
+      const duration = Math.min(300, 120 + (dist / itemHeight) * 30);
+      const t0 = performance.now();
+      const frame = (now) => {
+        if (token !== tweenToken) return;
+        const p = Math.min(1, (now - t0) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        track.scrollTop = start + (target - start) * eased;
+        if (p < 1) tweenRaf = requestAnimationFrame(frame);
+      };
+      tweenRaf = requestAnimationFrame(frame);
     }
 
     function itemIndexAtCenter() {
@@ -70,6 +98,7 @@
 
     track.addEventListener("pointerdown", (ev) => {
       programmaticUntil = 0;
+      cancelTween();
       clearTimeout(scrollTimer);
       dragging = true;
       dragStartY = ev.clientY;
