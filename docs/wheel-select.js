@@ -10,7 +10,7 @@
   const DRAG_RAMP_START_ITEMS = 4;
   const DRAG_RAMP_FACTOR = 1.2;
   const DRAG_RAMP_MAX_GAIN = 2.5;
-  const DRAG_INERTIA_SCALE = 0.5;
+  const DRAG_INERTIA_SCALE = 0.8;
   const DRAG_INERTIA_TAU_MS = 80;
   const DRAG_INERTIA_MAX_MS = 400;
   const DRAG_INERTIA_MIN_V = 0.02;
@@ -164,7 +164,7 @@
       const gain = items <= DRAG_RAMP_START_ITEMS
         ? 1
         : Math.min(DRAG_RAMP_MAX_GAIN, Math.pow(DRAG_RAMP_FACTOR, items - DRAG_RAMP_START_ITEMS));
-      const v = lastVy * (gain - 1) * DRAG_INERTIA_SCALE;
+      const v = lastVy * (gain - 0.8) * DRAG_INERTIA_SCALE;
       if (Math.abs(v) < DRAG_INERTIA_MIN_V) {
         selectByIndex(itemIndexAtCenter(), true);
         return;
