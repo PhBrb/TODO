@@ -75,6 +75,7 @@
       dragStartY = ev.clientY;
       dragStartScroll = track.scrollTop;
       track.setPointerCapture?.(ev.pointerId);
+      track.classList.add("dragging");
     });
 
     track.addEventListener("pointermove", (ev) => {
@@ -85,6 +86,7 @@
     const endDrag = () => {
       if (!dragging) return;
       dragging = false;
+      track.classList.remove("dragging");
       selectByIndex(itemIndexAtCenter(), true);
     };
     track.addEventListener("pointerup", endDrag);
