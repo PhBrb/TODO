@@ -7,6 +7,8 @@
   const ITEM_HEIGHT_PX = 28;
   const COMPACT_ITEM_HEIGHT_PX = 20;
   const SNAP_MS_PER_ITEM = 30;
+  const DRAG_RAMP_START_ITEMS = 5;
+  const DRAG_RAMP_FACTOR = 1.1;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
     const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
@@ -95,22 +97,42 @@
     }
 
     let dragging = false;
-    let dragStartY = 0;
+    let dragLastY = 0;
     let dragStartScroll = 0;
+    let dragOffset = 0;
+    let dragDir = 0;
+    let dragRamp = 0;
 
     track.addEventListener("pointerdown", (ev) => {
       programmaticUntil = 0;
       cancelTween();
       clearTimeout(scrollTimer);
       dragging = true;
-      dragStartY = ev.clientY;
+      dragLastY = ev.clientY;
       dragStartScroll = track.scrollTop;
+      dragOffset = 0;
+      dragDir = 0;
+      dragRamp = 0;
       track.setPointerCapture?.(ev.pointerId);
     });
 
     track.addEventListener("pointermove", (ev) => {
       if (!dragging) return;
-      track.scrollTop = dragStartScroll - (ev.clientY - dragStartY);
+      const dy = dragLastY - ev.clientY;
+      dragLastY = ev.clientY;
+      if (dy === 0) return;
+      const dir = Math.sign(dy);
+      if (dir !== dragDir) {
+        dragDir = dir;
+        dragRamp = 0;
+      }
+      dragRamp += dy / itemHeight;
+      const items = Math.floor(Math.abs(dragRamp));
+      const gain = items <= DRAG_RAMP_START_ITEMS
+        ? 1
+        : Math.pow(DRAG_RAMP_FACTOR, items - DRAG_RAMP_START_ITEMS);
+      dragOffset += dy * gain;
+      track.scrollTop = dragStartScroll + dragOffset;
     });
 
     const endDrag = () => {
