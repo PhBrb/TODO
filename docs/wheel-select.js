@@ -6,6 +6,7 @@
   // onChange. Keyboard arrows work when the wheel has focus.
   const ITEM_HEIGHT_PX = 28;
   const COMPACT_ITEM_HEIGHT_PX = 20;
+  const SNAP_MS_PER_ITEM = 30;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
     const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
@@ -71,12 +72,13 @@
       const start = track.scrollTop;
       const target = scrollTopForIndex(i);
       const dist = Math.abs(target - start);
-      programmaticUntil = performance.now() + Math.min(400, 150 + (dist / itemHeight) * 30);
       if (dist < 0.5) {
+        programmaticUntil = performance.now() + 100;
         track.scrollTop = target;
         return;
       }
-      const duration = Math.min(300, 120 + (dist / itemHeight) * 30);
+      const duration = Math.min(300, 120 + (dist / itemHeight) * SNAP_MS_PER_ITEM);
+      programmaticUntil = performance.now() + duration + 100;
       const t0 = performance.now();
       const frame = (now) => {
         if (token !== tweenToken) return;
@@ -104,7 +106,6 @@
       dragStartY = ev.clientY;
       dragStartScroll = track.scrollTop;
       track.setPointerCapture?.(ev.pointerId);
-      track.classList.add("dragging");
     });
 
     track.addEventListener("pointermove", (ev) => {
@@ -115,7 +116,6 @@
     const endDrag = () => {
       if (!dragging) return;
       dragging = false;
-      track.classList.remove("dragging");
       selectByIndex(itemIndexAtCenter(), true);
     };
     track.addEventListener("pointerup", endDrag);
