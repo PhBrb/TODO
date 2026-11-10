@@ -10,6 +10,10 @@
   const DRAG_RAMP_START_ITEMS = 4;
   const DRAG_RAMP_FACTOR = 1.2;
   const DRAG_RAMP_MAX_GAIN = 2.5;
+  const DRAG_INERTIA_SCALE = 0.5;
+  const DRAG_INERTIA_TAU_MS = 80;
+  const DRAG_INERTIA_MAX_MS = 400;
+  const DRAG_INERTIA_MIN_V = 0.02;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
     const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
@@ -105,6 +109,8 @@
     let dragRamp = 0;
     let carryDir = 0;
     let carryLevel = 0;
+    let lastMoveT = 0;
+    let lastVy = 0;
 
     track.addEventListener("pointerdown", (ev) => {
       programmaticUntil = 0;
@@ -116,6 +122,8 @@
       dragOffset = 0;
       dragDir = 0;
       dragRamp = 0;
+      lastMoveT = performance.now();
+      lastVy = 0;
       track.setPointerCapture?.(ev.pointerId);
     });
 
@@ -137,6 +145,10 @@
       const gain = items <= DRAG_RAMP_START_ITEMS
         ? 1
         : Math.min(DRAG_RAMP_MAX_GAIN, Math.pow(DRAG_RAMP_FACTOR, items - DRAG_RAMP_START_ITEMS));
+      const now = performance.now();
+      const dt = Math.max(1, now - lastMoveT);
+      lastVy = lastVy * 0.7 + (dy / dt) * 0.3;
+      lastMoveT = now;
       dragOffset += dy * gain;
       const maxScroll = track.scrollHeight - track.clientHeight;
       dragOffset = Math.max(-dragStartScroll, Math.min(maxScroll - dragStartScroll, dragOffset));
@@ -148,8 +160,38 @@
       dragging = false;
       carryDir = dragDir;
       carryLevel = Math.floor(Math.abs(dragRamp));
-      selectByIndex(itemIndexAtCenter(), true);
+      const items = Math.floor(Math.abs(dragRamp));
+      const gain = items <= DRAG_RAMP_START_ITEMS
+        ? 1
+        : Math.min(DRAG_RAMP_MAX_GAIN, Math.pow(DRAG_RAMP_FACTOR, items - DRAG_RAMP_START_ITEMS));
+      const v = lastVy * (gain - 1) * DRAG_INERTIA_SCALE;
+      if (Math.abs(v) < DRAG_INERTIA_MIN_V) {
+        selectByIndex(itemIndexAtCenter(), true);
+        return;
+      }
+      glide(v);
     };
+
+    function glide(v) {
+      cancelTween();
+      const token = tweenToken;
+      programmaticUntil = performance.now() + DRAG_INERTIA_MAX_MS + 100;
+      let last = performance.now();
+      const t0 = last;
+      const frame = (now) => {
+        if (token !== tweenToken) return;
+        const dt = now - last;
+        last = now;
+        track.scrollTop += v * dt;
+        v *= Math.exp(-dt / DRAG_INERTIA_TAU_MS);
+        if (Math.abs(v) < DRAG_INERTIA_MIN_V || now - t0 > DRAG_INERTIA_MAX_MS) {
+          selectByIndex(itemIndexAtCenter(), true);
+          return;
+        }
+        tweenRaf = requestAnimationFrame(frame);
+      };
+      tweenRaf = requestAnimationFrame(frame);
+    }
     track.addEventListener("pointerup", endDrag);
     track.addEventListener("pointercancel", endDrag);
 
