@@ -102,6 +102,8 @@
     let dragOffset = 0;
     let dragDir = 0;
     let dragRamp = 0;
+    let carryDir = 0;
+    let carryLevel = 0;
 
     track.addEventListener("pointerdown", (ev) => {
       programmaticUntil = 0;
@@ -124,7 +126,10 @@
       const dir = Math.sign(dy);
       if (dir !== dragDir) {
         dragDir = dir;
-        dragRamp = 0;
+        dragRamp = dir === carryDir
+          ? dir * Math.max(DRAG_RAMP_START_ITEMS, carryLevel - 1)
+          : 0;
+        carryDir = 0;
       }
       dragRamp += dy / itemHeight;
       const items = Math.floor(Math.abs(dragRamp));
@@ -140,6 +145,8 @@
     const endDrag = () => {
       if (!dragging) return;
       dragging = false;
+      carryDir = dragDir;
+      carryLevel = Math.floor(Math.abs(dragRamp));
       selectByIndex(itemIndexAtCenter(), true);
     };
     track.addEventListener("pointerup", endDrag);
