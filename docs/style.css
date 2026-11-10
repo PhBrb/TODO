@@ -859,7 +859,6 @@ body.actions-hidden .subtask-add { display: none; }
 .wheel-select-track {
   height: calc(var(--wheel-item-height) + 2 * var(--wheel-peek));
   overflow-y: auto;
-  scroll-snap-type: y mandatory;
   overscroll-behavior: contain;
   touch-action: none;
   scrollbar-width: none;
@@ -868,14 +867,11 @@ body.actions-hidden .subtask-add { display: none; }
 
 .wheel-select-track::-webkit-scrollbar { display: none; }
 
-.wheel-select-track.dragging { scroll-snap-type: none; }
-
 .wheel-select-item {
   height: var(--wheel-item-height);
   display: flex;
   align-items: center;
   justify-content: center;
-  scroll-snap-align: center;
   font-size: 0.85rem;
   color: var(--muted);
   white-space: nowrap;

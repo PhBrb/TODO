@@ -1,9 +1,9 @@
 (() => {
   "use strict";
 
-  // Wheel select: a scroll-snap list that acts like a picker wheel. Flick or
-  // scroll with the mouse wheel to move, it snaps to the nearest option and
-  // fires onChange. Keyboard arrows work when the wheel has focus.
+  // Wheel select: a picker wheel. Drag it 1:1 with a pointer or scroll
+  // with the mouse wheel; it tweens to the nearest option and fires
+  // onChange. Keyboard arrows work when the wheel has focus.
   const ITEM_HEIGHT_PX = 28;
   const COMPACT_ITEM_HEIGHT_PX = 20;
 
@@ -125,10 +125,11 @@
       highlightIndex(itemIndexAtCenter());
       if (dragging) return;
       if (performance.now() < programmaticUntil) return;
+      cancelTween();
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(() => {
         selectByIndex(itemIndexAtCenter(), true);
-      }, 80);
+      }, 150);
     });
 
     track.addEventListener("scrollend", () => {
