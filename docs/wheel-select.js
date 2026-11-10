@@ -7,8 +7,8 @@
   const ITEM_HEIGHT_PX = 28;
   const COMPACT_ITEM_HEIGHT_PX = 20;
   const SNAP_MS_PER_ITEM = 30;
-  const DRAG_RAMP_START_ITEMS = 4;
-  const DRAG_RAMP_FACTOR = 1.15;
+  const DRAG_RAMP_START_ITEMS = 3;
+  const DRAG_RAMP_FACTOR = 1.2;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
     const itemHeight = compact ? COMPACT_ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
