@@ -860,6 +860,8 @@ body.actions-hidden .subtask-add { display: none; }
   height: calc(var(--wheel-item-height) + 2 * var(--wheel-peek));
   overflow-y: auto;
   scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+  touch-action: none;
   scrollbar-width: none;
   padding: var(--wheel-peek) 8px;
 }

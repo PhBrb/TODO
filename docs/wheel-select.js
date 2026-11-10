@@ -64,13 +64,35 @@
       return Math.max(0, Math.min(options.length - 1, Math.round(track.scrollTop / itemHeight)));
     }
 
-    track.addEventListener("pointerdown", () => {
+    let dragging = false;
+    let dragStartY = 0;
+    let dragStartScroll = 0;
+
+    track.addEventListener("pointerdown", (ev) => {
       programmaticUntil = 0;
       clearTimeout(scrollTimer);
+      dragging = true;
+      dragStartY = ev.clientY;
+      dragStartScroll = track.scrollTop;
+      track.setPointerCapture?.(ev.pointerId);
     });
+
+    track.addEventListener("pointermove", (ev) => {
+      if (!dragging) return;
+      track.scrollTop = dragStartScroll - (ev.clientY - dragStartY);
+    });
+
+    const endDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      selectByIndex(itemIndexAtCenter(), true);
+    };
+    track.addEventListener("pointerup", endDrag);
+    track.addEventListener("pointercancel", endDrag);
 
     track.addEventListener("scroll", () => {
       highlightIndex(itemIndexAtCenter());
+      if (dragging) return;
       if (performance.now() < programmaticUntil) return;
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(() => {
