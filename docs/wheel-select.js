@@ -132,6 +132,8 @@
         ? 1
         : Math.pow(DRAG_RAMP_FACTOR, items - DRAG_RAMP_START_ITEMS);
       dragOffset += dy * gain;
+      const maxScroll = track.scrollHeight - track.clientHeight;
+      dragOffset = Math.max(-dragStartScroll, Math.min(maxScroll - dragStartScroll, dragOffset));
       track.scrollTop = dragStartScroll + dragOffset;
     });
 
