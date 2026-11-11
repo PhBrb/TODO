@@ -23,6 +23,10 @@ CI builds a debug APK artifact on every push that touches `docs/`, `package.json
 
 Native OS features are wired through `docs/native-bridge.js`, which no-ops on the web: haptics on task completion and a daily local-notification reminder (hour configurable via `REMINDER_HOUR` in `docs/game-constants.js`). Plugin web code is vendored into `docs/vendor/capacitor/` by `scripts/prepare-capacitor.mjs` at sync time (gitignored; only present in the native build). To move progress between the web app and the Android app, use the backup export/import in the app's settings — it works in both environments.
 
+## Install from the web (PWA)
+
+The GitHub Pages site is also installable as a PWA: open it in Chrome on Android and use the menu → "Install app" / "Add to Home screen". `docs/manifest.webmanifest` (icons in `docs/icons/`) plus `docs/sw.js` make it run standalone; the service worker is network-first, caches the app shell (not the 3D models in `docs/models/`) and is versioned with the app `VERSION` via `docs/pwa-register.js`. The service worker is not registered inside the Capacitor Android app.
+
 ## Credits
 
 - Room decoration models in `docs/models/sooahs/` (and the shared day-bake atlases in `docs/models/textures/`) were extracted from [sooahs-room-folio](https://github.com/andrewwoan/sooahs-room-folio) (MIT License).
