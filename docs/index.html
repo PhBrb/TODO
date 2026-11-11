@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#6c5ce7">
+  <link rel="manifest" href="./manifest.webmanifest">
   <title>TODO — MWE</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -158,7 +159,10 @@
     {
       "imports": {
         "three": "./vendor/three.module.js",
-        "three/addons/": "./vendor/addons/"
+        "three/addons/": "./vendor/addons/",
+        "@capacitor/core": "./vendor/capacitor/core.js",
+        "@capacitor/haptics": "./vendor/capacitor/haptics/index.js",
+        "@capacitor/local-notifications": "./vendor/capacitor/local-notifications/index.js"
       }
     }
   </script>
@@ -168,6 +172,7 @@
   <script src="wheel-select.js"></script>
   <script src="confirm-dialog.js"></script>
   <script type="module" src="room-boot.js"></script>
+  <script type="module" src="pwa-register.js"></script>
   <script type="module" src="game.js"></script>
   <script type="module" src="app.js"></script>
 </body>
