@@ -10,7 +10,7 @@ The app is a static site in `docs/`, deployed to GitHub Pages by `.github/workfl
 
 The same `docs/` directory is wrapped as an Android app with [Capacitor](https://capacitorjs.com/). The web app stays the single source of truth; the Android project in `android/` is generated, not committed.
 
-Prerequisites: Node.js, JDK 17, Android Studio (or Android SDK + `ANDROID_HOME`).
+Prerequisites: Node.js 24+, JDK 21, Android Studio 2026.1+ (or Android SDK with platform 37 + `ANDROID_HOME`). Uses Capacitor 9 pre-release (npm dist-tag `next`: AGP 9.4.1 / Gradle 9.8.2 / compileSdk 37), which the AppFunctions integration requires.
 
 ```bash
 npm ci                  # install Capacitor CLI + plugins
@@ -25,7 +25,7 @@ Native OS features are wired through `docs/native-bridge.js`, which no-ops on th
 
 ## AI assistant support (AppFunctions)
 
-The Android app exposes functions to on-device AI assistants (Android 16+, e.g. Gemini) via [AppFunctions](https://developer.android.com/ai/appfunctions). The native side is a local Capacitor plugin in `plugins/todo-assistant/` (generated into `android/` by `cap sync`, uses `androidx.appfunctions:1.0.0-alpha11` with KSP). Functions bridge into the WebView: `window.todoAssistant` in `docs/assistant-bridge.js` calls the regular game functions.
+The Android app exposes functions to on-device AI assistants (Android 16+, e.g. Gemini) via [AppFunctions](https://developer.android.com/ai/appfunctions). The native side is a local Capacitor plugin in `plugins/todo-assistant/` (generated into `android/` by `cap sync`, uses `androidx.appfunctions:1.0.0-beta01` with KSP 2.3.3 on AGP 9 / compileSdk 37). Functions bridge into the WebView: `window.todoAssistant` in `docs/assistant-bridge.js` calls the regular game functions.
 
 Current test function: `createTestTask` creates a task with fixed settings (title "🧪 Assistant test task", easy, todo list). Verify on a device with:
 

@@ -2,7 +2,7 @@ package dev.phbrb.todo.assistant
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.appfunctions.AppFunction
+import androidx.appfunctions.AppFunctionDeclaration
 import androidx.appfunctions.AppFunctionException
 import androidx.appfunctions.AppFunctionSerializable
 import androidx.appfunctions.AppFunctionService
@@ -23,7 +23,7 @@ abstract class BaseTodoAppFunctionService : AppFunctionService() {
      *
      * @return the created test task
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun createTestTask(): TestTask {
         val webView = WebViewHolder.webView
             ?: throw AppFunctionException("TODO app is not running")
