@@ -11,6 +11,7 @@
     "cap:open": "cap open android"
   },
   "dependencies": {
+    "@todo/assistant": "file:plugins/todo-assistant",
     "@capacitor/android": "^8.6.0",
     "@capacitor/core": "^8.6.0",
     "@capacitor/haptics": "^8.0.2",
