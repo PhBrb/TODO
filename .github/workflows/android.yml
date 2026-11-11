@@ -1,17 +1,19 @@
 name: Android build
 
+# On hold: AppFunctions need assistant-side support that is not available yet.
+# Manual builds only via workflow_dispatch; re-enable the push trigger below when ready.
 on:
-  push:
-    branches: ['main']
-    paths:
-      - 'docs/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'capacitor.config.json'
-      - 'plugins/**'
-      - 'scripts/**'
-      - '.github/workflows/android.yml'
   workflow_dispatch:
+  # push:
+  #   branches: ['main']
+  #   paths:
+  #     - 'docs/**'
+  #     - 'package.json'
+  #     - 'package-lock.json'
+  #     - 'capacitor.config.json'
+  #     - 'plugins/**'
+  #     - 'scripts/**'
+  #     - '.github/workflows/android.yml'
 
 permissions:
   contents: read
