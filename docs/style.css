@@ -326,6 +326,7 @@ body.actions-hidden .subtask-add { display: none; }
 }
 .chain-zigzag-above { top: -3px; }
 .chain-zigzag-below { bottom: -3px; }
+.chain-zigzag-edge.expandable { pointer-events: auto; cursor: pointer; }
 .subtask .chain-zigzag-edge { left: 16px; height: 5px; }
 .subtask .chain-zigzag-above { top: -2px; }
 .subtask .chain-zigzag-below { bottom: -2px; }
