@@ -1,5 +1,5 @@
 
-const VERSION = "0.75.27";
+const VERSION = "0.75.28";
 const STORAGE_KEY = "todo-mwe-state";
 
 const SCHEMA_VERSION = 3;
