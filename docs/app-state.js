@@ -12,6 +12,7 @@ export const AppUI = {
     weeklyProgressEl: $("weekly-progress"),
     weeklyBar: $("weekly-bar"),
     levelDisplayEl: $("level-display"),
+    streakSumEl: $("streak-sum"),
     boostBannerEl: $("boost-banner"),
     boostTimerEl: $("boost-timer"),
     resetBtn: $("reset-btn"),

@@ -450,6 +450,7 @@ let render = function () {
   renderProgress();
 
   AppUI.els.levelDisplayEl.textContent = Game.levelFromXp(Game.state.xp);
+  AppUI.els.streakSumEl.textContent = Game.state.tasks.reduce((sum, t) => sum + (t.streak > 0 ? t.streak : 0), 0);
 
   if (Game.isBoostActive()) {
     AppUI.els.boostBannerEl.classList.remove("hidden");
