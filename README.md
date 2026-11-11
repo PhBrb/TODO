@@ -19,7 +19,7 @@ npm run cap:sync        # copy docs/ into android assets, set version from docs/
 npm run cap:open        # open in Android Studio
 ```
 
-CI builds a debug APK artifact on pushes to `main` that touch `docs/`, `package.json`, `capacitor.config.json` or `scripts/` (see `.github/workflows/android.yml`; also runnable manually via `workflow_dispatch` on any branch). The Pages site deploys on every push to any branch that touches `docs/`.
+The APK build is currently on hold (assistant-side AppFunctions support is not available yet): `.github/workflows/android.yml` runs manually only via `workflow_dispatch` on any branch — the push trigger is commented out and can be re-enabled there. The Pages site deploys on every push to any branch that touches `docs/`.
 
 Native OS features are wired through `docs/native-bridge.js`, which no-ops on the web: haptics on task completion and a daily local-notification reminder (hour configurable via `REMINDER_HOUR` in `docs/game-constants.js`). Plugin web code is vendored into `docs/vendor/capacitor/` by `scripts/prepare-capacitor.mjs` at sync time (gitignored; only present in the native build). To move progress between the web app and the Android app, use the backup export/import in the app's settings — it works in both environments.
 
