@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<appfunctions>
+    <appfunction>
+        <id>dev.phbrb.todo.assistant.BaseTodoAppFunctionService#createTestTask</id>
+        <enabledByDefault>true</enabledByDefault>
+        <description>Creates a test task in the TODO app with fixed settings: title "Assistant test task", difficulty easy, no repeat, list todo.</description>
+        <response>
+            <id>unused</id>
+            <valueType>
+                <dataTypeReference>dev.phbrb.todo.assistant.TestTask</dataTypeReference>
+                <id>unused</id>
+                <isNullable>false</isNullable>
+                <type>11</type>
+            </valueType>
+            <description>the created test task</description>
+        </response>
+        <functionId>dev.phbrb.todo.assistant.BaseTodoAppFunctionService#createTestTask</functionId>
+    </appfunction>
+    <AppFunctionComponentMetadataDocument>
+        <dataTypes>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>true</isNullable>
+                <objectQualifiedName>dev.phbrb.todo.assistant.TestTask</objectQualifiedName>
+                <description>The test task created by the assistant.</description>
+                <properties>
+                    <dataTypeMetadata>
+                        <id>unused</id>
+                        <isNullable>false</isNullable>
+                        <description>The id of the created task.</description>
+                        <type>6</type>
+                    </dataTypeMetadata>
+                    <id>unused</id>
+                    <name>taskId</name>
+                </properties>
+                <properties>
+                    <dataTypeMetadata>
+                        <id>unused</id>
+                        <isNullable>false</isNullable>
+                        <description>The title of the created task.</description>
+                        <type>8</type>
+                    </dataTypeMetadata>
+                    <id>unused</id>
+                    <name>title</name>
+                </properties>
+                <required>taskId</required>
+                <required>title</required>
+                <type>3</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <name>dev.phbrb.todo.assistant.TestTask</name>
+        </dataTypes>
+        <id>dev.phbrb.todo.assistant.BaseTodoAppFunctionService</id>
+    </AppFunctionComponentMetadataDocument>
+</appfunctions>

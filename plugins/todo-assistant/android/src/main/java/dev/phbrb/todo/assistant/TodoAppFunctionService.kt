@@ -2,8 +2,8 @@ package dev.phbrb.todo.assistant
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.appfunctions.AppFunctionAppUnknownException
 import androidx.appfunctions.AppFunctionDeclaration
-import androidx.appfunctions.AppFunctionException
 import androidx.appfunctions.AppFunctionSerializable
 import androidx.appfunctions.AppFunctionService
 import androidx.appfunctions.AppFunctionServiceEntryPoint
@@ -26,7 +26,7 @@ abstract class BaseTodoAppFunctionService : AppFunctionService() {
     @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun createTestTask(): TestTask {
         val webView = WebViewHolder.webView
-            ?: throw AppFunctionException("TODO app is not running")
+            ?: throw AppFunctionAppUnknownException("TODO app is not running")
         val raw = suspendCancellableCoroutine { cont ->
             webView.post {
                 webView.evaluateJavascript(
@@ -35,7 +35,7 @@ abstract class BaseTodoAppFunctionService : AppFunctionService() {
             }
         }
         if (raw == "null") {
-            throw AppFunctionException("TODO web app is not ready")
+            throw AppFunctionAppUnknownException("TODO web app is not ready")
         }
         val obj = JSONObject(raw)
         return TestTask(taskId = obj.getLong("taskId"), title = obj.getString("title"))

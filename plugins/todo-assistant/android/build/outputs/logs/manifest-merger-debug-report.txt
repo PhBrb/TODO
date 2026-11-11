@@ -1,0 +1,54 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:1:1-24:12
+INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:1:1-24:12
+	package
+		INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:2:5-51
+	xmlns:android
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:1:11-69
+application
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:4:5-23:19
+service#dev.phbrb.todo.assistant.TodoAppFunctionService
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:5:9-19:19
+	android:exported
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:8:13-36
+	android:permission
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:7:13-78
+	tools:targetApi
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:9:13-33
+	android:name
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:6:13-75
+property#android.app.appfunctions.schema
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:10:13-12:60
+	android:value
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:12:17-57
+	android:name
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:11:17-63
+property#android.app.appfunctions.v2
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:13:13-15:65
+	android:value
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:15:17-62
+	android:name
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:14:17-59
+intent-filter#action:name:android.app.appfunctions.AppFunctionService
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:16:13-18:29
+action#android.app.appfunctions.AppFunctionService
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:17:17-86
+	android:name
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:17:25-83
+property#android.app.appfunctions.app_metadata
+ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:20:9-22:52
+	android:resource
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:22:13-49
+	android:name
+		ADDED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml:21:13-65
+uses-sdk
+INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml
+INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /workspace/github__PhBrb__TODO/plugins/todo-assistant/android/src/main/AndroidManifest.xml

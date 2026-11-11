@@ -57,7 +57,7 @@ jobs:
       - name: Install Android SDK platform 37
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=canary "platforms;android-37" "build-tools;36.0.0"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0"
 
       - name: Build debug APK
         uses: gradle/gradle-build-action@v3
