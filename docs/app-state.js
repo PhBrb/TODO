@@ -55,6 +55,7 @@ export const AppUI = {
   },
   activeTab: "highlight",
   createDeadlineEnabled: true,
+  expandedChains: new Set(),
   wheels: {},
   scheduleControls: null,
   dueAtWheelsControls: null,
