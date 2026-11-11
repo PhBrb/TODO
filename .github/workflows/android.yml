@@ -2,12 +2,12 @@ name: Android build
 
 on:
   push:
-    branches: ['**']
+    branches: ['main']
     paths:
       - 'docs/**'
       - 'package.json'
       - 'package-lock.json'
-      - 'capacitor.config.ts'
+      - 'capacitor.config.json'
       - 'scripts/**'
       - '.github/workflows/android.yml'
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Build debug APK
         uses: gradle/gradle-build-action@v3
