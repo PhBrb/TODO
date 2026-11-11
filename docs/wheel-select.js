@@ -10,9 +10,9 @@
   const DRAG_RAMP_START_ITEMS = 4;
   const DRAG_RAMP_FACTOR = 1.2;
   const DRAG_RAMP_MAX_GAIN = 2.5;
-  const DRAG_INERTIA_SCALE = 0.8;
+  const DRAG_INERTIA_SCALE = 0.9;
   const DRAG_INERTIA_TAU_MS = 80;
-  const DRAG_INERTIA_MAX_MS = 400;
+  const DRAG_INERTIA_MAX_MS = 500;
   const DRAG_INERTIA_MIN_V = 0.02;
 
   function createWheelSelect(options, { selected, label, onChange, compact = false } = {}) {
