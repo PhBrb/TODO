@@ -481,21 +481,18 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-check-wrap {
   position: relative;
-  width: 22px;
-  height: 22px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
-  display: inline-grid;
+  display: grid;
   place-items: center;
 }
 
 .task-check-ring {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 34px;
-  height: 34px;
+  inset: 0;
   pointer-events: none;
-  transform: translate(-50%, -50%) rotate(-90deg);
+  transform: rotate(-90deg);
 }
 
 .task-check-ring circle {

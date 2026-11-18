@@ -66,23 +66,28 @@ function buildSubtaskRing(task) {
   svg.classList.add("task-check-ring");
   // Segmented background ring: n dash segments with gaps, so the page
   // background shows between segments (one segment per subtask).
+  const GAP = 0.14;
+  const seg = (100 / n) * (1 - GAP);
+  const gap = (100 / n) * GAP;
   const track = document.createElementNS(SVG_NS, "circle");
   track.setAttribute("cx", String(c));
   track.setAttribute("cy", String(c));
   track.setAttribute("r", String(r));
   track.setAttribute("pathLength", "100");
   track.classList.add("task-ring-track");
-  const gapFrac = 0.14;
-  track.style.strokeDasharray = `${(100 / n) * (1 - gapFrac)} ${(100 / n) * gapFrac}`;
+  track.style.strokeDasharray = `${seg} ${gap}`;
   svg.appendChild(track);
-  const frac = done / n;
+  // Progress fills whole segments only, so gaps stay visible: repeat the
+  // segment pattern `done` times, then an empty dash for the rest.
   const bar = document.createElementNS(SVG_NS, "circle");
   bar.setAttribute("cx", String(c));
   bar.setAttribute("cy", String(c));
   bar.setAttribute("r", String(r));
   bar.setAttribute("pathLength", "100");
   bar.classList.add("task-ring-bar");
-  bar.style.strokeDasharray = `${frac * 100} 100`;
+  bar.style.strokeDasharray = done === 0
+    ? "0 100"
+    : `${Array.from({ length: done }, () => `${seg} ${gap}`).join(" ")} 0 100`;
   svg.appendChild(bar);
   return svg;
 }
