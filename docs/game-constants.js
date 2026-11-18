@@ -1,5 +1,5 @@
 
-const VERSION = "0.79.8";
+const VERSION = "0.79.14";
 const STORAGE_KEY = "todo-mwe-state";
 
 const REMINDER_HOUR = 20;
