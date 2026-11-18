@@ -61,7 +61,6 @@ function buildSubtaskRing(task) {
   const size = 34;
   const c = size / 2;
   const r = 14;
-  const circ = 2 * Math.PI * r;
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
   svg.classList.add("task-check-ring");
