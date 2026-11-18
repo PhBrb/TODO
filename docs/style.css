@@ -131,6 +131,11 @@ body.actions-hidden .subtask-add { display: none; }
 
 .streak-sum { font-size: 0.8rem; }
 
+.streak-sum.off {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
 .sheet-handle .version {
   position: absolute;
   right: 46px;
