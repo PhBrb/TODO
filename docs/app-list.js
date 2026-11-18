@@ -52,6 +52,46 @@ function taskCheckbox(li, task) {
   return cb;
 }
 
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function buildSubtaskRing(task) {
+  const n = task.subtasks.length;
+  if (n <= 2) return null;
+  const done = task.subtasks.filter((s) => s.done).length;
+  const size = 34;
+  const c = size / 2;
+  const r = 14;
+  const circ = 2 * Math.PI * r;
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+  svg.classList.add("task-check-ring");
+  const track = document.createElementNS(SVG_NS, "circle");
+  track.setAttribute("cx", String(c));
+  track.setAttribute("cy", String(c));
+  track.setAttribute("r", String(r));
+  track.classList.add("task-ring-track");
+  svg.appendChild(track);
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * Math.PI * 2 - Math.PI / 2;
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", String(c + Math.cos(a) * (r - 2.5)));
+    line.setAttribute("y1", String(c + Math.sin(a) * (r - 2.5)));
+    line.setAttribute("x2", String(c + Math.cos(a) * (r + 2.5)));
+    line.setAttribute("y2", String(c + Math.sin(a) * (r + 2.5)));
+    line.classList.add("task-ring-tick");
+    svg.appendChild(line);
+  }
+  const frac = done / n;
+  const bar = document.createElementNS(SVG_NS, "circle");
+  bar.setAttribute("cx", String(c));
+  bar.setAttribute("cy", String(c));
+  bar.setAttribute("r", String(r));
+  bar.classList.add("task-ring-bar");
+  bar.style.strokeDasharray = `${frac * circ} ${circ}`;
+  svg.appendChild(bar);
+  return svg;
+}
+
 function taskTitleNode(task, editingThisTask, chainInfo = null) {
   if (!editingThisTask) {
     const title = document.createElement("div");
@@ -372,7 +412,17 @@ function taskNode(task, chainInfo = null, chainUi = null) {
 
   taskDraggable(li, task);
 
-  li.appendChild(taskCheckbox(li, task));
+  const cb = taskCheckbox(li, task);
+  const ring = buildSubtaskRing(task);
+  if (ring) {
+    const wrap = document.createElement("span");
+    wrap.className = "task-check-wrap";
+    wrap.appendChild(cb);
+    wrap.appendChild(ring);
+    li.appendChild(wrap);
+  } else {
+    li.appendChild(cb);
+  }
   li.appendChild(body);
   li.appendChild(taskActionsNode(task));
   return li;

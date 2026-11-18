@@ -476,7 +476,46 @@ body.actions-hidden .subtask-add { display: none; }
 .task-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
 
 #task-list.editing > .task > input[type="checkbox"],
+#task-list.editing > .task > .task-check-wrap,
 #task-list.editing .subtask > input[type="checkbox"] { display: none; }
+
+.task-check-wrap {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+}
+
+.task-check-ring {
+  position: absolute;
+  inset: -6px;
+  width: 34px;
+  height: 34px;
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.task-check-ring circle,
+.task-check-ring line {
+  fill: none;
+}
+
+.task-ring-track {
+  stroke: var(--accent-soft);
+  stroke-width: 2.5;
+}
+
+.task-ring-tick {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.task-ring-bar {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
 
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
 
