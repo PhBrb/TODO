@@ -65,29 +65,25 @@ function buildSubtaskRing(task) {
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
   svg.classList.add("task-check-ring");
+  // Segmented background ring: n dash segments with gaps, so the page
+  // background shows between segments (one segment per subtask).
   const track = document.createElementNS(SVG_NS, "circle");
   track.setAttribute("cx", String(c));
   track.setAttribute("cy", String(c));
   track.setAttribute("r", String(r));
+  track.setAttribute("pathLength", "100");
   track.classList.add("task-ring-track");
+  const gapFrac = 0.14;
+  track.style.strokeDasharray = `${(100 / n) * (1 - gapFrac)} ${(100 / n) * gapFrac}`;
   svg.appendChild(track);
-  for (let k = 0; k < n; k++) {
-    const a = (k / n) * Math.PI * 2 - Math.PI / 2;
-    const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", String(c + Math.cos(a) * (r - 2.5)));
-    line.setAttribute("y1", String(c + Math.sin(a) * (r - 2.5)));
-    line.setAttribute("x2", String(c + Math.cos(a) * (r + 2.5)));
-    line.setAttribute("y2", String(c + Math.sin(a) * (r + 2.5)));
-    line.classList.add("task-ring-tick");
-    svg.appendChild(line);
-  }
   const frac = done / n;
   const bar = document.createElementNS(SVG_NS, "circle");
   bar.setAttribute("cx", String(c));
   bar.setAttribute("cy", String(c));
   bar.setAttribute("r", String(r));
+  bar.setAttribute("pathLength", "100");
   bar.classList.add("task-ring-bar");
-  bar.style.strokeDasharray = `${frac * circ} ${circ}`;
+  bar.style.strokeDasharray = `${frac * 100} 100`;
   svg.appendChild(bar);
   return svg;
 }

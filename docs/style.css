@@ -490,26 +490,21 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-check-ring {
   position: absolute;
-  inset: -6px;
+  left: 50%;
+  top: 50%;
   width: 34px;
   height: 34px;
   pointer-events: none;
-  transform: rotate(-90deg);
+  transform: translate(-50%, -50%) rotate(-90deg);
 }
 
-.task-check-ring circle,
-.task-check-ring line {
+.task-check-ring circle {
   fill: none;
 }
 
 .task-ring-track {
   stroke: var(--accent-soft);
   stroke-width: 2.5;
-}
-
-.task-ring-tick {
-  stroke: var(--muted);
-  stroke-width: 1.5;
 }
 
 .task-ring-bar {
