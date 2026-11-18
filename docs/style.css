@@ -488,6 +488,11 @@ body.actions-hidden .subtask-add { display: none; }
   place-items: center;
 }
 
+.task-check-wrap input[type="checkbox"] {
+  position: relative;
+  z-index: 1;
+}
+
 .task-check-ring {
   position: absolute;
   inset: 0;
