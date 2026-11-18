@@ -507,6 +507,7 @@ body.actions-hidden .subtask-add { display: none; }
 .task-ring-track {
   stroke: var(--accent-soft);
   stroke-width: 2.5;
+  opacity: 0.55;
 }
 
 .task-ring-bar {
