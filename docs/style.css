@@ -666,7 +666,7 @@ body.actions-hidden .subtask-add { display: none; }
   animation: pop 0.3s ease;
 }
 
-.rating-panel button {
+.rating-panel button:not(.rating-close) {
   border: 1px solid var(--accent-soft);
   background: #fff;
   color: var(--accent);
@@ -682,6 +682,7 @@ body.actions-hidden .subtask-add { display: none; }
   right: -10px;
   width: 32px;
   height: 32px;
+  box-sizing: border-box;
   border-radius: 50%;
   border: none;
   background: var(--card);
