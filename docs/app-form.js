@@ -3,6 +3,7 @@ import { AppUI } from "./app-state.js";
 import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, WEEKDAY_CHECKBOXES, createDueAtWheels, createFieldToggle, createWheel, deadlineInputValue, isRepeatingRepeat, labeledField, readScheduleValues } from "./app-util.js";
 
 const W = AppUI.wheels;
+AppUI.deadlineKind = AppUI.deadlineKind || "fixed";
 
 function deadlineSchedule(wrap, values, read) {
   const input = document.createElement("input");
@@ -177,12 +178,28 @@ function updateCreateFormMode() {
     AppUI.deadlineToggleBtn = createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
       AppUI.createDeadlineEnabled = on;
       syncCreateWeeklyWheels();
-    }, "\u{1F4C5} Deadline", "Show/hide the day & time wheels");
+    }, "\u{1F4C5} Deadline", "Show/hide the deadline wheels");
+    AppUI.deadlineKindBtn = createFieldToggle(AppUI.deadlineKind === "offset", (on) => {
+      AppUI.deadlineKind = on ? "offset" : "fixed";
+      AppUI.deadlineKindBtn.textContent = on ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time";
+      syncCreateWeeklyWheels();
+    }, "\u{1F4C5} Fixed day + time", "Switch deadline between fixed day/time and time after completion");
+    AppUI.deadlineBtnRow = document.createElement("div");
+    AppUI.deadlineBtnRow.className = "deadline-btn-row";
+    AppUI.deadlineBtnRow.appendChild(AppUI.deadlineToggleBtn);
+    AppUI.deadlineBtnRow.appendChild(AppUI.deadlineKindBtn);
+    AppUI.deadlineOffsetWrap = document.createElement("div");
+    AppUI.deadlineOffsetWrap.className = "deadline-offset-wheels";
   }
   AppUI.deadlineToggleBtn.classList.toggle("on", AppUI.createDeadlineEnabled);
   AppUI.deadlineToggleBtn.setAttribute("aria-pressed", String(AppUI.createDeadlineEnabled));
-  AppUI.els.scheduleContainer.appendChild(AppUI.deadlineToggleBtn);
+  AppUI.deadlineKindBtn.classList.toggle("on", AppUI.deadlineKind === "offset");
+  AppUI.deadlineKindBtn.setAttribute("aria-pressed", String(AppUI.deadlineKind === "offset"));
+  AppUI.deadlineKindBtn.textContent = AppUI.deadlineKind === "offset" ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time";
+  AppUI.els.scheduleContainer.appendChild(AppUI.deadlineBtnRow);
   AppUI.els.scheduleContainer.appendChild(AppUI.scheduleControls.el);
+  AppUI.els.scheduleContainer.appendChild(AppUI.deadlineOffsetWrap);
+  buildCreateOffsetWheels();
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
   AppUI.els.deadlineSlot.innerHTML = "";
   if (deadlineField) {
@@ -214,14 +231,31 @@ function updateCreateFormMode() {
   syncCreateWeeklyWheels();
 }
 
+function buildCreateOffsetWheels() {
+  const wrap = AppUI.deadlineOffsetWrap;
+  wrap.innerHTML = "";
+  const days = createWheel(CUSTOM_DAYS_OPTIONS, 1, "Days", null, false);
+  const hours = createWheel(CUSTOM_HOURS_OPTIONS, 0, "Hours", null, false);
+  const mins = createWheel(CUSTOM_MINUTES_OPTIONS, 0, "Minutes", null, false);
+  wrap.appendChild(days.el);
+  wrap.appendChild(hours.el);
+  wrap.appendChild(mins.el);
+  wrap.readOffsetMs = () =>
+    (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
+}
+
 function syncCreateWeeklyWheels() {
   const weekly = AppUI.lastRepeat === "weekly";
-  if (AppUI.deadlineToggleBtn) AppUI.deadlineToggleBtn.classList.toggle("hidden", !weekly);
+  if (AppUI.deadlineBtnRow) AppUI.deadlineBtnRow.classList.toggle("hidden", !weekly);
+  if (!weekly) return;
+  const show = AppUI.createDeadlineEnabled;
+  const offset = AppUI.deadlineKind === "offset";
   if (AppUI.scheduleControls) {
-    AppUI.scheduleControls.el.classList.toggle("hidden", weekly && !AppUI.createDeadlineEnabled);
+    AppUI.scheduleControls.el.classList.toggle("hidden", !show || offset);
   }
   const showDueAt = scheduleShowsTimeOfDay(AppUI.lastRepeat);
-  AppUI.els.dueAtField.classList.toggle("hidden", !showDueAt || (weekly && !AppUI.createDeadlineEnabled));
+  AppUI.els.dueAtField.classList.toggle("hidden", !showDueAt || !show || offset);
+  if (AppUI.deadlineOffsetWrap) AppUI.deadlineOffsetWrap.classList.toggle("hidden", !show || !offset);
 }
 
 function syncDueAtLabel() {
@@ -252,14 +286,17 @@ function initForm() {
       Game.editTask(taskId, values);
     }
     if (repeat === "weekly") {
-      if (AppUI.createDeadlineEnabled && AppUI.dueAtWheelsControls) {
+      if (!AppUI.createDeadlineEnabled) {
+        Game.editTask(taskId, { deadlineRule: null });
+      } else if (AppUI.deadlineKind === "offset" && AppUI.deadlineOffsetWrap.readOffsetMs) {
+        const ms = AppUI.deadlineOffsetWrap.readOffsetMs();
+        Game.editTask(taskId, { deadlineRule: ms > 0 ? { kind: "offset", ms } : null });
+      } else if (AppUI.dueAtWheelsControls) {
         const weekdays = values.repeatWeekdays || [1];
         const minutes = AppUI.dueAtWheelsControls.read();
         const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
         const mm = String(minutes % 60).padStart(2, "0");
         Game.editTask(taskId, { deadlineRule: { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) } });
-      } else {
-        Game.editTask(taskId, { deadlineRule: null });
       }
     }
     AppUI.els.taskInput.value = "";
@@ -268,4 +305,4 @@ function initForm() {
   });
 }
 
-export {  SCHEDULE_BUILDERS, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };
+export {  SCHEDULE_BUILDERS, buildCreateOffsetWheels, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };

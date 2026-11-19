@@ -1380,3 +1380,16 @@ body.actions-hidden .subtask-add { display: none; }
   text-align: right;
 }
 
+
+.deadline-btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.deadline-offset-wheels {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

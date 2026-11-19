@@ -1,7 +1,7 @@
 import * as Game from "./game.js";
 import { buildScheduleControls, scheduleShowsTimeOfDay } from "./app-form.js";
 import { AppUI } from "./app-state.js";
-import { DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, buildSelect, createDueAtWheels, createFieldToggle, createWheel, labeledField, readScheduleValues, scheduleValuesFromTask } from "./app-util.js";
+import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, buildSelect, createDueAtWheels, createFieldToggle, createWheel, labeledField, readScheduleValues, scheduleValuesFromTask } from "./app-util.js";
 import { showToast } from "./app-ui.js";
 import { render } from "./app-list.js";
 
@@ -200,20 +200,62 @@ function syncDeadlineSlot(scheduleArea) {
   }
 }
 
+function buildDeadlineOffsetWheels(wrap, rule) {
+  wrap.innerHTML = "";
+  const ms = rule && rule.kind === "offset" ? rule.ms : 86400000;
+  const days = createWheel(CUSTOM_DAYS_OPTIONS, Math.floor(ms / 86400000), "Days", null, true);
+  const hours = createWheel(CUSTOM_HOURS_OPTIONS, Math.floor((ms % 86400000) / 3600000), "Hours", null, true);
+  const mins = createWheel(CUSTOM_MINUTES_OPTIONS, Math.floor((ms % 3600000) / 60000), "Minutes", null, true);
+  wrap.appendChild(days.el);
+  wrap.appendChild(hours.el);
+  wrap.appendChild(mins.el);
+  wrap.readOffsetMs = () =>
+    (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
+}
+
+// For weekly tasks the deadline toggle hides/shows the deadline wheels;
+// the kind button switches between fixed day/time and after-completion offset.
+function syncWeeklyWheels(scheduleArea) {
+  const weekly = scheduleArea.repeat === "weekly";
+  if (scheduleArea.deadlineBtnRow) {
+    scheduleArea.deadlineBtnRow.classList.toggle("hidden", !weekly);
+  }
+  if (!weekly) return;
+  const show = scheduleArea.deadlineEnabled;
+  const offset = scheduleArea.deadlineKind === "offset";
+  if (scheduleArea.schedule) scheduleArea.schedule.el.classList.toggle("hidden", !show || offset);
+  if (scheduleArea.dueAtField) scheduleArea.dueAtField.classList.toggle("hidden", !show || offset);
+  if (scheduleArea.deadlineOffsetWrap) scheduleArea.deadlineOffsetWrap.classList.toggle("hidden", !show || !offset);
+}
+
 function buildEditScheduleArea(task) {
   const scheduleValues = scheduleValuesFromTask(task);
   const scheduleWrap = document.createElement("div");
   scheduleWrap.className = "repeat-schedule edit-schedule";
   const deadlineSlot = document.createElement("div");
   deadlineSlot.className = "labeled-field deadline-slot hidden";
-  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), deadlineToggle: null, repeat: task.repeat };
+  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), deadlineToggle: null, deadlineKindBtn: null, deadlineBtnRow: null, deadlineOffsetWrap: null, deadlineKind: "fixed", repeat: task.repeat };
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
+  state.deadlineKind = task.deadlineRule && task.deadlineRule.kind === "offset" ? "offset" : "fixed";
   state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => {
     state.deadlineEnabled = on;
     syncWeeklyWheels(state);
-  }, "📅 Deadline", "Show/hide the day & time wheels");
-  scheduleWrap.insertBefore(state.deadlineToggle, state.schedule.el);
+  }, "📅 Deadline", "Show/hide the deadline wheels");
+  state.deadlineKindBtn = createFieldToggle(state.deadlineKind === "offset", (on) => {
+    state.deadlineKind = on ? "offset" : "fixed";
+    state.deadlineKindBtn.textContent = on ? "⏳ After completion" : "📅 Fixed day + time";
+    syncWeeklyWheels(state);
+  }, state.deadlineKind === "offset" ? "⏳ After completion" : "📅 Fixed day + time", "Switch deadline between fixed day/time and time after completion");
+  state.deadlineBtnRow = document.createElement("div");
+  state.deadlineBtnRow.className = "deadline-btn-row";
+  state.deadlineBtnRow.appendChild(state.deadlineToggle);
+  state.deadlineBtnRow.appendChild(state.deadlineKindBtn);
+  scheduleWrap.insertBefore(state.deadlineBtnRow, state.schedule.el);
+  state.deadlineOffsetWrap = document.createElement("div");
+  state.deadlineOffsetWrap.className = "deadline-offset-wheels";
+  scheduleWrap.appendChild(state.deadlineOffsetWrap);
+  buildDeadlineOffsetWheels(state.deadlineOffsetWrap, task.deadlineRule);
   syncDeadlineSlot(state);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
@@ -229,8 +271,12 @@ function refreshEditSchedule(task, edit) {
   Object.assign(scheduleArea.scheduleValues, readScheduleValues(scheduleArea.schedule.read));
   scheduleArea.scheduleWrap.innerHTML = "";
   scheduleArea.schedule = buildScheduleControls(repeat, scheduleArea.scheduleValues, true);
-  if (scheduleArea.deadlineToggle) scheduleArea.scheduleWrap.appendChild(scheduleArea.deadlineToggle);
+  if (scheduleArea.deadlineBtnRow) scheduleArea.scheduleWrap.appendChild(scheduleArea.deadlineBtnRow);
   scheduleArea.scheduleWrap.appendChild(scheduleArea.schedule.el);
+  if (scheduleArea.deadlineOffsetWrap) {
+    scheduleArea.scheduleWrap.appendChild(scheduleArea.deadlineOffsetWrap);
+    buildDeadlineOffsetWheels(scheduleArea.deadlineOffsetWrap, null);
+  }
   syncDeadlineSlot(scheduleArea);
   scheduleArea.scheduleWrap.classList.toggle("hidden", scheduleArea.schedule.el.childElementCount === 0);
   const showDueAt = scheduleShowsTimeOfDay(repeat);
@@ -291,16 +337,19 @@ function saveEditRow(task, edit) {
     updates.deadlineEnabled = scheduleArea.deadlineEnabled;
   }
   if (repeat === "weekly") {
-    // The weekday + time wheels define the fixed deadline day/time.
-    // Toggle off = no deadline.
-    if (scheduleArea.deadlineEnabled && scheduleArea.dueAt) {
+    // Toggle off = no deadline. Otherwise the deadline is either a fixed
+    // weekday(s)+time or a days/hours/minutes offset after completion.
+    if (!scheduleArea.deadlineEnabled) {
+      updates.deadlineRule = null;
+    } else if (scheduleArea.deadlineKind === "offset" && scheduleArea.deadlineOffsetWrap.readOffsetMs) {
+      const ms = scheduleArea.deadlineOffsetWrap.readOffsetMs();
+      updates.deadlineRule = ms > 0 ? { kind: "offset", ms } : null;
+    } else if (scheduleArea.dueAt) {
       const weekdays = readScheduleValues(scheduleArea.schedule.read).repeatWeekdays || [1];
       const minutes = scheduleArea.dueAt.read();
       const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
       const mm = String(minutes % 60).padStart(2, "0");
       updates.deadlineRule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
-    } else {
-      updates.deadlineRule = null;
     }
   }
   if (!isFun) updates.difficulty = diff.value;
