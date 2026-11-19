@@ -1379,3 +1379,69 @@ body.actions-hidden .subtask-add { display: none; }
   min-width: 34px;
   text-align: right;
 }
+
+.rules-editor {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rules-title {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rule-editor select {
+  max-width: 100%;
+}
+
+.rule-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.rule-days {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.rule-day {
+  border: 1px solid var(--accent-soft);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 8px;
+  width: 28px;
+  height: 24px;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.rule-day.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.rule-fixed {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rule-offset {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.rule-offset input {
+  width: 64px;
+}

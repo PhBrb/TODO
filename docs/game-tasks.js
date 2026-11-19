@@ -1,4 +1,5 @@
 import { BONUS_TASK_RATE, CHEST_ITEM_ID, COIN_REWARD, CUSTOM_REPEAT_DEFAULT_MS, DIFFICULTY_ORDER, DIFFICULTY_SUGGESTION_STREAK, FUN_TASK_COINS, FUN_TASK_XP, GOAL_REWARD, HIGHLIGHT_COUNT, REPEAT_VALUES, TASK_LISTS, TIME_LIMIT_MINUTES, WEEKLY_GOAL_REWARD } from "./game-constants.js";
+import { normalizeRule } from "./game-rules.js";
 import { applyFirstTaskBonus, maybeStartBoost } from "./game-progression.js";
 import { achievementProgressFromCompletion, announceAchievements, announceLevelUp, awardSubtask, buildRewardMessage, clawBackMilestone, computeReward, earnChest, grantMilestones, grantXpAndCoins, reachedGoalCount, reachedWeeklyGoalCount, trackAchievement, trackDailyGoal, updateStreak } from "./game-rewards.js";
 import { nextOccurrence, repeatKey } from "./game-schedule.js";
@@ -520,6 +521,15 @@ const EDIT_UPDATERS = {
   },
   deadline(task, v) {
     task.deadline = v ? new Date(v).getTime() : null;
+  },
+  deadlineRule(task, v) {
+    task.deadlineRule = normalizeRule(v, { allowOffset: true });
+  },
+  resetRule(task, v) {
+    task.resetRule = normalizeRule(v, { allowOffset: true });
+  },
+  ignoreRule(task, v) {
+    task.ignoreRule = normalizeRule(v, { allowOffset: false });
   },
   repeatAfterCompletion(task, v) {
     task.repeatAfterCompletion = v === true;

@@ -197,15 +197,124 @@ function syncDeadlineSlot(scheduleArea) {
   }
 }
 
+// Editor for one schedule rule (deadline / reset / ignore).
+function buildRuleEditor(label, rule, allowOffset) {
+  const kindSel = document.createElement("select");
+  const kinds = [
+    ["none", "None"],
+    ["fixed", "Fixed day(s) + time"],
+  ];
+  if (allowOffset) kinds.push(["offset", "Time after completion"]);
+  for (const [v, l] of kinds) {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = l;
+    kindSel.appendChild(o);
+  }
+  kindSel.value = rule && rule.kind ? rule.kind : "none";
+
+  const daysWrap = document.createElement("div");
+  daysWrap.className = "rule-days";
+  const selected = new Set(
+    rule && rule.kind === "fixed" ? rule.slots.map((s) => s.weekday) : []
+  );
+  for (let d = 0; d < 7; d++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "rule-day" + (selected.has(d) ? " on" : "");
+    b.textContent = Game.WEEKDAY_LABELS[d];
+    b.addEventListener("click", () => {
+      if (selected.has(d)) {
+        selected.delete(d);
+        b.classList.remove("on");
+      } else {
+        selected.add(d);
+        b.classList.add("on");
+      }
+    });
+    daysWrap.appendChild(b);
+  }
+  const timeInput = document.createElement("input");
+  timeInput.type = "time";
+  timeInput.value =
+    rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00";
+  const fixedWrap = document.createElement("div");
+  fixedWrap.className = "rule-fixed";
+  fixedWrap.appendChild(daysWrap);
+  fixedWrap.appendChild(timeInput);
+
+  const offsetInput = document.createElement("input");
+  offsetInput.type = "number";
+  offsetInput.min = "1";
+  offsetInput.step = "1";
+  offsetInput.value = rule && rule.kind === "offset" ? String(rule.ms / 3600000) : "24";
+  const offsetWrap = document.createElement("div");
+  offsetWrap.className = "rule-offset";
+  offsetWrap.appendChild(offsetInput);
+  const offsetUnit = document.createElement("span");
+  offsetUnit.textContent = "h after completion";
+  offsetWrap.appendChild(offsetUnit);
+
+  const controls = document.createElement("div");
+  controls.className = "rule-controls";
+  controls.appendChild(fixedWrap);
+  controls.appendChild(offsetWrap);
+  const syncKind = () => {
+    const kind = kindSel.value;
+    fixedWrap.classList.toggle("hidden", kind !== "fixed");
+    offsetWrap.classList.toggle("hidden", kind !== "offset");
+  };
+  kindSel.addEventListener("change", syncKind);
+  syncKind();
+
+  const el = labeledField(label, [kindSel, controls]);
+  el.classList.add("rule-editor");
+  function read() {
+    const kind = kindSel.value;
+    if (kind === "none") return null;
+    if (kind === "offset") {
+      const h = Number(offsetInput.value);
+      return Number.isFinite(h) && h > 0 ? { kind: "offset", ms: Math.round(h * 3600000) } : null;
+    }
+    const time = Game.normalizeTimeOfDay(timeInput.value) || "18:00";
+    const slots = [...selected]
+      .sort((a, b) => a - b)
+      .map((weekday) => ({ weekday, time }));
+    return slots.length ? { kind: "fixed", slots } : null;
+  }
+  return { el, read };
+}
+
+// Deadline / reset / ignore editors, shown for weekly tasks.
+function buildRulesEditor(task) {
+  const wrap = document.createElement("div");
+  wrap.className = "rules-editor";
+  const title = document.createElement("div");
+  title.className = "rules-title";
+  title.textContent = "Deadline / Reset / Ignore";
+  wrap.appendChild(title);
+  const deadline = buildRuleEditor("Deadline", task.deadlineRule, true);
+  const reset = buildRuleEditor("Reset", task.resetRule, true);
+  const ignore = buildRuleEditor("Ignore", task.ignoreRule, false);
+  wrap.appendChild(deadline.el);
+  wrap.appendChild(reset.el);
+  wrap.appendChild(ignore.el);
+  return { el: wrap, deadline, reset, ignore };
+}
+
 function buildEditScheduleArea(task) {
   const scheduleValues = scheduleValuesFromTask(task);
   const scheduleWrap = document.createElement("div");
   scheduleWrap.className = "repeat-schedule edit-schedule";
   const deadlineSlot = document.createElement("div");
   deadlineSlot.className = "labeled-field deadline-slot hidden";
-  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button") };
+  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), rulesEditor: null };
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
+  if (task.repeat === "weekly") {
+    state.rulesEditor = buildRulesEditor(task);
+    scheduleWrap.appendChild(state.rulesEditor.el);
+  }
   syncDeadlineSlot(state);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
@@ -275,6 +384,11 @@ function saveEditRow(task, edit) {
   if (scheduleArea.dueAt) {
     updates.repeatTime = scheduleArea.dueAt.read();
     updates.deadlineEnabled = scheduleArea.deadlineEnabled;
+  }
+  if (scheduleArea.rulesEditor) {
+    updates.deadlineRule = scheduleArea.rulesEditor.deadline.read();
+    updates.resetRule = scheduleArea.rulesEditor.reset.read();
+    updates.ignoreRule = scheduleArea.rulesEditor.ignore.read();
   }
   if (!isFun) updates.difficulty = diff.value;
   clearEditing();
