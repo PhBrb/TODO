@@ -301,7 +301,9 @@ function updateCreateFormMode() {
   if (!AppUI.resetSection) {
     AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false, compact: false });
   }
-  AppUI.els.form.appendChild(AppUI.resetSection.el);
+  const timeLimitRow = document.getElementById("time-limit-row");
+  if (timeLimitRow) AppUI.els.form.insertBefore(AppUI.resetSection.el, timeLimitRow);
+  else AppUI.els.form.appendChild(AppUI.resetSection.el);
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
   AppUI.els.deadlineSlot.innerHTML = "";
   if (deadlineField) {

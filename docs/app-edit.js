@@ -182,8 +182,8 @@ function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   selectors.appendChild(mainRow);
   selectors.appendChild(scheduleArea.scheduleWrap);
   selectors.appendChild(timeRow);
-  selectors.appendChild(timeLimitRow);
   if (scheduleArea.resetSection) selectors.appendChild(scheduleArea.resetSection.el);
+  selectors.appendChild(timeLimitRow);
   return selectors;
 }
 
