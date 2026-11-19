@@ -54,37 +54,35 @@ function taskCheckbox(li, task) {
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
+// Rounded-rect outline of the 22px checkbox, starting at top center.
+const RING_PATH_D =
+  "M11 1 H17 A6 6 0 0 1 21 7 V15 A6 6 0 0 1 17 21 H5 A6 6 0 0 1 1 15 V7 A6 6 0 0 1 7 1 Z";
+
 function buildSubtaskRing(task) {
   const n = task.subtasks.length;
   if (n <= 2) return null;
   const done = task.subtasks.filter((s) => s.done).length;
   const size = 22;
-  const c = size / 2;
-  const r = 9;
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
   svg.setAttribute("width", String(size));
   svg.setAttribute("height", String(size));
   svg.classList.add("task-check-ring");
-  // Segmented background ring: n dash segments with gaps, so the page
-  // background shows between segments (one segment per subtask).
+  // Segmented outline: n dash segments with gaps, so the page background
+  // shows between segments (one segment per subtask).
   const GAP = 0.14;
   const seg = (100 / n) * (1 - GAP);
   const gap = (100 / n) * GAP;
-  const track = document.createElementNS(SVG_NS, "circle");
-  track.setAttribute("cx", String(c));
-  track.setAttribute("cy", String(c));
-  track.setAttribute("r", String(r));
+  const track = document.createElementNS(SVG_NS, "path");
+  track.setAttribute("d", RING_PATH_D);
   track.setAttribute("pathLength", "100");
   track.classList.add("task-ring-track");
   track.style.strokeDasharray = `${seg} ${gap}`;
   svg.appendChild(track);
   // Progress fills whole segments only, so gaps stay visible: repeat the
   // segment pattern `done` times, then an empty dash for the rest.
-  const bar = document.createElementNS(SVG_NS, "circle");
-  bar.setAttribute("cx", String(c));
-  bar.setAttribute("cy", String(c));
-  bar.setAttribute("r", String(r));
+  const bar = document.createElementNS(SVG_NS, "path");
+  bar.setAttribute("d", RING_PATH_D);
   bar.setAttribute("pathLength", "100");
   bar.classList.add("task-ring-bar");
   bar.style.strokeDasharray = done === 0
