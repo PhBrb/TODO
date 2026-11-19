@@ -489,11 +489,21 @@ body.actions-hidden .subtask-add { display: none; }
 }
 
 .task-check-wrap input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
   position: relative;
   z-index: 1;
   background: transparent;
   margin: 0;
+  border: 2px solid var(--accent-soft);
+  border-radius: 6px;
+  cursor: pointer;
 }
+
+.task-check-wrap input[type="checkbox"]:checked {
+  border-color: var(--done);
+  background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5L13 4.5" stroke="%236c5ce7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 12px no-repeat;
+}/* keep the ring visible inside: checked state only recolors border + shows the check */
 
 .task-check-ring {
   position: absolute;
