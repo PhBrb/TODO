@@ -186,23 +186,26 @@ function buildOffsetWheelsInto(wrap, rule, compact = true) {
 
 // A labeled rule section: enable toggle + kind switch (fixed day/time vs
 // after-completion offset) + the corresponding wheel selectors.
-function buildRuleSection({ label, rule, enabled = true, onKind = null, compact = true }) {
+function buildRuleSection({ label, rule, enabled = true, onKind = null, compact = true, allowOffset = true }) {
   const section = document.createElement("div");
   section.className = "rule-section";
-  let kind = rule && rule.kind === "offset" ? "offset" : "fixed";
+  let kind = !allowOffset ? "fixed" : rule && rule.kind === "offset" ? "offset" : "fixed";
   let isEnabled = enabled !== false;
   const kindLabel = (k) => (k === "offset" ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time");
   const btnRow = document.createElement("div");
   btnRow.className = "deadline-btn-row";
   const toggle = createFieldToggle(isEnabled, (on) => { isEnabled = on; sync(); }, label, "Show/hide the wheels");
-  const kindBtn = createFieldToggle(kind === "offset", (on) => {
-    kind = on ? "offset" : "fixed";
-    kindBtn.textContent = kindLabel(kind);
-    if (onKind) onKind(kind);
-    sync();
-  }, kindLabel(kind), "Switch between fixed day/time and time after completion");
   btnRow.appendChild(toggle);
-  btnRow.appendChild(kindBtn);
+  let kindBtn = null;
+  if (allowOffset) {
+    kindBtn = createFieldToggle(kind === "offset", (on) => {
+      kind = on ? "offset" : "fixed";
+      kindBtn.textContent = kindLabel(kind);
+      if (onKind) onKind(kind);
+      sync();
+    }, kindLabel(kind), "Switch between fixed day/time and time after completion");
+    btnRow.appendChild(kindBtn);
+  }
 
   const fixedWrap = document.createElement("div");
   const grid = weekdayToggleGrid(rule && rule.kind === "fixed" ? rule.slots.map((sl) => sl.weekday) : [1]);
@@ -246,6 +249,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
     isEnabled: () => isEnabled,
     getKind: () => kind,
     setKind(k) {
+      if (!kindBtn) return;
       kind = k;
       kindBtn.classList.toggle("on", k === "offset");
       kindBtn.setAttribute("aria-pressed", String(k === "offset"));
@@ -253,6 +257,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
       sync();
     },
     setKindEnabled(e) {
+      if (!kindBtn) return;
       kindBtn.disabled = !e;
       kindBtn.classList.toggle("disabled", !e);
     },
@@ -301,9 +306,14 @@ function updateCreateFormMode() {
   if (!AppUI.resetSection) {
     AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false, compact: false });
   }
+  if (!AppUI.ignoreSection) {
+    AppUI.ignoreSection = buildRuleSection({ label: "\u{1F6AB} Ignore", rule: null, enabled: false, compact: false, allowOffset: false });
+  }
   const timeLimitRow = document.getElementById("time-limit-row");
   if (timeLimitRow) AppUI.els.form.insertBefore(AppUI.resetSection.el, timeLimitRow);
   else AppUI.els.form.appendChild(AppUI.resetSection.el);
+  if (timeLimitRow) AppUI.els.form.insertBefore(AppUI.ignoreSection.el, timeLimitRow);
+  else AppUI.els.form.appendChild(AppUI.ignoreSection.el);
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
   AppUI.els.deadlineSlot.innerHTML = "";
   if (deadlineField) {
@@ -352,6 +362,7 @@ function syncCreateWeeklyWheels() {
   const weekly = AppUI.lastRepeat === "weekly";
   if (AppUI.deadlineBtnRow) AppUI.deadlineBtnRow.classList.toggle("hidden", !weekly);
   if (AppUI.resetSection) AppUI.resetSection.el.classList.toggle("hidden", !weekly);
+  if (AppUI.ignoreSection) AppUI.ignoreSection.el.classList.toggle("hidden", !weekly);
   if (!weekly) return;
   const show = AppUI.createDeadlineEnabled;
   const offset = AppUI.deadlineKind === "offset";
@@ -392,6 +403,7 @@ function initForm() {
     }
     if (repeat === "weekly") {
       if (AppUI.resetSection) Game.editTask(taskId, { resetRule: AppUI.resetSection.read() });
+      if (AppUI.ignoreSection) Game.editTask(taskId, { ignoreRule: AppUI.ignoreSection.read() });
       if (!AppUI.createDeadlineEnabled) {
         Game.editTask(taskId, { deadlineRule: null });
       } else if (AppUI.deadlineKind === "offset" && AppUI.deadlineOffsetWrap.readOffsetMs) {

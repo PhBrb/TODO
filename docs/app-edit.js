@@ -183,6 +183,7 @@ function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   selectors.appendChild(scheduleArea.scheduleWrap);
   selectors.appendChild(timeRow);
   if (scheduleArea.resetSection) selectors.appendChild(scheduleArea.resetSection.el);
+  if (scheduleArea.ignoreSection) selectors.appendChild(scheduleArea.ignoreSection.el);
   selectors.appendChild(timeLimitRow);
   return selectors;
 }
@@ -222,6 +223,7 @@ function syncWeeklyWheels(scheduleArea) {
     scheduleArea.deadlineBtnRow.classList.toggle("hidden", !weekly);
   }
   if (scheduleArea.resetSection) scheduleArea.resetSection.el.classList.toggle("hidden", !weekly);
+  if (scheduleArea.ignoreSection) scheduleArea.ignoreSection.el.classList.toggle("hidden", !weekly);
   if (!weekly) return;
   const show = scheduleArea.deadlineEnabled;
   const offset = scheduleArea.deadlineKind === "offset";
@@ -236,7 +238,7 @@ function buildEditScheduleArea(task) {
   scheduleWrap.className = "repeat-schedule edit-schedule";
   const deadlineSlot = document.createElement("div");
   deadlineSlot.className = "labeled-field deadline-slot hidden";
-  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), deadlineToggle: null, deadlineKindBtn: null, deadlineBtnRow: null, deadlineOffsetWrap: null, deadlineKind: "fixed", repeat: task.repeat, resetSection: null };
+  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), deadlineToggle: null, deadlineKindBtn: null, deadlineBtnRow: null, deadlineOffsetWrap: null, deadlineKind: "fixed", repeat: task.repeat, resetSection: null, ignoreSection: null };
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
   state.deadlineKind = task.deadlineRule && task.deadlineRule.kind === "offset" ? "offset" : "fixed";
@@ -263,6 +265,7 @@ function buildEditScheduleArea(task) {
   scheduleWrap.appendChild(state.deadlineOffsetWrap);
   buildDeadlineOffsetWheels(state.deadlineOffsetWrap, task.deadlineRule);
   state.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: task.resetRule, enabled: task.resetRule != null, compact: true });
+  state.ignoreSection = buildRuleSection({ label: "\u{1F6AB} Ignore", rule: task.ignoreRule, enabled: task.ignoreRule != null, compact: true, allowOffset: false });
   if (state.deadlineKind === "offset") {
     state.resetSection.setKind("offset");
     state.resetSection.setKindEnabled(false);
@@ -363,6 +366,7 @@ function saveEditRow(task, edit) {
       updates.deadlineRule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
     }
     if (scheduleArea.resetSection) updates.resetRule = scheduleArea.resetSection.read();
+    if (scheduleArea.ignoreSection) updates.ignoreRule = scheduleArea.ignoreSection.read();
   }
   if (!isFun) updates.difficulty = diff.value;
   clearEditing();
