@@ -492,6 +492,7 @@ body.actions-hidden .subtask-add { display: none; }
   position: relative;
   z-index: 1;
   background: transparent;
+  margin: 0;
 }
 
 .task-check-ring {
