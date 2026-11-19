@@ -492,8 +492,6 @@ body.actions-hidden .subtask-add { display: none; }
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  overflow: hidden;
-  border-radius: 6px;
 }
 
 .task-check-fill {
@@ -503,7 +501,7 @@ body.actions-hidden .subtask-add { display: none; }
   bottom: 0;
   background: var(--done);
   opacity: 0.4;
-  border-radius: 0;
+  border-radius: 0 0 6px 6px;
   pointer-events: none;
   z-index: 2;
   transition: height 0.25s ease;
