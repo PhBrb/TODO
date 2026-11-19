@@ -52,44 +52,16 @@ function taskCheckbox(li, task) {
   return cb;
 }
 
-const SVG_NS = "http://www.w3.org/2000/svg";
-
-// Rounded-rect outline of the 22px checkbox, starting at top center.
-const RING_PATH_D =
-  "M11 1 H17 A6 6 0 0 1 21 7 V15 A6 6 0 0 1 17 21 H5 A6 6 0 0 1 1 15 V7 A6 6 0 0 1 7 1 Z";
-
-function buildSubtaskRing(task) {
+// Green fill that rises from the bottom of the parent checkbox as
+// subtasks are completed (only for tasks with more than 2 subtasks).
+function buildSubtaskFill(task) {
   const n = task.subtasks.length;
   if (n <= 2) return null;
   const done = task.subtasks.filter((s) => s.done).length;
-  const size = 22;
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
-  svg.setAttribute("width", String(size));
-  svg.setAttribute("height", String(size));
-  svg.classList.add("task-check-ring");
-  // Segmented outline: n dash segments with gaps, so the page background
-  // shows between segments (one segment per subtask).
-  const GAP = 0.14;
-  const seg = (100 / n) * (1 - GAP);
-  const gap = (100 / n) * GAP;
-  const track = document.createElementNS(SVG_NS, "path");
-  track.setAttribute("d", RING_PATH_D);
-  track.setAttribute("pathLength", "100");
-  track.classList.add("task-ring-track");
-  track.style.strokeDasharray = `${seg} ${gap}`;
-  svg.appendChild(track);
-  // Progress fills whole segments only, so gaps stay visible: repeat the
-  // segment pattern `done` times, then an empty dash for the rest.
-  const bar = document.createElementNS(SVG_NS, "path");
-  bar.setAttribute("d", RING_PATH_D);
-  bar.setAttribute("pathLength", "100");
-  bar.classList.add("task-ring-bar");
-  bar.style.strokeDasharray = done === 0
-    ? "0 100"
-    : `${Array.from({ length: done }, () => `${seg} ${gap}`).join(" ")} 0 100`;
-  svg.appendChild(bar);
-  return svg;
+  const fill = document.createElement("div");
+  fill.className = "task-check-fill";
+  fill.style.height = `${(done / n) * 100}%`;
+  return fill;
 }
 
 function taskTitleNode(task, editingThisTask, chainInfo = null) {
@@ -413,12 +385,12 @@ function taskNode(task, chainInfo = null, chainUi = null) {
   taskDraggable(li, task);
 
   const cb = taskCheckbox(li, task);
-  const ring = buildSubtaskRing(task);
-  if (ring) {
+  const fill = buildSubtaskFill(task);
+  if (fill) {
     const wrap = document.createElement("span");
     wrap.className = "task-check-wrap";
+    wrap.appendChild(fill);
     wrap.appendChild(cb);
-    wrap.appendChild(ring);
     li.appendChild(wrap);
   } else {
     li.appendChild(cb);
