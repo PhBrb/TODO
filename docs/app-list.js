@@ -56,7 +56,7 @@ function taskCheckbox(li, task) {
 // subtasks are completed (only for tasks with more than 2 subtasks).
 function buildSubtaskFill(task) {
   const n = task.subtasks.length;
-  if (n <= 2) return null;
+  if (n <= 2 || task.done) return null;
   const done = task.subtasks.filter((s) => s.done).length;
   const fill = document.createElement("div");
   fill.className = "task-check-fill";
