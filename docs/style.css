@@ -481,8 +481,8 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-check-wrap {
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -491,6 +491,7 @@ body.actions-hidden .subtask-add { display: none; }
 .task-check-wrap input[type="checkbox"] {
   position: relative;
   z-index: 1;
+  background: transparent;
 }
 
 .task-check-ring {
@@ -506,13 +507,13 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-ring-track {
   stroke: var(--accent-soft);
-  stroke-width: 2.5;
+  stroke-width: 2;
   opacity: 0.55;
 }
 
 .task-ring-bar {
   stroke: var(--accent);
-  stroke-width: 2.5;
+  stroke-width: 2;
 }
 
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
