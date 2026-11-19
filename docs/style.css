@@ -248,6 +248,11 @@ body.actions-hidden .subtask-add { display: none; }
   height: 22px;
   accent-color: var(--done);
   flex-shrink: 0;
+}
+
+/* direct child only: subtask checkboxes are nested inside .task and must
+   keep the UA margin, otherwise subtask rows shrink and intersect */
+.task > input[type="checkbox"] {
   margin: 0;
 }
 
@@ -487,6 +492,8 @@ body.actions-hidden .subtask-add { display: none; }
   flex-shrink: 0;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  border-radius: 6px;
 }
 
 .task-check-fill {
@@ -496,7 +503,7 @@ body.actions-hidden .subtask-add { display: none; }
   bottom: 0;
   background: var(--done);
   opacity: 0.4;
-  border-radius: 6px;
+  border-radius: 0;
   pointer-events: none;
   z-index: 2;
   transition: height 0.25s ease;
