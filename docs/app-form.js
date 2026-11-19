@@ -298,7 +298,7 @@ function updateCreateFormMode() {
   if (!AppUI.resetSection) {
     AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false });
   }
-  AppUI.els.scheduleContainer.appendChild(AppUI.resetSection.el);
+  AppUI.els.form.appendChild(AppUI.resetSection.el);
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
   AppUI.els.deadlineSlot.innerHTML = "";
   if (deadlineField) {
