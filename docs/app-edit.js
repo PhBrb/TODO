@@ -200,140 +200,20 @@ function syncDeadlineSlot(scheduleArea) {
   }
 }
 
-// Editor for one schedule rule (deadline / reset / ignore).
-function buildRuleEditor(label, rule, allowOffset) {
-  const kindSel = document.createElement("select");
-  const kinds = [
-    ["none", "None"],
-    ["fixed", "Fixed day(s) + time"],
-  ];
-  if (allowOffset) kinds.push(["offset", "Time after completion"]);
-  for (const [v, l] of kinds) {
-    const o = document.createElement("option");
-    o.value = v;
-    o.textContent = l;
-    kindSel.appendChild(o);
-  }
-  kindSel.value = rule && rule.kind ? rule.kind : "none";
-
-  const daysWrap = document.createElement("div");
-  daysWrap.className = "rule-days";
-  const selected = new Set(
-    rule && rule.kind === "fixed" ? rule.slots.map((s) => s.weekday) : []
-  );
-  for (let d = 0; d < 7; d++) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "rule-day" + (selected.has(d) ? " on" : "");
-    b.textContent = Game.WEEKDAY_LABELS[d];
-    b.addEventListener("click", () => {
-      if (selected.has(d)) {
-        selected.delete(d);
-        b.classList.remove("on");
-      } else {
-        selected.add(d);
-        b.classList.add("on");
-      }
-    });
-    daysWrap.appendChild(b);
-  }
-  const timeInput = document.createElement("input");
-  timeInput.type = "time";
-  timeInput.value =
-    rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00";
-  const fixedWrap = document.createElement("div");
-  fixedWrap.className = "rule-fixed";
-  fixedWrap.appendChild(daysWrap);
-  fixedWrap.appendChild(timeInput);
-
-  const offsetInput = document.createElement("input");
-  offsetInput.type = "number";
-  offsetInput.min = "1";
-  offsetInput.step = "1";
-  offsetInput.value = rule && rule.kind === "offset" ? String(rule.ms / 3600000) : "24";
-  const offsetWrap = document.createElement("div");
-  offsetWrap.className = "rule-offset";
-  offsetWrap.appendChild(offsetInput);
-  const offsetUnit = document.createElement("span");
-  offsetUnit.textContent = "h after completion";
-  offsetWrap.appendChild(offsetUnit);
-
-  const controls = document.createElement("div");
-  controls.className = "rule-controls";
-  controls.appendChild(fixedWrap);
-  controls.appendChild(offsetWrap);
-  const syncKind = () => {
-    const kind = kindSel.value;
-    fixedWrap.classList.toggle("hidden", kind !== "fixed");
-    offsetWrap.classList.toggle("hidden", kind !== "offset");
-  };
-  kindSel.addEventListener("change", syncKind);
-  syncKind();
-
-  const el = labeledField(label, [kindSel, controls]);
-  el.classList.add("rule-editor");
-  function read() {
-    const kind = kindSel.value;
-    if (kind === "none") return null;
-    if (kind === "offset") {
-      const h = Number(offsetInput.value);
-      return Number.isFinite(h) && h > 0 ? { kind: "offset", ms: Math.round(h * 3600000) } : null;
-    }
-    const time = Game.normalizeTimeOfDay(timeInput.value) || "18:00";
-    const slots = [...selected]
-      .sort((a, b) => a - b)
-      .map((weekday) => ({ weekday, time }));
-    return slots.length ? { kind: "fixed", slots } : null;
-  }
-  return { el, read };
-}
-
-// Ignore editor, shown for weekly tasks. (Deadline/reset are defined by the
-// weekday + time wheels controlled by the deadline toggle.)
-function buildRulesEditor(task) {
-  const wrap = document.createElement("div");
-  wrap.className = "rules-editor";
-  const title = document.createElement("div");
-  title.className = "rules-title";
-  title.textContent = "Ignore";
-  wrap.appendChild(title);
-  const ignore = buildRuleEditor("Ignore (reduces urgency)", task.ignoreRule, false);
-  wrap.appendChild(ignore.el);
-  return { el: wrap, ignore };
-}
-
-// For weekly tasks the deadline toggle hides/shows the weekday and time
-// wheels; the wheels define the fixed day/time when the task resets.
-function syncWeeklyWheels(scheduleArea) {
-  const weekly = scheduleArea.repeat === "weekly";
-  if (scheduleArea.deadlineToggle) {
-    scheduleArea.deadlineToggle.classList.toggle("hidden", !weekly);
-  }
-  if (scheduleArea.rulesEditor) {
-    scheduleArea.rulesEditor.el.classList.toggle("hidden", !weekly);
-  }
-  if (!weekly) return;
-  const show = scheduleArea.deadlineEnabled;
-  if (scheduleArea.schedule) scheduleArea.schedule.el.classList.toggle("hidden", !show);
-  if (scheduleArea.dueAtField) scheduleArea.dueAtField.classList.toggle("hidden", !show);
-}
-
 function buildEditScheduleArea(task) {
   const scheduleValues = scheduleValuesFromTask(task);
   const scheduleWrap = document.createElement("div");
   scheduleWrap.className = "repeat-schedule edit-schedule";
   const deadlineSlot = document.createElement("div");
   deadlineSlot.className = "labeled-field deadline-slot hidden";
-  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), rulesEditor: null, deadlineToggle: null, repeat: task.repeat };
+  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), deadlineToggle: null, repeat: task.repeat };
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
-  state.rulesEditor = buildRulesEditor(task);
   state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => {
     state.deadlineEnabled = on;
     syncWeeklyWheels(state);
   }, "📅 Deadline", "Show/hide the day & time wheels");
   scheduleWrap.insertBefore(state.deadlineToggle, state.schedule.el);
-  scheduleWrap.appendChild(state.rulesEditor.el);
   syncDeadlineSlot(state);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
@@ -351,7 +231,6 @@ function refreshEditSchedule(task, edit) {
   scheduleArea.schedule = buildScheduleControls(repeat, scheduleArea.scheduleValues, true);
   if (scheduleArea.deadlineToggle) scheduleArea.scheduleWrap.appendChild(scheduleArea.deadlineToggle);
   scheduleArea.scheduleWrap.appendChild(scheduleArea.schedule.el);
-  if (scheduleArea.rulesEditor) scheduleArea.scheduleWrap.appendChild(scheduleArea.rulesEditor.el);
   syncDeadlineSlot(scheduleArea);
   scheduleArea.scheduleWrap.classList.toggle("hidden", scheduleArea.schedule.el.childElementCount === 0);
   const showDueAt = scheduleShowsTimeOfDay(repeat);
@@ -382,9 +261,7 @@ function syncEditDueAtLabel(scheduleArea) {
   const label = scheduleArea.dueAtField.querySelector(".field-label");
   if (label) {
     label.textContent =
-      scheduleArea.repeat === "weekly"
-        ? "🔁 Resets at"
-        : scheduleArea.deadlineEnabled ? "🔔 Due at" : "🔔 Resets at";
+      scheduleArea.repeat === "weekly" || scheduleArea.deadlineEnabled ? "📅 Due at" : "🔔 Resets at";
   }
 }
 
@@ -414,23 +291,17 @@ function saveEditRow(task, edit) {
     updates.deadlineEnabled = scheduleArea.deadlineEnabled;
   }
   if (repeat === "weekly") {
-    // The weekday + time wheels define the fixed day/time when the task
-    // resets; the same day/time is the deadline. Toggle off = no deadline.
+    // The weekday + time wheels define the fixed deadline day/time.
+    // Toggle off = no deadline.
     if (scheduleArea.deadlineEnabled && scheduleArea.dueAt) {
       const weekdays = readScheduleValues(scheduleArea.schedule.read).repeatWeekdays || [1];
       const minutes = scheduleArea.dueAt.read();
       const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
       const mm = String(minutes % 60).padStart(2, "0");
-      const rule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
-      updates.resetRule = rule;
-      updates.deadlineRule = rule;
+      updates.deadlineRule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
     } else {
-      updates.resetRule = null;
       updates.deadlineRule = null;
     }
-  }
-  if (scheduleArea.rulesEditor) {
-    updates.ignoreRule = scheduleArea.rulesEditor.ignore.read();
   }
   if (!isFun) updates.difficulty = diff.value;
   clearEditing();

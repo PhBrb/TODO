@@ -173,6 +173,15 @@ function updateCreateFormMode() {
   const repeat = isFun ? "none" : W.repeat.value;
   AppUI.els.scheduleContainer.innerHTML = "";
   AppUI.scheduleControls = buildScheduleControls(repeat, {}, false);
+  if (!AppUI.deadlineToggleBtn) {
+    AppUI.deadlineToggleBtn = createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
+      AppUI.createDeadlineEnabled = on;
+      syncCreateWeeklyWheels();
+    }, "\u{1F4C5} Deadline", "Show/hide the day & time wheels");
+  }
+  AppUI.deadlineToggleBtn.classList.toggle("on", AppUI.createDeadlineEnabled);
+  AppUI.deadlineToggleBtn.setAttribute("aria-pressed", String(AppUI.createDeadlineEnabled));
+  AppUI.els.scheduleContainer.appendChild(AppUI.deadlineToggleBtn);
   AppUI.els.scheduleContainer.appendChild(AppUI.scheduleControls.el);
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
   AppUI.els.deadlineSlot.innerHTML = "";
@@ -188,22 +197,36 @@ function updateCreateFormMode() {
   if (scheduleShowsTimeOfDay(repeat)) {
     AppUI.dueAtWheelsControls = createDueAtWheels(undefined, false);
     for (const el of AppUI.dueAtWheelsControls.els) AppUI.els.dueAtWheelsEl.appendChild(el);
-    AppUI.els.dueAtLabelRow.appendChild(createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
-      AppUI.createDeadlineEnabled = on;
-      syncDueAtLabel();
-    }, "Deadline", "Toggle deadline urgency"));
+    if (repeat !== "weekly") {
+      AppUI.els.dueAtLabelRow.appendChild(createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
+        AppUI.createDeadlineEnabled = on;
+        syncDueAtLabel();
+      }, "Deadline", "Toggle deadline urgency"));
+    }
     AppUI.els.dueAtLabelRow.appendChild(AppUI.dueAtWheelsControls.endOfDayBtn);
     AppUI.els.dueAtField.classList.remove("hidden");
   } else {
     AppUI.dueAtWheelsControls = null;
     AppUI.els.dueAtField.classList.add("hidden");
   }
+  AppUI.lastRepeat = repeat;
   syncDueAtLabel();
+  syncCreateWeeklyWheels();
+}
+
+function syncCreateWeeklyWheels() {
+  const weekly = AppUI.lastRepeat === "weekly";
+  if (AppUI.deadlineToggleBtn) AppUI.deadlineToggleBtn.classList.toggle("hidden", !weekly);
+  if (AppUI.scheduleControls) {
+    AppUI.scheduleControls.el.classList.toggle("hidden", weekly && !AppUI.createDeadlineEnabled);
+  }
+  const showDueAt = scheduleShowsTimeOfDay(AppUI.lastRepeat);
+  AppUI.els.dueAtField.classList.toggle("hidden", !showDueAt || (weekly && !AppUI.createDeadlineEnabled));
 }
 
 function syncDueAtLabel() {
   if (!AppUI.els.dueAtLabel) return;
-  AppUI.els.dueAtLabel.textContent = AppUI.createDeadlineEnabled ? "🕔 Due at" : "🕔 Resets at";
+  AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.createDeadlineEnabled) ? "🕔 Due at" : "🕔 Resets at";
 }
 
 function initForm() {
@@ -228,10 +251,21 @@ function initForm() {
     if (isRepeatingRepeat(repeat)) {
       Game.editTask(taskId, values);
     }
+    if (repeat === "weekly") {
+      if (AppUI.createDeadlineEnabled && AppUI.dueAtWheelsControls) {
+        const weekdays = values.repeatWeekdays || [1];
+        const minutes = AppUI.dueAtWheelsControls.read();
+        const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+        const mm = String(minutes % 60).padStart(2, "0");
+        Game.editTask(taskId, { deadlineRule: { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) } });
+      } else {
+        Game.editTask(taskId, { deadlineRule: null });
+      }
+    }
     AppUI.els.taskInput.value = "";
     updateCreateFormMode();
     AppUI.els.taskInput.focus();
   });
 }
 
-export {  SCHEDULE_BUILDERS, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };
+export {  SCHEDULE_BUILDERS, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };
