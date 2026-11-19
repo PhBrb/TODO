@@ -165,6 +165,97 @@ function scheduleShowsTimeOfDay(repeat) {
   return repeat === "daily" || repeat === "weekly" || repeat === "monthly";
 }
 
+
+function timeToMinutes(time) {
+  const [h, m] = String(time).split(":").map(Number);
+  return (h * 60 + m) || undefined;
+}
+
+function buildOffsetWheelsInto(wrap, rule) {
+  wrap.innerHTML = "";
+  const ms = rule && rule.kind === "offset" ? rule.ms : 86400000;
+  const days = createWheel(CUSTOM_DAYS_OPTIONS, Math.floor(ms / 86400000), "Days", null, true);
+  const hours = createWheel(CUSTOM_HOURS_OPTIONS, Math.floor((ms % 86400000) / 3600000), "Hours", null, true);
+  const mins = createWheel(CUSTOM_MINUTES_OPTIONS, Math.floor((ms % 3600000) / 60000), "Minutes", null, true);
+  wrap.appendChild(days.el);
+  wrap.appendChild(hours.el);
+  wrap.appendChild(mins.el);
+  wrap.readOffsetMs = () =>
+    (Number(days.value) * 86400 + Number(hours.value) * 3600 + Number(mins.value) * 60) * 1000;
+}
+
+// A labeled rule section: enable toggle + kind switch (fixed day/time vs
+// after-completion offset) + the corresponding wheel selectors.
+function buildRuleSection({ label, rule, enabled = true, onKind = null }) {
+  const section = document.createElement("div");
+  section.className = "rule-section";
+  let kind = rule && rule.kind === "offset" ? "offset" : "fixed";
+  let isEnabled = enabled !== false;
+  const kindLabel = (k) => (k === "offset" ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time");
+  const btnRow = document.createElement("div");
+  btnRow.className = "deadline-btn-row";
+  const toggle = createFieldToggle(isEnabled, (on) => { isEnabled = on; sync(); }, label, "Show/hide the wheels");
+  const kindBtn = createFieldToggle(kind === "offset", (on) => {
+    kind = on ? "offset" : "fixed";
+    kindBtn.textContent = kindLabel(kind);
+    if (onKind) onKind(kind);
+    sync();
+  }, kindLabel(kind), "Switch between fixed day/time and time after completion");
+  btnRow.appendChild(toggle);
+  btnRow.appendChild(kindBtn);
+
+  const fixedWrap = document.createElement("div");
+  const grid = weekdayToggleGrid(rule && rule.kind === "fixed" ? rule.slots.map((sl) => sl.weekday) : [1]);
+  const wheels = createDueAtWheels(timeToMinutes(rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00"), true);
+  fixedWrap.appendChild(grid.group);
+  for (const el of wheels.els) fixedWrap.appendChild(el);
+
+  const offsetWrap = document.createElement("div");
+  offsetWrap.className = "deadline-offset-wheels";
+  buildOffsetWheelsInto(offsetWrap, rule);
+
+  function sync() {
+    const showFixed = isEnabled && kind === "fixed";
+    grid.group.classList.toggle("hidden", !showFixed);
+    for (const el of wheels.els) el.classList.toggle("hidden", !showFixed);
+    offsetWrap.classList.toggle("hidden", !(isEnabled && kind === "offset"));
+  }
+  section.appendChild(btnRow);
+  section.appendChild(fixedWrap);
+  section.appendChild(offsetWrap);
+  sync();
+
+  function read() {
+    if (!isEnabled) return null;
+    if (kind === "offset") {
+      const ms = offsetWrap.readOffsetMs();
+      return ms > 0 ? { kind: "offset", ms } : null;
+    }
+    const weekdays = grid.buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
+    const minutes = wheels.read();
+    const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+    const mm = String(minutes % 60).padStart(2, "0");
+    return weekdays.length ? { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) } : null;
+  }
+  return {
+    el: section,
+    read,
+    isEnabled: () => isEnabled,
+    getKind: () => kind,
+    setKind(k) {
+      kind = k;
+      kindBtn.classList.toggle("on", k === "offset");
+      kindBtn.setAttribute("aria-pressed", String(k === "offset"));
+      kindBtn.textContent = kindLabel(k);
+      sync();
+    },
+    setKindEnabled(e) {
+      kindBtn.disabled = !e;
+      kindBtn.classList.toggle("disabled", !e);
+    },
+  };
+}
+
 function updateCreateFormMode() {
   if (!W.list || !W.diff || !W.repeat || !W.timeLimit) return;
   const isFun = W.list.value === "fun";
@@ -182,6 +273,10 @@ function updateCreateFormMode() {
     AppUI.deadlineKindBtn = createFieldToggle(AppUI.deadlineKind === "offset", (on) => {
       AppUI.deadlineKind = on ? "offset" : "fixed";
       AppUI.deadlineKindBtn.textContent = on ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time";
+      if (AppUI.resetSection) {
+        if (on) AppUI.resetSection.setKind("offset");
+        AppUI.resetSection.setKindEnabled(!on);
+      }
       syncCreateWeeklyWheels();
     }, "\u{1F4C5} Fixed day + time", "Switch deadline between fixed day/time and time after completion");
     AppUI.deadlineBtnRow = document.createElement("div");
@@ -200,6 +295,10 @@ function updateCreateFormMode() {
   AppUI.els.scheduleContainer.appendChild(AppUI.scheduleControls.el);
   AppUI.els.scheduleContainer.appendChild(AppUI.deadlineOffsetWrap);
   buildCreateOffsetWheels();
+  if (!AppUI.resetSection) {
+    AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false });
+  }
+  AppUI.els.scheduleContainer.appendChild(AppUI.resetSection.el);
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
   AppUI.els.deadlineSlot.innerHTML = "";
   if (deadlineField) {
@@ -247,6 +346,7 @@ function buildCreateOffsetWheels() {
 function syncCreateWeeklyWheels() {
   const weekly = AppUI.lastRepeat === "weekly";
   if (AppUI.deadlineBtnRow) AppUI.deadlineBtnRow.classList.toggle("hidden", !weekly);
+  if (AppUI.resetSection) AppUI.resetSection.el.classList.toggle("hidden", !weekly);
   if (!weekly) return;
   const show = AppUI.createDeadlineEnabled;
   const offset = AppUI.deadlineKind === "offset";
@@ -286,6 +386,7 @@ function initForm() {
       Game.editTask(taskId, values);
     }
     if (repeat === "weekly") {
+      if (AppUI.resetSection) Game.editTask(taskId, { resetRule: AppUI.resetSection.read() });
       if (!AppUI.createDeadlineEnabled) {
         Game.editTask(taskId, { deadlineRule: null });
       } else if (AppUI.deadlineKind === "offset" && AppUI.deadlineOffsetWrap.readOffsetMs) {
@@ -305,4 +406,4 @@ function initForm() {
   });
 }
 
-export {  SCHEDULE_BUILDERS, buildCreateOffsetWheels, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };
+export {  SCHEDULE_BUILDERS, buildCreateOffsetWheels, buildRuleSection, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };

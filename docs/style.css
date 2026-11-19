@@ -1393,3 +1393,7 @@ body.actions-hidden .subtask-add { display: none; }
   gap: 8px;
   flex-wrap: wrap;
 }
+
+.rule-section {
+  margin-top: 8px;
+}
