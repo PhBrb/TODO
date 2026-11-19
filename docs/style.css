@@ -250,6 +250,12 @@ body.actions-hidden .subtask-add { display: none; }
   flex-shrink: 0;
 }
 
+/* direct child only: subtask checkboxes are nested inside .task and must
+   keep the UA margin, otherwise subtask rows shrink and intersect */
+.task > input[type="checkbox"] {
+  margin: 0;
+}
+
 .task-body { flex: 1; min-width: 0; }
 .task-title { font-weight: 600; overflow-wrap: break-word; }
 .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
@@ -481,38 +487,30 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-check-wrap {
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
 }
 
+.task-check-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--done);
+  opacity: 0.4;
+  border-radius: 0 0 6px 6px;
+  pointer-events: none;
+  z-index: 2;
+  transition: height 0.25s ease;
+}
+
 .task-check-wrap input[type="checkbox"] {
   position: relative;
   z-index: 1;
-}
-
-.task-check-ring {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  transform: rotate(-90deg);
-}
-
-.task-check-ring circle {
-  fill: none;
-}
-
-.task-ring-track {
-  stroke: var(--accent-soft);
-  stroke-width: 2.5;
-  opacity: 0.55;
-}
-
-.task-ring-bar {
-  stroke: var(--accent);
-  stroke-width: 2.5;
+  margin: 0;
 }
 
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
