@@ -496,26 +496,16 @@ body.actions-hidden .subtask-add { display: none; }
   bottom: 0;
   background: var(--done);
   opacity: 0.4;
-  border-radius: 4px;
+  border-radius: 6px;
   pointer-events: none;
+  z-index: 2;
   transition: height 0.25s ease;
 }
 
 .task-check-wrap input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
   position: relative;
   z-index: 1;
-  background: transparent;
   margin: 0;
-  border: 2px solid var(--accent-soft);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.task-check-wrap input[type="checkbox"]:checked {
-  background: var(--done) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5L13 4.5" stroke="%23ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 12px no-repeat;
-  border-color: var(--done);
 }
 
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
