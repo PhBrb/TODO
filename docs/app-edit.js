@@ -176,10 +176,13 @@ function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   timeRow.className = "edit-selectors-row";
   timeRow.appendChild(scheduleArea.dueAtField);
   timeRow.appendChild(scheduleArea.deadlineSlot);
-  timeRow.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
+  const timeLimitRow = document.createElement("div");
+  timeLimitRow.className = "edit-selectors-row";
+  timeLimitRow.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
   selectors.appendChild(mainRow);
   selectors.appendChild(scheduleArea.scheduleWrap);
   selectors.appendChild(timeRow);
+  selectors.appendChild(timeLimitRow);
   return selectors;
 }
 
@@ -285,21 +288,34 @@ function buildRuleEditor(label, rule, allowOffset) {
   return { el, read };
 }
 
-// Deadline / reset / ignore editors, shown for weekly tasks.
+// Ignore editor, shown for weekly tasks. (Deadline/reset are defined by the
+// weekday + time wheels controlled by the deadline toggle.)
 function buildRulesEditor(task) {
   const wrap = document.createElement("div");
   wrap.className = "rules-editor";
   const title = document.createElement("div");
   title.className = "rules-title";
-  title.textContent = "Deadline / Reset / Ignore";
+  title.textContent = "Ignore";
   wrap.appendChild(title);
-  const deadline = buildRuleEditor("Deadline", task.deadlineRule, true);
-  const reset = buildRuleEditor("Reset", task.resetRule, true);
-  const ignore = buildRuleEditor("Ignore", task.ignoreRule, false);
-  wrap.appendChild(deadline.el);
-  wrap.appendChild(reset.el);
+  const ignore = buildRuleEditor("Ignore (reduces urgency)", task.ignoreRule, false);
   wrap.appendChild(ignore.el);
-  return { el: wrap, deadline, reset, ignore };
+  return { el: wrap, ignore };
+}
+
+// For weekly tasks the deadline toggle hides/shows the weekday and time
+// wheels; the wheels define the fixed day/time when the task resets.
+function syncWeeklyWheels(scheduleArea) {
+  const weekly = scheduleArea.repeat === "weekly";
+  if (scheduleArea.deadlineToggle) {
+    scheduleArea.deadlineToggle.classList.toggle("hidden", !weekly);
+  }
+  if (scheduleArea.rulesEditor) {
+    scheduleArea.rulesEditor.el.classList.toggle("hidden", !weekly);
+  }
+  if (!weekly) return;
+  const show = scheduleArea.deadlineEnabled;
+  if (scheduleArea.schedule) scheduleArea.schedule.el.classList.toggle("hidden", !show);
+  if (scheduleArea.dueAtField) scheduleArea.dueAtField.classList.toggle("hidden", !show);
 }
 
 function buildEditScheduleArea(task) {
@@ -308,13 +324,16 @@ function buildEditScheduleArea(task) {
   scheduleWrap.className = "repeat-schedule edit-schedule";
   const deadlineSlot = document.createElement("div");
   deadlineSlot.className = "labeled-field deadline-slot hidden";
-  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), rulesEditor: null };
+  const state = { scheduleValues, scheduleWrap, schedule: null, dueAt: null, dueAtWheelsWrap: null, dueAtField: null, deadlineSlot, deadlineEnabled: task.deadlineEnabled !== false, endOfDayBtn: document.createElement("button"), rulesEditor: null, deadlineToggle: null, repeat: task.repeat };
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
-  if (task.repeat === "weekly") {
-    state.rulesEditor = buildRulesEditor(task);
-    scheduleWrap.appendChild(state.rulesEditor.el);
-  }
+  state.rulesEditor = buildRulesEditor(task);
+  state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => {
+    state.deadlineEnabled = on;
+    syncWeeklyWheels(state);
+  }, "📅 Deadline", "Show/hide the day & time wheels");
+  scheduleWrap.insertBefore(state.deadlineToggle, state.schedule.el);
+  scheduleWrap.appendChild(state.rulesEditor.el);
   syncDeadlineSlot(state);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
@@ -325,11 +344,14 @@ function buildEditScheduleArea(task) {
 function refreshEditSchedule(task, edit) {
   const { listSel, rep, scheduleArea } = edit;
   const repeat = listSel.value === "fun" ? "none" : rep.value;
+  scheduleArea.repeat = repeat;
   if (scheduleArea.dueAt) scheduleArea.scheduleValues.repeatTime = scheduleArea.dueAt.read();
   Object.assign(scheduleArea.scheduleValues, readScheduleValues(scheduleArea.schedule.read));
   scheduleArea.scheduleWrap.innerHTML = "";
   scheduleArea.schedule = buildScheduleControls(repeat, scheduleArea.scheduleValues, true);
+  if (scheduleArea.deadlineToggle) scheduleArea.scheduleWrap.appendChild(scheduleArea.deadlineToggle);
   scheduleArea.scheduleWrap.appendChild(scheduleArea.schedule.el);
+  if (scheduleArea.rulesEditor) scheduleArea.scheduleWrap.appendChild(scheduleArea.rulesEditor.el);
   syncDeadlineSlot(scheduleArea);
   scheduleArea.scheduleWrap.classList.toggle("hidden", scheduleArea.schedule.el.childElementCount === 0);
   const showDueAt = scheduleShowsTimeOfDay(repeat);
@@ -339,11 +361,13 @@ function refreshEditSchedule(task, edit) {
     for (const el of scheduleArea.dueAt.els) scheduleArea.dueAtWheelsWrap.appendChild(el);
     const labelRow = scheduleArea.dueAtField.querySelector(".field-label-row");
     labelRow.querySelectorAll(".field-toggle-btn").forEach((b) => b.remove());
-    const toggle = createFieldToggle(scheduleArea.deadlineEnabled, (on) => {
-      scheduleArea.deadlineEnabled = on;
-      syncEditDueAtLabel(scheduleArea);
-    }, "Deadline", "Toggle deadline urgency");
-    labelRow.insertBefore(toggle, scheduleArea.endOfDayBtn);
+    if (repeat !== "weekly") {
+      const toggle = createFieldToggle(scheduleArea.deadlineEnabled, (on) => {
+        scheduleArea.deadlineEnabled = on;
+        syncEditDueAtLabel(scheduleArea);
+      }, "Deadline", "Toggle deadline urgency");
+      labelRow.insertBefore(toggle, scheduleArea.endOfDayBtn);
+    }
     scheduleArea.endOfDayBtn.replaceWith(scheduleArea.dueAt.endOfDayBtn);
     scheduleArea.endOfDayBtn = scheduleArea.dueAt.endOfDayBtn;
   } else {
@@ -351,12 +375,16 @@ function refreshEditSchedule(task, edit) {
   }
   scheduleArea.dueAtField.classList.toggle("hidden", !showDueAt);
   syncEditDueAtLabel(scheduleArea);
+  syncWeeklyWheels(scheduleArea);
 }
 
 function syncEditDueAtLabel(scheduleArea) {
   const label = scheduleArea.dueAtField.querySelector(".field-label");
   if (label) {
-    label.textContent = scheduleArea.deadlineEnabled ? "🕔 Due at" : "🕔 Resets at";
+    label.textContent =
+      scheduleArea.repeat === "weekly"
+        ? "🔁 Resets at"
+        : scheduleArea.deadlineEnabled ? "🔔 Due at" : "🔔 Resets at";
   }
 }
 
@@ -385,9 +413,23 @@ function saveEditRow(task, edit) {
     updates.repeatTime = scheduleArea.dueAt.read();
     updates.deadlineEnabled = scheduleArea.deadlineEnabled;
   }
+  if (repeat === "weekly") {
+    // The weekday + time wheels define the fixed day/time when the task
+    // resets; the same day/time is the deadline. Toggle off = no deadline.
+    if (scheduleArea.deadlineEnabled && scheduleArea.dueAt) {
+      const weekdays = readScheduleValues(scheduleArea.schedule.read).repeatWeekdays || [1];
+      const minutes = scheduleArea.dueAt.read();
+      const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+      const mm = String(minutes % 60).padStart(2, "0");
+      const rule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
+      updates.resetRule = rule;
+      updates.deadlineRule = rule;
+    } else {
+      updates.resetRule = null;
+      updates.deadlineRule = null;
+    }
+  }
   if (scheduleArea.rulesEditor) {
-    updates.deadlineRule = scheduleArea.rulesEditor.deadline.read();
-    updates.resetRule = scheduleArea.rulesEditor.reset.read();
     updates.ignoreRule = scheduleArea.rulesEditor.ignore.read();
   }
   if (!isFun) updates.difficulty = diff.value;
