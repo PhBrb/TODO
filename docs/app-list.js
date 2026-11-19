@@ -63,6 +63,8 @@ function buildSubtaskRing(task) {
   const r = 9;
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+  svg.setAttribute("width", String(size));
+  svg.setAttribute("height", String(size));
   svg.classList.add("task-check-ring");
   // Segmented background ring: n dash segments with gaps, so the page
   // background shows between segments (one segment per subtask).
