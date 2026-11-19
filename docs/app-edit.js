@@ -262,7 +262,7 @@ function buildEditScheduleArea(task) {
   state.deadlineOffsetWrap.className = "deadline-offset-wheels";
   scheduleWrap.appendChild(state.deadlineOffsetWrap);
   buildDeadlineOffsetWheels(state.deadlineOffsetWrap, task.deadlineRule);
-  state.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: task.resetRule, enabled: task.resetRule != null });
+  state.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: task.resetRule, enabled: task.resetRule != null, compact: true });
   if (state.deadlineKind === "offset") {
     state.resetSection.setKind("offset");
     state.resetSection.setKindEnabled(false);

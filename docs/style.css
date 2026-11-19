@@ -1395,5 +1395,14 @@ body.actions-hidden .subtask-add { display: none; }
 }
 
 .rule-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 8px;
+}
+
+.rule-section > .deadline-btn-row,
+.rule-section > div:not(.deadline-offset-wheels) {
+  flex: 1 1 100%;
+  min-width: 0;
 }

@@ -171,12 +171,12 @@ function timeToMinutes(time) {
   return (h * 60 + m) || undefined;
 }
 
-function buildOffsetWheelsInto(wrap, rule) {
+function buildOffsetWheelsInto(wrap, rule, compact = true) {
   wrap.innerHTML = "";
   const ms = rule && rule.kind === "offset" ? rule.ms : 86400000;
-  const days = createWheel(CUSTOM_DAYS_OPTIONS, Math.floor(ms / 86400000), "Days", null, true);
-  const hours = createWheel(CUSTOM_HOURS_OPTIONS, Math.floor((ms % 86400000) / 3600000), "Hours", null, true);
-  const mins = createWheel(CUSTOM_MINUTES_OPTIONS, Math.floor((ms % 3600000) / 60000), "Minutes", null, true);
+  const days = createWheel(CUSTOM_DAYS_OPTIONS, Math.floor(ms / 86400000), "Days", null, compact);
+  const hours = createWheel(CUSTOM_HOURS_OPTIONS, Math.floor((ms % 86400000) / 3600000), "Hours", null, compact);
+  const mins = createWheel(CUSTOM_MINUTES_OPTIONS, Math.floor((ms % 3600000) / 60000), "Minutes", null, compact);
   wrap.appendChild(days.el);
   wrap.appendChild(hours.el);
   wrap.appendChild(mins.el);
@@ -186,7 +186,7 @@ function buildOffsetWheelsInto(wrap, rule) {
 
 // A labeled rule section: enable toggle + kind switch (fixed day/time vs
 // after-completion offset) + the corresponding wheel selectors.
-function buildRuleSection({ label, rule, enabled = true, onKind = null }) {
+function buildRuleSection({ label, rule, enabled = true, onKind = null, compact = true }) {
   const section = document.createElement("div");
   section.className = "rule-section";
   let kind = rule && rule.kind === "offset" ? "offset" : "fixed";
@@ -206,7 +206,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null }) {
 
   const fixedWrap = document.createElement("div");
   const grid = weekdayToggleGrid(rule && rule.kind === "fixed" ? rule.slots.map((sl) => sl.weekday) : [1]);
-  const wheels = createDueAtWheels(timeToMinutes(rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00"), true);
+  const wheels = createDueAtWheels(timeToMinutes(rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00"), compact);
   const wheelsWrap = document.createElement("div");
   wheelsWrap.className = "due-at-wheels";
   for (const el of wheels.els) wheelsWrap.appendChild(el);
@@ -215,7 +215,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null }) {
 
   const offsetWrap = document.createElement("div");
   offsetWrap.className = "deadline-offset-wheels";
-  buildOffsetWheelsInto(offsetWrap, rule);
+  buildOffsetWheelsInto(offsetWrap, rule, compact);
 
   function sync() {
     const showFixed = isEnabled && kind === "fixed";
@@ -299,7 +299,7 @@ function updateCreateFormMode() {
   AppUI.els.scheduleContainer.appendChild(AppUI.deadlineOffsetWrap);
   buildCreateOffsetWheels();
   if (!AppUI.resetSection) {
-    AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false });
+    AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false, compact: false });
   }
   AppUI.els.form.appendChild(AppUI.resetSection.el);
   const deadlineField = AppUI.scheduleControls.el.querySelector(".deadline-field");
