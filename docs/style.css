@@ -1401,6 +1401,23 @@ body.actions-hidden .subtask-add { display: none; }
   margin-top: 8px;
 }
 
+/* Visual grouping: each rule block (deadline/schedule, due-at, reset,
+   ignore, time limit) gets a card background so it is clear what belongs
+   together. */
+#repeat-schedule,
+.edit-schedule,
+.rule-section,
+#due-at-field,
+.edit-selectors .labeled-field:has(.due-at-wheels),
+#time-limit-row .labeled-field,
+.edit-selectors .edit-selectors-row .labeled-field:has(.wheel-select[aria-label="Time limit"]) {
+  background: var(--card);
+  border: 1px solid #ddd8f0;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: var(--shadow);
+}
+
 .rule-section > .deadline-btn-row,
 .rule-section > div:not(.deadline-offset-wheels) {
   flex: 1 1 100%;
