@@ -207,8 +207,11 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null }) {
   const fixedWrap = document.createElement("div");
   const grid = weekdayToggleGrid(rule && rule.kind === "fixed" ? rule.slots.map((sl) => sl.weekday) : [1]);
   const wheels = createDueAtWheels(timeToMinutes(rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00"), true);
+  const wheelsWrap = document.createElement("div");
+  wheelsWrap.className = "due-at-wheels";
+  for (const el of wheels.els) wheelsWrap.appendChild(el);
   fixedWrap.appendChild(grid.group);
-  for (const el of wheels.els) fixedWrap.appendChild(el);
+  fixedWrap.appendChild(wheelsWrap);
 
   const offsetWrap = document.createElement("div");
   offsetWrap.className = "deadline-offset-wheels";
