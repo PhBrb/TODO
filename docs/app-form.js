@@ -302,6 +302,7 @@ function updateCreateFormMode() {
   AppUI.els.scheduleContainer.appendChild(AppUI.deadlineBtnRow);
   AppUI.els.scheduleContainer.appendChild(AppUI.scheduleControls.el);
   AppUI.els.scheduleContainer.appendChild(AppUI.deadlineOffsetWrap);
+  AppUI.els.scheduleContainer.appendChild(AppUI.els.dueAtField);
   buildCreateOffsetWheels();
   if (!AppUI.resetSection) {
     AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false, compact: false });

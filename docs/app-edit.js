@@ -174,7 +174,6 @@ function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   mainRow.appendChild(labeledField("Repeat", [rep.el]));
   const timeRow = document.createElement("div");
   timeRow.className = "edit-selectors-row";
-  timeRow.appendChild(scheduleArea.dueAtField);
   timeRow.appendChild(scheduleArea.deadlineSlot);
   const timeLimitRow = document.createElement("div");
   timeLimitRow.className = "edit-selectors-row";
@@ -274,6 +273,7 @@ function buildEditScheduleArea(task) {
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
   state.dueAtField = labeledField("\ud83d\udd54 Due at", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
+  scheduleWrap.appendChild(state.dueAtField);
   return state;
 }
 
@@ -291,6 +291,7 @@ function refreshEditSchedule(task, edit) {
     scheduleArea.scheduleWrap.appendChild(scheduleArea.deadlineOffsetWrap);
     buildDeadlineOffsetWheels(scheduleArea.deadlineOffsetWrap, null);
   }
+  scheduleArea.scheduleWrap.appendChild(scheduleArea.dueAtField);
   syncDeadlineSlot(scheduleArea);
   scheduleArea.scheduleWrap.classList.toggle("hidden", scheduleArea.schedule.el.childElementCount === 0);
   const showDueAt = scheduleShowsTimeOfDay(repeat);

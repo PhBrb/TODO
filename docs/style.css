@@ -1401,14 +1401,18 @@ body.actions-hidden .subtask-add { display: none; }
   margin-top: 8px;
 }
 
-/* Visual grouping: each rule block (deadline/schedule, due-at, reset,
-   ignore, time limit) gets a card background so it is clear what belongs
-   together. */
+/* Visual grouping: each rule block (deadline/schedule, reset, ignore,
+   time limit) gets a card background so it is clear what belongs together.
+   The due-at field sits inside the deadline/schedule card. */
+#repeat-schedule > .labeled-field,
+.edit-schedule > .labeled-field { flex: 1 1 100%; min-width: 0; }
+#repeat-schedule > #due-at-field,
+.edit-schedule .labeled-field:has(.due-at-wheels) { flex: 1 1 100%; }
 #repeat-schedule,
 .edit-schedule,
 .rule-section,
-#due-at-field,
-.edit-selectors .labeled-field:has(.due-at-wheels),
+#deadline-slot,
+.edit-selectors .deadline-slot,
 #time-limit-row .labeled-field,
 .edit-selectors .edit-selectors-row .labeled-field:has(.wheel-select[aria-label="Time limit"]) {
   background: var(--card);
