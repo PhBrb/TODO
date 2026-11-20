@@ -165,7 +165,7 @@ function checkRecurringTasks() {
   const now = Date.now();
   let changed = false;
   for (const task of state.tasks) {
-    if (task.repeat === "none") continue;
+    if (task.repeat === "none" || task.repeat === "manual") continue;
     if (task.done && task.completedAt !== null) {
       if (nextOccurrence(task, task.completedAt) <= now) {
         task.done = false;

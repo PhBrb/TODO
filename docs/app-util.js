@@ -14,6 +14,7 @@ const REPEAT_OPTIONS = [
   ["weekly", "Weekly"],
   ["monthly", "Monthly"],
   ["custom", "Custom"],
+  ["manual", "Manual"],
 ];
 
 const WEEKDAY_CHECKBOXES = [

@@ -78,6 +78,9 @@ function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) 
     repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
     chainedAfter: 0,
     groupId: null,
+    deadlineRule: null,
+    resetRule: null,
+    ignoreRule: null,
     pinned: false,
     streakFreezeKey: null,
     timeLimit: isNonTask ? 0 : (TIME_LIMIT_MINUTES.includes(timeLimit) ? timeLimit : 0),
@@ -538,6 +541,13 @@ const EDIT_UPDATERS = {
     if (v === "none") {
       task.streak = 0;
       task.streakDayKeys = [];
+    }
+    if (v === "manual") {
+      // manual tasks have no deadline / reset / ignore settings
+      task.deadline = null;
+      task.deadlineRule = null;
+      task.resetRule = null;
+      task.ignoreRule = null;
     }
   },
   deadline(task, v) {
