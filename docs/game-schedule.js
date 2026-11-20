@@ -31,7 +31,6 @@ function fiveMinKey(ts) {
 }
 
 const REPEAT_KEY_BUILDERS = {
-  every_5min: (ts) => fiveMinKey(ts),
   custom: (ts) => fiveMinKey(ts),
   weekly: (ts) => {
     const d = shiftedDate(ts);
@@ -64,7 +63,7 @@ function prevRepeatKey(task, ts) {
     d.setMonth(d.getMonth() - 1);
     return repeatKey(task, d.getTime());
   }
-  if (task.repeat === "every_5min" || task.repeat === "custom") {
+  if (task.repeat === "custom") {
     return fiveMinKey(ts - (task.repeatCustomMs || CUSTOM_REPEAT_DEFAULT_MS));
   }
   if (task.repeat === "weekly") {
@@ -92,7 +91,6 @@ function timeOfDayMs(repeatTime) {
 
 function nextOccurrence(task, completedAt) {
   const repeat = task.repeat;
-  if (repeat === "every_5min") return completedAt + 300000;
   if (repeat === "custom") {
     const interval = task.repeatCustomMs || CUSTOM_REPEAT_DEFAULT_MS;
     if (task.repeatAfterCompletion) return completedAt + interval;

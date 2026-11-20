@@ -1,6 +1,6 @@
 import { ICONS } from "./game-icons.js";
 
-const VERSION = "0.79.46";
+const VERSION = "0.79.47";
 const STORAGE_KEY = "todo-mwe-state";
 
 const REMINDER_HOUR = 20;
@@ -113,7 +113,7 @@ const PLACEMENT_VERSION = 1;
 
 const DIFFICULTY_ORDER = ["too_easy", "easy", "medium", "hard"];
 
-const REPEAT_VALUES = ["none", "daily", "weekly", "monthly", "every_5min", "custom"];
+const REPEAT_VALUES = ["none", "daily", "weekly", "monthly", "custom"];
 
 const CUSTOM_REPEAT_DEFAULT_MS = 86400000;
 

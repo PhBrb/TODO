@@ -109,7 +109,7 @@ function taskMetaNode(task) {
   if (task.repeat !== "none") {
     const rep = document.createElement("span");
     rep.className = "badge repeat";
-    rep.textContent = ICONS.repeat + " " + (task.repeat === "every_5min" ? "5 min" : task.repeat);
+    rep.textContent = ICONS.repeat + " " + task.repeat;
     meta.appendChild(rep);
     if (task.streak > 0) {
       const st = document.createElement("span");

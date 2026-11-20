@@ -13,7 +13,6 @@ const REPEAT_OPTIONS = [
   ["daily", "Daily"],
   ["weekly", "Weekly"],
   ["monthly", "Monthly"],
-  ["every_5min", "Every 5 min (test)"],
   ["custom", "Custom"],
 ];
 
@@ -58,7 +57,7 @@ function mountWheel(containerId, options, selected, label, onChange) {
 }
 
 function isRepeatingRepeat(repeat) {
-  return repeat !== "none" && repeat !== "every_5min";
+  return repeat !== "none";
 }
 
 const END_OF_DAY_MINUTES = 23 * 60 + 59;
