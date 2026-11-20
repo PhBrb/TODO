@@ -433,6 +433,18 @@ function taskNode(task, chainInfo = null, chainUi = null, chainVis = null) {
   const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, chainInfo);
   body.appendChild(title);
   body.appendChild(taskMetaNode(task));
+  if (task.repeat === "manual") {
+    const enable = document.createElement("button");
+    enable.type = "button";
+    enable.className = "task-enable";
+    enable.textContent = ICONS.resetIn + " Enable";
+    enable.title = "Manually enable this task (manual repeat)";
+    enable.addEventListener("click", () => {
+      if (task.done) Game.uncompleteTask(task);
+      else Game.emitToast(ICONS.check + " \"" + task.title + "\" is already enabled");
+    });
+    body.appendChild(enable);
+  }
   if (editingThisTask) {
     activateEdit(li, titleInput, E.pending.controls, E.pending.onSave);
     body.appendChild(buildEditControlsRow());
