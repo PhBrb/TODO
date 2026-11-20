@@ -354,7 +354,7 @@ function completeTask(task) {
   task.done = true;
   task.startedAt = 0;
   task.completedAt = Date.now();
-  updateStreak(task, task.completedAt);
+  if (task.repeat !== "manual") updateStreak(task, task.completedAt);
 
   const firstBonus = applyFirstTaskBonus();
   if (firstBonus) {
@@ -548,7 +548,7 @@ const EDIT_UPDATERS = {
   repeat(task, v) {
     if (!REPEAT_VALUES.includes(v)) return;
     task.repeat = v;
-    if (v === "none") {
+    if (v === "none" || v === "manual") {
       task.streak = 0;
       task.streakDayKeys = [];
     }
