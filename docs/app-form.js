@@ -281,11 +281,11 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
 
 function updateCreateFormMode() {
   if (!W.list || !W.diff || !W.repeat || !W.timeLimit) return;
-  const isFun = W.list.value === "fun";
-  W.diff.disabled = isFun;
-  W.repeat.disabled = isFun;
-  W.timeLimit.disabled = isFun;
-  const repeat = isFun ? "none" : W.repeat.value;
+  const isNonTask = W.list.value === "fun" || W.list.value === "group";
+  W.diff.disabled = isNonTask;
+  W.repeat.disabled = isNonTask;
+  W.timeLimit.disabled = isNonTask;
+  const repeat = isNonTask ? "none" : W.repeat.value;
   AppUI.els.scheduleContainer.innerHTML = "";
   AppUI.scheduleControls = buildScheduleControls(repeat, {}, false);
   if (!AppUI.deadlineToggleBtn) {
@@ -414,7 +414,8 @@ function initForm() {
     e.preventDefault();
     const title = AppUI.els.taskInput.value.trim();
     if (!title) return;
-    const repeat = W.list.value === "fun" ? "none" : W.repeat.value;
+    const isNonTask = W.list.value === "fun" || W.list.value === "group";
+    const repeat = isNonTask ? "none" : W.repeat.value;
     const values = AppUI.scheduleControls ? readScheduleValues(AppUI.scheduleControls.read) : {};
     if (AppUI.dueAtWheelsControls) {
       values.repeatTime = AppUI.dueAtWheelsControls.read();
@@ -422,11 +423,11 @@ function initForm() {
     }
     const taskId = Game.addTask(
       title,
-      W.list.value === "fun" ? null : W.diff.value,
+      isNonTask ? null : W.diff.value,
       repeat,
       values.deadline || "",
       W.list.value,
-      Number(W.timeLimit.value)
+      isNonTask ? 0 : Number(W.timeLimit.value)
     );
     if (isRepeatingRepeat(repeat)) {
       Game.editTask(taskId, values);

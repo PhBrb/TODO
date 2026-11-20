@@ -340,18 +340,18 @@ function syncEditDueAtLabel(scheduleArea) {
 }
 
 function updateEditWheelsEnabled(task, edit) {
-  const isFun = edit.listSel.value === "fun";
+  const isFun = edit.listSel.value === "fun" || edit.listSel.value === "group";
   edit.diff.disabled = isFun || task.subtasks.length > 0;
   edit.rep.disabled = isFun;
   edit.diff.el.title = task.subtasks.length > 0
     ? "Difficulty is derived from the most difficult sub-task"
     : "";
-  edit.rep.el.title = isFun ? "Fun tasks never repeat" : "";
+  edit.rep.el.title = isFun ? (edit.listSel.value === "group" ? "Groups never repeat" : "Fun tasks never repeat") : "";
 }
 
 function saveEditRow(task, edit) {
   const { listSel, rep, diff, timeLimit, scheduleArea } = edit;
-  const isFun = listSel.value === "fun";
+  const isFun = listSel.value === "fun" || listSel.value === "group";
   const repeat = isFun ? "none" : rep.value;
   const updates = {
     title: edit.titleInput.value,

@@ -54,20 +54,21 @@ function highlightTasks() {
 function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) {
   const taskList = TASK_LISTS.includes(list) ? list : "todo";
   const isFun = taskList === "fun";
-  const isBonus = !isFun && Math.random() < BONUS_TASK_RATE;
+  const isNonTask = isFun || taskList === "group";
+  const isBonus = !isNonTask && Math.random() < BONUS_TASK_RATE;
   const task = {
     id: state.nextId++,
     title,
     list: taskList,
-    difficulty: isFun ? null : difficulty,
-    repeat: isFun ? "none" : repeat,
+    difficulty: isNonTask ? null : difficulty,
+    repeat: isNonTask ? "none" : repeat,
     done: false,
     createdAt: Date.now(),
     completedAt: null,
     streak: 0,
     streakDayKeys: [],
     bonus: isBonus,
-    deadline: isFun ? null : (deadlineInput ? new Date(deadlineInput).getTime() : null),
+    deadline: isNonTask ? null : (deadlineInput ? new Date(deadlineInput).getTime() : null),
     deadlineEnabled: true,
     repeatTime: NaN,
     repeatAfterCompletion: false,
@@ -76,9 +77,10 @@ function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) 
     repeatMonthlyFirst: false,
     repeatCustomMs: CUSTOM_REPEAT_DEFAULT_MS,
     chainedAfter: 0,
+    groupId: null,
     pinned: false,
     streakFreezeKey: null,
-    timeLimit: isFun ? 0 : (TIME_LIMIT_MINUTES.includes(timeLimit) ? timeLimit : 0),
+    timeLimit: isNonTask ? 0 : (TIME_LIMIT_MINUTES.includes(timeLimit) ? timeLimit : 0),
     startedAt: 0,
     ratedDifficulty: null,
     difficultySuggested: false,
@@ -304,6 +306,16 @@ function unchainTask(task) {
   return unchainIn(state.tasks, task);
 }
 
+function moveTaskIntoGroup(taskId, groupId) {
+  const task = state.tasks.find((t) => t.id === taskId);
+  const group = state.tasks.find((t) => t.id === groupId);
+  if (!task || !group || group.list !== "group") return;
+  if (task.list === "group" || task.id === groupId || task.groupId === groupId) return;
+  task.groupId = groupId;
+  saveState();
+  emitRender();
+}
+
 function completeFunTask(task) {
   task.done = true;
   task.completedAt = Date.now();
@@ -458,8 +470,10 @@ function uncompleteTask(task, cascadeSubtasks = true) {
 }
 
 function deleteTask(id) {
+  const deleted = state.tasks.find((t) => t.id === id);
   for (const other of state.tasks) {
     if (other.chainedAfter === id) other.chainedAfter = 0;
+    if (deleted && deleted.list === "group" && other.groupId === id) other.groupId = null;
   }
   state.tasks = state.tasks.filter((t) => t.id !== id);
   saveState();
@@ -580,4 +594,4 @@ function editTask(id, updates) {
   emitRender();
 }
 
-export { EDIT_UPDATERS, addSubtask, addTask, chainHead, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, editSubtask, editTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
+export { EDIT_UPDATERS, addSubtask, addTask, chainHead, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };

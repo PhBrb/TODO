@@ -121,6 +121,7 @@ const TASK_FIELD_MIGRATORS = {
   repeatMonthlyFirst: (raw) => raw.repeatMonthlyFirst === true,
   repeatCustomMs: (raw) => Math.max(60000, num(raw.repeatCustomMs, CUSTOM_REPEAT_DEFAULT_MS)),
   chainedAfter: (raw) => num(raw.chainedAfter, 0),
+  groupId: (raw) => (typeof raw.groupId === "number" ? raw.groupId : null),
   pinned: (raw) => raw.pinned === true,
   streakFreezeKey: (raw) => (typeof raw.streakFreezeKey === "string" ? raw.streakFreezeKey : null),
   timeLimit: (raw) => num(raw.timeLimit, 0),

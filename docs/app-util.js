@@ -44,6 +44,7 @@ const LIST_OPTIONS = [
   ["todo", "Todo"],
   ["backlog", "Backlog"],
   ["fun", "Fun"],
+  ["group", ICONS.chest + " Group"],
 ];
 
 function createWheel(options, selected, label, onChange, compact = false) {

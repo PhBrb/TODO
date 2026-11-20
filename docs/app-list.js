@@ -12,9 +12,12 @@ const E = AppUI.edit;
 async function deleteTaskWithConfirm(task) {
   const hasStreak = task.repeat !== "none" && task.streak > 0;
   const hasSubtasks = task.subtasks.length > 0;
-  if (hasStreak || hasSubtasks) {
+  const memberCount = Game.state.tasks.filter((t) => t.groupId === task.id).length;
+  const hasMembers = memberCount > 0;
+  if (hasStreak || hasSubtasks || hasMembers) {
     const reasons = [];
     if (hasSubtasks) reasons.push(`${task.subtasks.length} subtask${task.subtasks.length === 1 ? "" : "s"}`);
+    if (hasMembers) reasons.push(`${memberCount} grouped task${memberCount === 1 ? "" : "s"} (moved back out)`);
     if (hasStreak) reasons.push(`a ${task.streak}-day streak`);
     const ok = await ConfirmDialog.confirm(
       `Delete "${task.title}"? It has ${reasons.join(" and ")}.`
@@ -304,7 +307,7 @@ function taskActionsNode(task) {
   const actions = document.createElement("div");
   const editingThis = E.taskId === task.id || editingSubtaskOf(task);
   actions.className = "task-actions" + (editingThis ? " hidden" : "");
-  actions.appendChild(pin);
+  if (task.list !== "group") actions.appendChild(pin);
   actions.appendChild(edit);
   actions.appendChild(del);
 
@@ -355,7 +358,34 @@ document.addEventListener("click", (ev) => {
   if (changed) render();
 });
 
+function groupNode(task, chainInfo = null) {
+  const li = document.createElement("li");
+  li.className = "task group";
+  li.dataset.id = task.id;
+  li.title = "Group";
+  const editingThisTask = E.taskId === task.id && E.pending && E.pending.kind === "task"
+    || (E.pending && E.pending.kind === "restore" && E.pending.taskId === task.id);
+  const body = document.createElement("div");
+  body.className = "task-body";
+  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, chainInfo);
+  body.appendChild(title);
+  if (editingThisTask) {
+    activateEdit(li, titleInput, E.pending.controls, E.pending.onSave);
+    body.appendChild(buildEditControlsRow());
+  }
+  const children = document.createElement("div");
+  children.className = "group-children";
+  for (const m of Game.state.tasks.filter((t) => t.groupId === task.id)) {
+    children.appendChild(taskNode(m, chainInfo, { inlineLink: false, zigzagAbove: false, zigzagBelow: false }));
+  }
+  body.appendChild(children);
+  li.appendChild(body);
+  li.appendChild(taskActionsNode(task));
+  return li;
+}
+
 function taskNode(task, chainInfo = null, chainUi = null) {
+  if (task.list === "group") return groupNode(task, chainInfo);
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
@@ -402,8 +432,8 @@ function taskNode(task, chainInfo = null, chainUi = null) {
 }
 
 function tasksForTab() {
-  if (AppUI.activeTab === "highlight") return Game.highlightTasks();
-  return Game.state.tasks.filter((t) => (t.list || "todo") === AppUI.activeTab);
+  if (AppUI.activeTab === "highlight") return Game.highlightTasks().filter((t) => !t.groupId);
+  return Game.state.tasks.filter((t) => !t.groupId && ((t.list || "todo") === AppUI.activeTab || t.list === "group"));
 }
 
 let prevDailyReached = null;

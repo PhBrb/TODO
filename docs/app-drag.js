@@ -46,7 +46,12 @@ function finishDrag(ev) {
   if (drag.kind === "subtask") {
     Game.chainSubtask(drag.parent, drag.subtask, target.id);
   } else {
-    Game.chainTask(drag.task, target.id);
+    const targetTask = state.tasks.find((t) => t.id === target.id);
+    if (targetTask && targetTask.list === "group") {
+      Game.moveTaskIntoGroup(drag.task.id, target.id);
+    } else {
+      Game.chainTask(drag.task, target.id);
+    }
   }
 }
 
