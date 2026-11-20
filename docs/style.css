@@ -250,9 +250,31 @@ body.actions-hidden .subtask-add { display: none; }
   flex-shrink: 0;
 }
 
+/* direct child only: subtask checkboxes are nested inside .task and must
+   keep the UA margin, otherwise subtask rows shrink and intersect */
+.task > input[type="checkbox"] {
+  margin: 0;
+}
+
 .task-body { flex: 1; min-width: 0; }
 .task-title { font-weight: 600; overflow-wrap: break-word; }
 .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+.task.group { background: #efedfd; align-items: flex-start; }
+.task.group > .task-body { padding-top: 2px; }
+.group-children {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  margin-right: -6px; /* extend slightly further right into the card padding */
+}
+
+/* Edit mode: the group's action icons sit at the top right, above the
+   children, so the children span the full card width. */
+body:not(.actions-hidden) .task.group { flex-wrap: wrap; }
+body:not(.actions-hidden) .task.group > .task-body { flex: 1 1 100%; min-width: 0; }
+body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top: 9px; right: 12px; flex-direction: row; }
 
 .task::after {
   content: "";
@@ -289,6 +311,8 @@ body.actions-hidden .subtask-add { display: none; }
 .badge.timer.running { background: #dcebff; color: #23509c; font-variant-numeric: tabular-nums; }
 .badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
 .task-start { font-size: 0.75rem; padding: 2px 8px; margin-right: 4px; }
+.task-meta .badge.task-enable { cursor: pointer; color: var(--accent); }
+.task-meta .badge.task-enable:hover { text-decoration: underline; }
 .badge.chain { background: #f3e8ff; color: #8b5cf6; margin-left: 4px; cursor: pointer; }
 .badge.pinned { background: #e8f0ff; color: #3f6ab5; margin-left: 4px; }
 .task { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -481,38 +505,30 @@ body.actions-hidden .subtask-add { display: none; }
 
 .task-check-wrap {
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
 }
 
+.task-check-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--done);
+  opacity: 0.4;
+  border-radius: 0 0 6px 6px;
+  pointer-events: none;
+  z-index: 2;
+  transition: height 0.25s ease;
+}
+
 .task-check-wrap input[type="checkbox"] {
   position: relative;
   z-index: 1;
-}
-
-.task-check-ring {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  transform: rotate(-90deg);
-}
-
-.task-check-ring circle {
-  fill: none;
-}
-
-.task-ring-track {
-  stroke: var(--accent-soft);
-  stroke-width: 2.5;
-  opacity: 0.55;
-}
-
-.task-ring-bar {
-  stroke: var(--accent);
-  stroke-width: 2.5;
+  margin: 0;
 }
 
 .subtask-list.chain-locked .subtask { opacity: 0.45; }
@@ -822,6 +838,7 @@ body.actions-hidden .subtask-add { display: none; }
 }
 
 .confirm-cancel { background: #ece8ff; color: var(--accent); }
+.confirm-btn { background: #ece8ff; color: var(--accent); }
 .confirm-ok { background: #c0392b; color: #fff; }
 
 .empty-hint {
@@ -1380,4 +1397,52 @@ body.actions-hidden .subtask-add { display: none; }
   color: var(--muted);
   min-width: 34px;
   text-align: right;
+}
+
+
+.deadline-btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.deadline-offset-wheels {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rule-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Visual grouping: each rule block (deadline/schedule, reset, ignore,
+   time limit) gets a card background so it is clear what belongs together.
+   The due-at field sits inside the deadline/schedule card. */
+#repeat-schedule > .labeled-field,
+.edit-schedule > .labeled-field { flex: 1 1 100%; min-width: 0; }
+#repeat-schedule > #due-at-field,
+.edit-schedule .labeled-field:has(.due-at-wheels) { flex: 1 1 100%; }
+#repeat-schedule,
+.edit-schedule,
+.rule-section,
+#deadline-slot,
+.edit-selectors .deadline-slot,
+#time-limit-row .labeled-field,
+.edit-selectors .edit-selectors-row .labeled-field:has(.wheel-select[aria-label="Time limit"]) {
+  background: var(--card);
+  border: 1px solid #ddd8f0;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: var(--shadow);
+}
+
+.rule-section > .deadline-btn-row,
+.rule-section > div:not(.deadline-offset-wheels) {
+  flex: 1 1 100%;
+  min-width: 0;
 }

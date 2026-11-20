@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS, CHEST_OPEN_MS, COIN_REWARD, CUSTOM_REPEAT_DEFAULT_MS, ITEM_ROTATIONS, ITEM_TYPES, PLACEMENT_VERSION, REPEAT_VALUES, SCHEMA_VERSION, SHOP_ITEMS, STORAGE_KEY, TASK_LISTS } from "./game-constants.js";
+import { normalizeRule } from "./game-rules.js";
 
 function defaultAchievementStats() {
   return {
@@ -106,6 +107,9 @@ const TASK_FIELD_MIGRATORS = {
   bonus: (raw) => raw.bonus === true,
   deadline: (raw) => (typeof raw.deadline === "number" ? raw.deadline : null),
   deadlineEnabled: (raw) => raw.deadlineEnabled !== false,
+  deadlineRule: (raw) => normalizeRule(raw.deadlineRule, { allowOffset: true }),
+  resetRule: (raw) => normalizeRule(raw.resetRule, { allowOffset: true }),
+  ignoreRule: (raw) => normalizeRule(raw.ignoreRule, { allowOffset: false }),
   repeatTime: (raw) => num(raw.repeatTime, NaN),
   repeatAfterCompletion: (raw) =>
     raw.repeatAfterCompletion === true || raw.repeatCustomFromCompletion === true,
@@ -117,6 +121,7 @@ const TASK_FIELD_MIGRATORS = {
   repeatMonthlyFirst: (raw) => raw.repeatMonthlyFirst === true,
   repeatCustomMs: (raw) => Math.max(60000, num(raw.repeatCustomMs, CUSTOM_REPEAT_DEFAULT_MS)),
   chainedAfter: (raw) => num(raw.chainedAfter, 0),
+  groupId: (raw) => (typeof raw.groupId === "number" ? raw.groupId : null),
   pinned: (raw) => raw.pinned === true,
   streakFreezeKey: (raw) => (typeof raw.streakFreezeKey === "string" ? raw.streakFreezeKey : null),
   timeLimit: (raw) => num(raw.timeLimit, 0),
