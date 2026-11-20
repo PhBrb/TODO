@@ -370,7 +370,7 @@ document.addEventListener("click", (ev) => {
   if (changed) render();
 });
 
-function groupNode(task, chainInfo = null) {
+function groupNode(task) {
   const li = document.createElement("li");
   li.className = "task group";
   li.dataset.id = task.id;
@@ -379,7 +379,7 @@ function groupNode(task, chainInfo = null) {
     || (E.pending && E.pending.kind === "restore" && E.pending.taskId === task.id);
   const body = document.createElement("div");
   body.className = "task-body";
-  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, chainInfo);
+  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, null);
   body.appendChild(title);
   if (editingThisTask) {
     activateEdit(li, titleInput, E.pending.controls, E.pending.onSave);
@@ -388,7 +388,7 @@ function groupNode(task, chainInfo = null) {
   const children = document.createElement("div");
   children.className = "group-children";
   for (const m of Game.state.tasks.filter((t) => t.groupId === task.id)) {
-    children.appendChild(taskNode(m, chainInfo, { inlineLink: false, zigzagAbove: false, zigzagBelow: false }));
+    children.appendChild(taskNode(m, null, { inlineLink: false, zigzagAbove: false, zigzagBelow: false }));
   }
   body.appendChild(children);
   li.appendChild(body);
@@ -397,7 +397,7 @@ function groupNode(task, chainInfo = null) {
 }
 
 function taskNode(task, chainInfo = null, chainUi = null) {
-  if (task.list === "group") return groupNode(task, chainInfo);
+  if (task.list === "group") return groupNode(task);
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;

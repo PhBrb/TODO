@@ -267,9 +267,14 @@ body.actions-hidden .subtask-add { display: none; }
   flex-direction: column;
   gap: 6px;
   margin-top: 8px;
-  padding-left: 14px;
-  border-left: 2px solid #ddd8f0;
+  margin-right: -6px; /* extend slightly further right into the card padding */
 }
+
+/* Edit mode: the group's action icons sit at the top right, above the
+   children, so the children span the full card width. */
+body:not(.actions-hidden) .task.group { flex-wrap: wrap; }
+body:not(.actions-hidden) .task.group > .task-body { flex: 1 1 100%; min-width: 0; }
+body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top: 9px; right: 12px; flex-direction: row; }
 
 .task::after {
   content: "";
