@@ -831,6 +831,7 @@ body.actions-hidden .subtask-add { display: none; }
 }
 
 .confirm-cancel { background: #ece8ff; color: var(--accent); }
+.confirm-btn { background: #ece8ff; color: var(--accent); }
 .confirm-ok { background: #c0392b; color: #fff; }
 
 .empty-hint {

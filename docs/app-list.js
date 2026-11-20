@@ -13,11 +13,23 @@ async function deleteTaskWithConfirm(task) {
   const hasStreak = task.repeat !== "none" && task.streak > 0;
   const hasSubtasks = task.subtasks.length > 0;
   const memberCount = Game.state.tasks.filter((t) => t.groupId === task.id).length;
-  const hasMembers = memberCount > 0;
-  if (hasStreak || hasSubtasks || hasMembers) {
+  const hasMembers = task.list === "group" && memberCount > 0;
+  if (hasMembers) {
+    const choice = await ConfirmDialog.choices(
+      `Delete group "${task.title}"? It has ${memberCount} grouped task${memberCount === 1 ? "" : "s"}.`,
+      [
+        { label: "Cancel", value: null, className: "confirm-cancel", focus: true },
+        { label: "Keep tasks", value: "keep", className: "confirm-btn" },
+        { label: "Delete grouped tasks", value: "deleteAll", className: "confirm-ok" },
+      ]
+    );
+    if (choice === "deleteAll") Game.deleteTask(task.id, { deleteMembers: true });
+    else if (choice === "keep") Game.deleteTask(task.id);
+    return;
+  }
+  if (hasStreak || hasSubtasks) {
     const reasons = [];
     if (hasSubtasks) reasons.push(`${task.subtasks.length} subtask${task.subtasks.length === 1 ? "" : "s"}`);
-    if (hasMembers) reasons.push(`${memberCount} grouped task${memberCount === 1 ? "" : "s"} (moved back out)`);
     if (hasStreak) reasons.push(`a ${task.streak}-day streak`);
     const ok = await ConfirmDialog.confirm(
       `Delete "${task.title}"? It has ${reasons.join(" and ")}.`

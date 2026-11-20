@@ -469,13 +469,19 @@ function uncompleteTask(task, cascadeSubtasks = true) {
   emitRender();
 }
 
-function deleteTask(id) {
+function deleteTask(id, opts = {}) {
   const deleted = state.tasks.find((t) => t.id === id);
-  for (const other of state.tasks) {
-    if (other.chainedAfter === id) other.chainedAfter = 0;
-    if (deleted && deleted.list === "group" && other.groupId === id) other.groupId = null;
+  const isGroup = Boolean(deleted && deleted.list === "group");
+  const deleteMembers = isGroup && opts.deleteMembers === true;
+  const removedIds = new Set([id]);
+  if (deleteMembers) {
+    for (const t of state.tasks) if (t.groupId === id) removedIds.add(t.id);
   }
-  state.tasks = state.tasks.filter((t) => t.id !== id);
+  for (const other of state.tasks) {
+    if (removedIds.has(other.chainedAfter)) other.chainedAfter = 0;
+    if (isGroup && !deleteMembers && other.groupId === id) other.groupId = null;
+  }
+  state.tasks = state.tasks.filter((t) => !removedIds.has(t.id));
   saveState();
   emitRender();
 }
