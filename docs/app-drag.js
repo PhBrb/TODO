@@ -49,6 +49,14 @@ function finishDrag(ev) {
     const targetTask = state.tasks.find((t) => t.id === target.id);
     if (targetTask && targetTask.list === "group") {
       Game.moveTaskIntoGroup(drag.task.id, target.id);
+    } else if (targetTask && targetTask.groupId) {
+      if (drag.task.groupId === targetTask.groupId) {
+        Game.chainTask(drag.task, target.id); // link within the same group
+      } else {
+        Game.moveTaskIntoGroup(drag.task.id, targetTask.groupId); // joining via a member
+      }
+    } else if (drag.task.groupId) {
+      // a grouped task is not linked to tasks outside its group: no-op
     } else {
       Game.chainTask(drag.task, target.id);
     }

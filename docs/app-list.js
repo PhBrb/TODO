@@ -370,7 +370,7 @@ document.addEventListener("click", (ev) => {
   if (changed) render();
 });
 
-function groupNode(task) {
+function groupNode(task, chainInfo = null, chainVis = null) {
   const li = document.createElement("li");
   li.className = "task group";
   li.dataset.id = task.id;
@@ -379,7 +379,7 @@ function groupNode(task) {
     || (E.pending && E.pending.kind === "restore" && E.pending.taskId === task.id);
   const body = document.createElement("div");
   body.className = "task-body";
-  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, null);
+  const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, chainInfo);
   body.appendChild(title);
   if (editingThisTask) {
     activateEdit(li, titleInput, E.pending.controls, E.pending.onSave);
@@ -387,8 +387,23 @@ function groupNode(task) {
   }
   const children = document.createElement("div");
   children.className = "group-children";
-  for (const m of Game.state.tasks.filter((t) => t.groupId === task.id)) {
-    children.appendChild(taskNode(m, null, { inlineLink: false, zigzagAbove: false, zigzagBelow: false }));
+  const members = Game.state.tasks.filter((t) => t.groupId === task.id);
+  const ordered = chainOrdered(members, sortTasks(members));
+  let prevM = null;
+  for (const m of ordered) {
+    const v = chainVis && chainVis.get(m.id) ? chainVis.get(m.id) : { hidden: false, zigzagAbove: false, zigzagBelow: false };
+    if (v.hidden) continue;
+    const prevIsPred = prevM && prevM.id === m.chainedAfter;
+    const mChainUi = {
+      inlineLink: Boolean(m.chainedAfter) && !v.zigzagAbove && !prevIsPred,
+      zigzagAbove: v.zigzagAbove,
+      zigzagBelow: v.zigzagBelow,
+    };
+    if (!v.zigzagAbove && prevIsPred) {
+      children.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(m)));
+    }
+    children.appendChild(taskNode(m, chainInfo, mChainUi, chainVis));
+    prevM = m;
   }
   body.appendChild(children);
   li.appendChild(body);
@@ -396,8 +411,8 @@ function groupNode(task) {
   return li;
 }
 
-function taskNode(task, chainInfo = null, chainUi = null) {
-  if (task.list === "group") return groupNode(task);
+function taskNode(task, chainInfo = null, chainUi = null, chainVis = null) {
+  if (task.list === "group") return groupNode(task, chainInfo, chainVis);
   const li = document.createElement("li");
   li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
   li.dataset.id = task.id;
@@ -535,7 +550,7 @@ let render = function () {
     if (!v.zigzagAbove && prevIsPredecessor) {
       AppUI.els.listEl.appendChild(chainLinkNode("chain-link-row", () => Game.unchainTask(task)));
     }
-    const node = taskNode(task, chainInfo, chainUi);
+    const node = taskNode(task, chainInfo, chainUi, chainVis);
     AppUI.els.listEl.appendChild(node);
     prevTask = task;
   }

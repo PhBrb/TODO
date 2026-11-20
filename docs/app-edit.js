@@ -391,6 +391,20 @@ function openEditRow(task) {
   clearEditing();
   E.taskId = task.id;
 
+  if (task.list === "group") {
+    // Groups only get the name edit; a group always stays a group.
+    E.pending = {
+      kind: "task",
+      controls: [],
+      onSave: (title) => {
+        clearEditing();
+        Game.editTask(task.id, { title });
+      },
+    };
+    render();
+    return;
+  }
+
   const edit = {
     listSel: createWheel(LIST_OPTIONS, task.list || "todo", "List", null, true),
     diff: createWheel(DIFFICULTY_OPTIONS, task.difficulty ?? "easy", "Difficulty", null, true),
