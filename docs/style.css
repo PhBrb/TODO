@@ -311,17 +311,8 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 .badge.timer.running { background: #dcebff; color: #23509c; font-variant-numeric: tabular-nums; }
 .badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
 .task-start { font-size: 0.75rem; padding: 2px 8px; margin-right: 4px; }
-.task-enable {
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  margin-top: 4px;
-  align-self: flex-start;
-  border: 1px solid #ddd8f0;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--accent);
-  cursor: pointer;
-}
+.task-meta .badge.task-enable { cursor: pointer; color: var(--accent); }
+.task-meta .badge.task-enable:hover { text-decoration: underline; }
 .badge.chain { background: #f3e8ff; color: #8b5cf6; margin-left: 4px; cursor: pointer; }
 .badge.pinned { background: #e8f0ff; color: #3f6ab5; margin-left: 4px; }
 .task { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

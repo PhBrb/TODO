@@ -110,6 +110,16 @@ function taskMetaNode(task) {
     const rep = document.createElement("span");
     rep.className = "badge repeat";
     rep.textContent = ICONS.repeat + " " + task.repeat;
+    if (task.repeat === "manual") {
+      rep.classList.add("task-enable");
+      rep.role = "button";
+      rep.tabIndex = 0;
+      rep.title = "Manually enable this task";
+      rep.addEventListener("click", () => {
+        if (task.done) Game.enableTask(task);
+        else Game.emitToast(ICONS.check + " \"" + task.title + "\" is already enabled");
+      });
+    }
     meta.appendChild(rep);
     if (task.streak > 0) {
       const st = document.createElement("span");
@@ -433,18 +443,6 @@ function taskNode(task, chainInfo = null, chainUi = null, chainVis = null) {
   const { node: title, input: titleInput } = taskTitleNode(task, editingThisTask, chainInfo);
   body.appendChild(title);
   body.appendChild(taskMetaNode(task));
-  if (task.repeat === "manual") {
-    const enable = document.createElement("button");
-    enable.type = "button";
-    enable.className = "task-enable";
-    enable.textContent = ICONS.resetIn + " Enable";
-    enable.title = "Manually enable this task (manual repeat)";
-    enable.addEventListener("click", () => {
-      if (task.done) Game.uncompleteTask(task);
-      else Game.emitToast(ICONS.check + " \"" + task.title + "\" is already enabled");
-    });
-    body.appendChild(enable);
-  }
   if (editingThisTask) {
     activateEdit(li, titleInput, E.pending.controls, E.pending.onSave);
     body.appendChild(buildEditControlsRow());
