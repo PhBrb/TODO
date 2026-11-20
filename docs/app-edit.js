@@ -241,10 +241,7 @@ function buildEditScheduleArea(task) {
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
   state.deadlineKind = task.deadlineRule && task.deadlineRule.kind === "offset" ? "offset" : "fixed";
-  state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => {
-    state.deadlineEnabled = on;
-    syncWeeklyWheels(state);
-  }, "📅 Deadline", "Show/hide the deadline wheels");
+  state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => setDeadlineEnabled(on), "📅 Deadline", "Show/hide the deadline wheels");
   state.deadlineKindBtn = createFieldToggle(state.deadlineKind === "offset", (on) => {
     state.deadlineKind = on ? "offset" : "fixed";
     if (state.resetSection) {
@@ -274,6 +271,21 @@ function buildEditScheduleArea(task) {
   state.dueAtWheelsWrap.className = "due-at-wheels";
   state.dueAtField = labeledField("\ud83d\udd54 Due at", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
   scheduleWrap.appendChild(state.dueAtField);
+
+  function setDeadlineEnabled(on) {
+    state.deadlineEnabled = on;
+    state.deadlineToggle.classList.toggle("on", on);
+    state.deadlineToggle.setAttribute("aria-pressed", String(on));
+    syncWeeklyWheels(state);
+    syncEditDueAtLabel(state);
+  }
+  // Clicking anywhere in the deadline card activates the deadline (never
+  // deactivates); clicks on interactive controls are ignored here.
+  scheduleWrap.addEventListener("click", (ev) => {
+    if (state.deadlineEnabled) return;
+    if (ev.target.closest("button, .wheel-select, input, select, textarea, label, a")) return;
+    setDeadlineEnabled(true);
+  });
   return state;
 }
 

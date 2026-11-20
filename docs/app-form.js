@@ -194,7 +194,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
   const kindLabel = (k) => (k === "offset" ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time");
   const btnRow = document.createElement("div");
   btnRow.className = "deadline-btn-row";
-  const toggle = createFieldToggle(isEnabled, (on) => { isEnabled = on; sync(); }, label, "Show/hide the wheels");
+  const toggle = createFieldToggle(isEnabled, (on) => setEnabled(on), label, "Show/hide the wheels");
   btnRow.appendChild(toggle);
   let kindBtn = null;
   if (allowOffset) {
@@ -230,6 +230,20 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
   section.appendChild(fixedWrap);
   section.appendChild(offsetWrap);
   sync();
+
+  function setEnabled(on) {
+    isEnabled = on;
+    toggle.classList.toggle("on", on);
+    toggle.setAttribute("aria-pressed", String(on));
+    sync();
+  }
+  // Clicking anywhere in the card activates the rule (never deactivates);
+  // clicks on interactive controls are left to those controls themselves.
+  section.addEventListener("click", (ev) => {
+    if (isEnabled) return;
+    if (ev.target.closest("button, .wheel-select, input, select, textarea, label, a")) return;
+    setEnabled(true);
+  });
 
   function read() {
     if (!isEnabled) return null;
@@ -274,10 +288,7 @@ function updateCreateFormMode() {
   AppUI.els.scheduleContainer.innerHTML = "";
   AppUI.scheduleControls = buildScheduleControls(repeat, {}, false);
   if (!AppUI.deadlineToggleBtn) {
-    AppUI.deadlineToggleBtn = createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
-      AppUI.createDeadlineEnabled = on;
-      syncCreateWeeklyWheels();
-    }, "\u{1F4C5} Deadline", "Show/hide the deadline wheels");
+    AppUI.deadlineToggleBtn = createFieldToggle(AppUI.createDeadlineEnabled, (on) => setCreateDeadlineEnabled(on), "\u{1F4C5} Deadline", "Show/hide the deadline wheels");
     AppUI.deadlineKindBtn = createFieldToggle(AppUI.deadlineKind === "offset", (on) => {
       AppUI.deadlineKind = on ? "offset" : "fixed";
       AppUI.deadlineKindBtn.textContent = on ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time";
@@ -380,7 +391,24 @@ function syncDueAtLabel() {
   AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.createDeadlineEnabled) ? "🕔 Due at" : "🕔 Resets at";
 }
 
+function setCreateDeadlineEnabled(on) {
+  AppUI.createDeadlineEnabled = on;
+  if (AppUI.deadlineToggleBtn) {
+    AppUI.deadlineToggleBtn.classList.toggle("on", on);
+    AppUI.deadlineToggleBtn.setAttribute("aria-pressed", String(on));
+  }
+  syncCreateWeeklyWheels();
+  syncDueAtLabel();
+}
+
 function initForm() {
+  // Clicking anywhere in the deadline/schedule card activates the deadline
+  // (never deactivates); clicks on interactive controls are ignored here.
+  AppUI.els.scheduleContainer.addEventListener("click", (ev) => {
+    if (AppUI.createDeadlineEnabled) return;
+    if (ev.target.closest("button, .wheel-select, input, select, textarea, label, a")) return;
+    setCreateDeadlineEnabled(true);
+  });
   AppUI.els.form.addEventListener("submit", (e) => {
     e.preventDefault();
     const title = AppUI.els.taskInput.value.trim();
