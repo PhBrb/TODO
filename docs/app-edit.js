@@ -4,6 +4,7 @@ import { AppUI } from "./app-state.js";
 import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, buildSelect, createDueAtWheels, createFieldToggle, createWheel, labeledField, readScheduleValues, scheduleValuesFromTask } from "./app-util.js";
 import { showToast } from "./app-ui.js";
 import { render } from "./app-list.js";
+import { ICONS } from "./game-icons.js";
 
 const E = AppUI.edit;
 
@@ -90,9 +91,9 @@ function openSubtaskEdit(parent, subtask) {
 let outsideEditDown = null;
 
 const RATING_OPTIONS = [
-  { label: "😫 Harder", value: "harder" },
-  { label: "👌 As expected", value: "ok" },
-  { label: "😊 Easier", value: "easier" },
+  { label: ICONS.weary + " Harder", value: "harder" },
+  { label: ICONS.okHand + " As expected", value: "ok" },
+  { label: ICONS.smile + " Easier", value: "easier" },
 ];
 const RATING_RING_RADIUS = 13;
 const RATING_RING_CIRC = 2 * Math.PI * RATING_RING_RADIUS;
@@ -114,7 +115,7 @@ function buildRatingCloseButton(onClose) {
   svg.append(bar);
   const x = document.createElement("span");
   x.className = "rating-close-x";
-  x.textContent = "×";
+  x.textContent = ICONS.times;
   btn.append(svg, x);
   btn.addEventListener("click", onClose);
   return { btn, bar };
@@ -135,7 +136,7 @@ function promptDifficultyRating(task) {
     panel.remove();
   };
   const q = document.createElement("span");
-  q.textContent = `"${task.title}" — how was it?`;
+  q.textContent = `"${task.title}" ${ICONS.emDash} how was it?`;
   panel.appendChild(q);
   for (const opt of RATING_OPTIONS) {
     const btn = document.createElement("button");
@@ -145,7 +146,7 @@ function promptDifficultyRating(task) {
       task.ratedDifficulty = opt.value;
       dismiss();
       if (opt.value === "easier") {
-        showToast("😄 Noted! You can edit the task's difficulty.");
+        showToast(ICONS.grin + " Noted! You can edit the task's difficulty.");
       } else {
         showToast("Noted, thanks!");
       }
@@ -177,7 +178,7 @@ function buildEditSelectors(task, listSel, diff, rep, scheduleArea, timeLimit) {
   timeRow.appendChild(scheduleArea.deadlineSlot);
   const timeLimitRow = document.createElement("div");
   timeLimitRow.className = "edit-selectors-row";
-  timeLimitRow.appendChild(labeledField("⏱️ Time limit", [timeLimit.el]));
+  timeLimitRow.appendChild(labeledField(ICONS.timeLimit + " Time limit", [timeLimit.el]));
   selectors.appendChild(mainRow);
   selectors.appendChild(scheduleArea.scheduleWrap);
   selectors.appendChild(timeRow);
@@ -241,16 +242,16 @@ function buildEditScheduleArea(task) {
   state.schedule = buildScheduleControls(task.repeat, scheduleValues, true);
   scheduleWrap.appendChild(state.schedule.el);
   state.deadlineKind = task.deadlineRule && task.deadlineRule.kind === "offset" ? "offset" : "fixed";
-  state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => setDeadlineEnabled(on), "📅 Deadline", "Show/hide the deadline wheels");
+  state.deadlineToggle = createFieldToggle(state.deadlineEnabled, (on) => setDeadlineEnabled(on), ICONS.calendar + " Deadline", "Show/hide the deadline wheels");
   state.deadlineKindBtn = createFieldToggle(state.deadlineKind === "offset", (on) => {
     state.deadlineKind = on ? "offset" : "fixed";
     if (state.resetSection) {
       if (on) state.resetSection.setKind("offset");
       state.resetSection.setKindEnabled(!on);
     }
-    state.deadlineKindBtn.textContent = on ? "⏳ After completion" : "📅 Fixed day + time";
+    state.deadlineKindBtn.textContent = on ? ICONS.hourglass + " After completion" : ICONS.calendar + " Fixed day + time";
     syncWeeklyWheels(state);
-  }, state.deadlineKind === "offset" ? "⏳ After completion" : "📅 Fixed day + time", "Switch deadline between fixed day/time and time after completion");
+  }, state.deadlineKind === "offset" ? ICONS.hourglass + " After completion" : ICONS.calendar + " Fixed day + time", "Switch deadline between fixed day/time and time after completion");
   state.deadlineBtnRow = document.createElement("div");
   state.deadlineBtnRow.className = "deadline-btn-row";
   state.deadlineBtnRow.appendChild(state.deadlineToggle);
@@ -260,8 +261,8 @@ function buildEditScheduleArea(task) {
   state.deadlineOffsetWrap.className = "deadline-offset-wheels";
   scheduleWrap.appendChild(state.deadlineOffsetWrap);
   buildDeadlineOffsetWheels(state.deadlineOffsetWrap, task.deadlineRule);
-  state.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: task.resetRule, enabled: task.resetRule != null, compact: true });
-  state.ignoreSection = buildRuleSection({ label: "\u{1F6AB} Ignore", rule: task.ignoreRule, enabled: task.ignoreRule != null, compact: true, allowOffset: false });
+  state.resetSection = buildRuleSection({ label: ICONS.repeat + " Reset", rule: task.resetRule, enabled: task.resetRule != null, compact: true });
+  state.ignoreSection = buildRuleSection({ label: ICONS.noEntry + " Ignore", rule: task.ignoreRule, enabled: task.ignoreRule != null, compact: true, allowOffset: false });
   if (state.deadlineKind === "offset") {
     state.resetSection.setKind("offset");
     state.resetSection.setKindEnabled(false);
@@ -269,7 +270,7 @@ function buildEditScheduleArea(task) {
   syncDeadlineSlot(state);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
-  state.dueAtField = labeledField("\ud83d\udd54 Due at", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
+  state.dueAtField = labeledField(ICONS.clock + " Due at", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
   scheduleWrap.appendChild(state.dueAtField);
 
   function setDeadlineEnabled(on) {
@@ -334,7 +335,7 @@ function syncEditDueAtLabel(scheduleArea) {
   const label = scheduleArea.dueAtField.querySelector(".field-label");
   if (label) {
     label.textContent =
-      scheduleArea.repeat === "weekly" || scheduleArea.deadlineEnabled ? "📅 Due at" : "🔔 Resets at";
+      scheduleArea.repeat === "weekly" || scheduleArea.deadlineEnabled ? ICONS.calendar + " Due at" : ICONS.bell + " Resets at";
   }
 }
 

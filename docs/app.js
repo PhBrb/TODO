@@ -12,6 +12,7 @@ import { rolloverCheckpoints } from "./game-progression.js";
 import { reachedGoalCount } from "./game-rewards.js";
 import { checkRecurringTasks } from "./game-schedule.js";
 import { loadState, resetState, saveState, state, ui } from "./game-state.js";
+import { hydrateIcons } from "./game-icons.js";
 import { syncDailyReminder } from "./native-bridge.js";
 
 ui.render = () => render();
@@ -54,6 +55,7 @@ AppUI.wheels.diff = mountWheel("difficulty-wheel", DIFFICULTY_OPTIONS, "easy", "
 AppUI.wheels.repeat = mountWheel("repeat-wheel", REPEAT_OPTIONS, "none", "Repeat", updateCreateFormMode);
 AppUI.wheels.timeLimit = mountWheel("time-limit-wheel", TIME_LIMIT_OPTIONS, 0, "Time limit");
 
+hydrateIcons();
 initForm();
 initOverlays();
 initInfoOverlay();

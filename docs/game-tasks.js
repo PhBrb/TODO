@@ -5,6 +5,7 @@ import { achievementProgressFromCompletion, announceAchievements, announceLevelU
 import { nextOccurrence, repeatKey } from "./game-schedule.js";
 import { clampWeekdays, itemIsOwned, emitPromptDifficultyRating, emitRender, saveState, emitToast, state } from "./game-state.js";
 import { hapticImpact, hapticNotification } from "./native-bridge.js";
+import { ICONS } from "./game-icons.js";
 
 function highlightRating(task, now) {
   let score = 0;
@@ -84,7 +85,7 @@ function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) 
     completedViaSubtasks: false,
     subtasks: [],
   };
-  if (isBonus) emitToast("⭐ New bonus task! Extra rewards");
+  if (isBonus) emitToast(ICONS.star + " New bonus task! Extra rewards");
   state.tasks.push(task);
   saveState();
   emitRender();
@@ -202,7 +203,7 @@ function subtaskChainSatisfies(parent, subtask) {
 }
 
 function chainSubtask(parent, subtask, targetId) {
-  return chainIn(parent.subtasks, subtask, targetId, "\ud83d\udd17");
+  return chainIn(parent.subtasks, subtask, targetId, ICONS.link);
 }
 
 function unchainSubtask(parent, subtask) {
@@ -246,7 +247,7 @@ function toggleSubtask(parent, subtask) {
   if (subtask.done) {
     if (subtasksLockedByChain(parent)) {
       subtask.done = false;
-      emitToast("🔗 Finish the chained predecessor task first");
+      emitToast(ICONS.link + " Finish the chained predecessor task first");
       saveState();
       emitRender();
       return;
@@ -254,7 +255,7 @@ function toggleSubtask(parent, subtask) {
     if (!subtaskChainSatisfies(parent, subtask)) {
       subtask.done = false;
       const predecessor = subtaskPredecessor(parent, subtask);
-      emitToast(`\ud83d\udd17 "${subtask.title}" is chained \u2014 complete "${predecessor.title}" first`);
+      emitToast(`${ICONS.link} "${subtask.title}" is chained ${ICONS.emDash} complete "${predecessor.title}" first`);
       saveState();
       emitRender();
       return;
@@ -296,7 +297,7 @@ function subtasksLockedByChain(task) {
 }
 
 function chainTask(task, targetId) {
-  return chainIn(state.tasks, task, targetId, "\ud83e\uddf1");
+  return chainIn(state.tasks, task, targetId, ICONS.brick);
 }
 
 function unchainTask(task) {
@@ -308,7 +309,7 @@ function completeFunTask(task) {
   task.completedAt = Date.now();
   task.reward = { coins: FUN_TASK_COINS, gems: 0, xp: FUN_TASK_XP };
   grantXpAndCoins(FUN_TASK_COINS, 0, FUN_TASK_XP);
-  emitToast(`\ud83c\udf89 +${FUN_TASK_COINS} \ud83e\ude99 +${FUN_TASK_XP} \u2728`);
+  emitToast(`${ICONS.party} +${FUN_TASK_COINS} ${ICONS.coin} +${FUN_TASK_XP} ${ICONS.sparkles}`);
   announceAchievements(trackAchievement({
     totalCompleted: state.achievements.stats.totalCompleted + 1,
     funCompleted: state.achievements.stats.funCompleted + 1,
@@ -321,7 +322,7 @@ function completeFunTask(task) {
 function completeTask(task) {
   if (task.list === "fun") return completeFunTask(task);
   if (!chainSatisfiesDependency(task)) {
-    emitToast(`\ud83e\uddf1 "${task.title}" is chained \u2014 complete "${chainPredecessor(task).title}" first`);
+    emitToast(`${ICONS.brick} "${task.title}" is chained ${ICONS.emDash} complete "${chainPredecessor(task).title}" first`);
     return;
   }
   const reward = computeReward(task);
@@ -358,13 +359,13 @@ function completeTask(task) {
   announceAchievements(trackAchievement(achievementProgressFromCompletion(task, task.completedAt)));
   if (leveledUp) announceLevelUp();
   if (milestones.weeklyReward > 0) {
-    emitToast(`🏆 Weekly goal reached! +${WEEKLY_GOAL_REWARD} 🪙`);
+    emitToast(`${ICONS.trophy} Weekly goal reached! +${WEEKLY_GOAL_REWARD} ${ICONS.coin}`);
   } else if (milestones.dailyReward > 0) {
-    emitToast(`🎉 Daily goal reached! +${GOAL_REWARD} 🪙`);
+    emitToast(`${ICONS.party} Daily goal reached! +${GOAL_REWARD} ${ICONS.coin}`);
   }
   emitToast(buildRewardMessage(task, reward, firstBonus));
 
-  if (chestEarned) emitToast("📦 Chest earned! Opens in 12h");
+  if (chestEarned) emitToast(ICONS.chest + " Chest earned! Opens in 12h");
   maybeStartBoost();
   emitPromptDifficultyRating(task);
   maybeSuggestDifficultyReduction(task);
@@ -490,7 +491,7 @@ function maybeSuggestDifficultyReduction(task) {
   const idx = order.indexOf(task.difficulty);
   if (idx <= 0) return;
   emitToast(
-    `💡 "${task.title}" is going strong (🔥 ${task.streak}). Consider lowering its difficulty.`
+    `${ICONS.bulb} "${task.title}" is going strong (${ICONS.fire} ${task.streak}). Consider lowering its difficulty.`
   );
 }
 

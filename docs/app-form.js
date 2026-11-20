@@ -1,6 +1,7 @@
 import * as Game from "./game.js";
 import { AppUI } from "./app-state.js";
 import { CUSTOM_DAYS_OPTIONS, CUSTOM_HOURS_OPTIONS, CUSTOM_MINUTES_OPTIONS, DIFFICULTY_OPTIONS, LIST_OPTIONS, REPEAT_OPTIONS, TIME_LIMIT_OPTIONS, WEEKDAY_CHECKBOXES, createDueAtWheels, createFieldToggle, createWheel, deadlineInputValue, isRepeatingRepeat, labeledField, readScheduleValues } from "./app-util.js";
+import { ICONS } from "./game-icons.js";
 
 const W = AppUI.wheels;
 AppUI.deadlineKind = AppUI.deadlineKind || "fixed";
@@ -13,7 +14,7 @@ function deadlineSchedule(wrap, values, read) {
   const box = document.createElement("div");
   box.className = "deadline-input-box";
   box.appendChild(input);
-  const field = labeledField("\ud83d\udcc5 Deadline", [box]);
+  const field = labeledField(ICONS.calendar + " Deadline", [box]);
   field.classList.add("deadline-field");
   wrap.appendChild(field);
   read.deadline = () => input.value;
@@ -191,7 +192,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
   section.className = "rule-section";
   let kind = !allowOffset ? "fixed" : rule && rule.kind === "offset" ? "offset" : "fixed";
   let isEnabled = enabled !== false;
-  const kindLabel = (k) => (k === "offset" ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time");
+  const kindLabel = (k) => (k === "offset" ? ICONS.hourglass + " After completion" : ICONS.calendar + " Fixed day + time");
   const btnRow = document.createElement("div");
   btnRow.className = "deadline-btn-row";
   const toggle = createFieldToggle(isEnabled, (on) => setEnabled(on), label, "Show/hide the wheels");
@@ -288,16 +289,16 @@ function updateCreateFormMode() {
   AppUI.els.scheduleContainer.innerHTML = "";
   AppUI.scheduleControls = buildScheduleControls(repeat, {}, false);
   if (!AppUI.deadlineToggleBtn) {
-    AppUI.deadlineToggleBtn = createFieldToggle(AppUI.createDeadlineEnabled, (on) => setCreateDeadlineEnabled(on), "\u{1F4C5} Deadline", "Show/hide the deadline wheels");
+    AppUI.deadlineToggleBtn = createFieldToggle(AppUI.createDeadlineEnabled, (on) => setCreateDeadlineEnabled(on), ICONS.calendar + " Deadline", "Show/hide the deadline wheels");
     AppUI.deadlineKindBtn = createFieldToggle(AppUI.deadlineKind === "offset", (on) => {
       AppUI.deadlineKind = on ? "offset" : "fixed";
-      AppUI.deadlineKindBtn.textContent = on ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time";
+      AppUI.deadlineKindBtn.textContent = on ? ICONS.hourglass + " After completion" : ICONS.calendar + " Fixed day + time";
       if (AppUI.resetSection) {
         if (on) AppUI.resetSection.setKind("offset");
         AppUI.resetSection.setKindEnabled(!on);
       }
       syncCreateWeeklyWheels();
-    }, "\u{1F4C5} Fixed day + time", "Switch deadline between fixed day/time and time after completion");
+    }, ICONS.calendar + " Fixed day + time", "Switch deadline between fixed day/time and time after completion");
     AppUI.deadlineBtnRow = document.createElement("div");
     AppUI.deadlineBtnRow.className = "deadline-btn-row";
     AppUI.deadlineBtnRow.appendChild(AppUI.deadlineToggleBtn);
@@ -309,17 +310,17 @@ function updateCreateFormMode() {
   AppUI.deadlineToggleBtn.setAttribute("aria-pressed", String(AppUI.createDeadlineEnabled));
   AppUI.deadlineKindBtn.classList.toggle("on", AppUI.deadlineKind === "offset");
   AppUI.deadlineKindBtn.setAttribute("aria-pressed", String(AppUI.deadlineKind === "offset"));
-  AppUI.deadlineKindBtn.textContent = AppUI.deadlineKind === "offset" ? "\u{23F3} After completion" : "\u{1F4C5} Fixed day + time";
+  AppUI.deadlineKindBtn.textContent = AppUI.deadlineKind === "offset" ? ICONS.hourglass + " After completion" : ICONS.calendar + " Fixed day + time";
   AppUI.els.scheduleContainer.appendChild(AppUI.deadlineBtnRow);
   AppUI.els.scheduleContainer.appendChild(AppUI.scheduleControls.el);
   AppUI.els.scheduleContainer.appendChild(AppUI.deadlineOffsetWrap);
   AppUI.els.scheduleContainer.appendChild(AppUI.els.dueAtField);
   buildCreateOffsetWheels();
   if (!AppUI.resetSection) {
-    AppUI.resetSection = buildRuleSection({ label: "\u{1F501} Reset", rule: null, enabled: false, compact: false });
+    AppUI.resetSection = buildRuleSection({ label: ICONS.repeat + " Reset", rule: null, enabled: false, compact: false });
   }
   if (!AppUI.ignoreSection) {
-    AppUI.ignoreSection = buildRuleSection({ label: "\u{1F6AB} Ignore", rule: null, enabled: false, compact: false, allowOffset: false });
+    AppUI.ignoreSection = buildRuleSection({ label: ICONS.noEntry + " Ignore", rule: null, enabled: false, compact: false, allowOffset: false });
   }
   const timeLimitRow = document.getElementById("time-limit-row");
   if (timeLimitRow) AppUI.els.form.insertBefore(AppUI.resetSection.el, timeLimitRow);
@@ -388,7 +389,7 @@ function syncCreateWeeklyWheels() {
 
 function syncDueAtLabel() {
   if (!AppUI.els.dueAtLabel) return;
-  AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.createDeadlineEnabled) ? "🕔 Due at" : "🕔 Resets at";
+  AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.createDeadlineEnabled) ? ICONS.clock + " Due at" : ICONS.clock + " Resets at";
 }
 
 function setCreateDeadlineEnabled(on) {

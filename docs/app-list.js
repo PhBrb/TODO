@@ -5,6 +5,7 @@ import { activateEdit, buildEditControlsRow, buildTitleInput, clearEditing, edit
 import { AppUI } from "./app-state.js";
 import { renderBalances, vibrateForReward } from "./app-ui.js";
 import { DELETE_ARM_MS, DIFFICULTY_OPTIONS, armDeleteButton, buildChainColorInfo, buildSelect, chainDot, chainInlineSymbol, chainLinkNode, chainOrdered, chainVisibility, formatDeadline, formatResetIn, formatMinutesSeconds, isGlobalEditMode, sortTasks, timeLimitRemaining, zigzagEdgeNode } from "./app-util.js";
+import { ICONS } from "./game-icons.js";
 
 const E = AppUI.edit;
 
@@ -87,18 +88,18 @@ function taskMetaNode(task) {
   if (task.pinned) {
     const pin = document.createElement("span");
     pin.className = "badge pinned";
-    pin.textContent = "\ud83d\udccc pinned";
+    pin.textContent = ICONS.pin + " pinned";
     meta.appendChild(pin);
   }
   if (task.repeat !== "none") {
     const rep = document.createElement("span");
     rep.className = "badge repeat";
-    rep.textContent = "\ud83d\udd01 " + (task.repeat === "every_5min" ? "5 min" : task.repeat);
+    rep.textContent = ICONS.repeat + " " + (task.repeat === "every_5min" ? "5 min" : task.repeat);
     meta.appendChild(rep);
     if (task.streak > 0) {
       const st = document.createElement("span");
       st.className = "badge streak";
-      st.textContent = "\ud83d\udd25 " + task.streak;
+      st.textContent = ICONS.fire + " " + task.streak;
       meta.appendChild(st);
     }
   }
@@ -121,12 +122,12 @@ function taskTimeBadge(task) {
     const tl = document.createElement("span");
     tl.className = "badge timer running";
     tl.dataset.taskId = task.id;
-    tl.textContent = `\u23f1\ufe0f ${formatMinutesSeconds(Math.max(0, timeLimitRemaining(task, Date.now())))}`;
+    tl.textContent = `${ICONS.timeLimit} ${formatMinutesSeconds(Math.max(0, timeLimitRemaining(task, Date.now())))}`;
     return tl;
   }
   const tl = document.createElement("span");
   tl.className = "badge timer";
-  tl.textContent = `\u23f1\ufe0f ${task.timeLimit}m`;
+  tl.textContent = `${ICONS.timeLimit} ${task.timeLimit}m`;
   return tl;
 }
 
@@ -178,7 +179,7 @@ function subtaskRow(task, st, parentLocked, chainInfo = null, chainUi = null) {
     || (editingSubtaskOf(task) === st && E.pending && E.pending.kind === "subtask");
   const stEdit = document.createElement("button");
   stEdit.className = "task-edit subtask-edit";
-  stEdit.textContent = "\u270e";
+  stEdit.textContent = ICONS.pencil;
   stEdit.addEventListener("click", () => openSubtaskEdit(task, st));
   const stTitle = editingThisSub ? buildTitleInput(st.title) : document.createElement("span");
   stTitle.className = editingThisSub ? "subtask-title title-input" : "subtask-title";
@@ -191,7 +192,7 @@ function subtaskRow(task, st, parentLocked, chainInfo = null, chainUi = null) {
   }
   const stDel = document.createElement("button");
   stDel.className = "task-delete subtask-delete";
-  stDel.textContent = "\u2715";
+  stDel.textContent = ICONS.x;
   armDeleteButton(stDel, () => Game.deleteSubtask(task, st.id));
   subtaskDraggable(row, task, st);
   row.appendChild(subtaskCheckbox(row, task, st, stLocked, parentLocked));
@@ -286,18 +287,18 @@ function taskActionsNode(task) {
   const pin = document.createElement("button");
   pin.type = "button";
   pin.className = "task-pin" + (task.pinned ? " pinned" : "");
-  pin.textContent = "\ud83d\udccc";
-  pin.title = task.pinned ? "Unpin task" : "Pin task \u2014 always in Highlight, first in other lists";
+  pin.textContent = ICONS.pin;
+  pin.title = task.pinned ? "Unpin task" : "Pin task " + ICONS.emDash + " always in Highlight, first in other lists";
   pin.addEventListener("click", () => Game.editTask(task.id, { pinned: !task.pinned }));
 
   const del = document.createElement("button");
   del.className = "task-delete";
-  del.textContent = "\u2715";
+  del.textContent = ICONS.x;
   armDeleteButton(del, () => deleteTaskWithConfirm(task));
 
   const edit = document.createElement("button");
   edit.className = "task-edit";
-  edit.textContent = "\u270e";
+  edit.textContent = ICONS.pencil;
   edit.addEventListener("click", () => openEditRow(task));
 
   const actions = document.createElement("div");
@@ -311,7 +312,7 @@ function taskActionsNode(task) {
     const start = document.createElement("button");
     start.className = "task-start";
     start.type = "button";
-    start.textContent = "\u25b6 Start";
+    start.textContent = ICONS.play + " Start";
     start.title = `Finish within ${task.timeLimit} min for a bonus`;
     start.addEventListener("click", () => Game.startTask(task));
     actions.appendChild(start);
@@ -434,7 +435,7 @@ function renderDailyProgress() {
   const completed = holdGoal ? Math.min(Game.state.dailyCompleted, holdGoal) : Game.state.dailyCompleted;
   AppUI.els.dailyProgressEl.textContent =
     !holdGoal && reached >= goals.length
-      ? `${Game.state.dailyCompleted} ✅ all goals done`
+      ? `${Game.state.dailyCompleted} ${ICONS.check} all goals done`
       : `${completed}/${nextGoal}`;
   renderBarFill(AppUI.els.dailyBar, (completed / nextGoal) * 100);
 }
@@ -455,7 +456,7 @@ function renderWeeklyProgress() {
   const completed = holdGoal ? Math.min(Game.state.weeklyCompleted, holdGoal) : Game.state.weeklyCompleted;
   AppUI.els.weeklyProgressEl.textContent =
     !holdGoal && reached >= goals.length
-      ? `${Game.state.weeklyCompleted} ✅`
+      ? `${Game.state.weeklyCompleted} ${ICONS.check}`
       : `${completed}/${nextGoal}`;
   renderBarFill(AppUI.els.weeklyBar, (completed / nextGoal) * 100);
 }
@@ -500,8 +501,8 @@ let render = function () {
   AppUI.els.listEl.classList.toggle("editing", E.taskId !== null || E.subtaskKey !== null);
   AppUI.els.emptyHint.classList.toggle("hidden", shown.length > 0);
   AppUI.els.emptyHint.textContent = AppUI.activeTab === "highlight"
-    ? "Nothing to highlight — complete tasks to earn recommendations! 🎉"
-    : "Nothing to do yet — add a task! 🎉";
+    ? "Nothing to highlight " + ICONS.emDash + " complete tasks to earn recommendations! " + ICONS.party
+    : "Nothing to do yet " + ICONS.emDash + " add a task! " + ICONS.party;
   renderBalances();
 
   renderProgress();
@@ -545,7 +546,7 @@ function updateLiveClocks() {
     const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
     if (!task) continue;
     const remaining = timeLimitRemaining(task, now);
-    node.textContent = `⏱️ ${formatMinutesSeconds(Math.max(0, remaining))}`;
+    node.textContent = `${ICONS.timeLimit} ${formatMinutesSeconds(Math.max(0, remaining))}`;
     node.classList.toggle("overdue", remaining <= 0);
   }
 
