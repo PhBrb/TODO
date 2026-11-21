@@ -234,6 +234,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
   }
 
   const fixedWrap = document.createElement("div");
+  fixedWrap.className = "rule-fixed";
   const grid = weekdayToggleGrid(rule && rule.kind === "fixed" ? rule.slots.map((sl) => sl.weekday) : [1]);
   const mPick = monthlyDayPicker(
     rule && rule.kind === "monthly" ? rule.weekday : rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].weekday : null,
@@ -243,6 +244,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
   const wheelsWrap = document.createElement("div");
   wheelsWrap.className = "due-at-wheels";
   for (const el of wheels.els) wheelsWrap.appendChild(el);
+  wheelsWrap.appendChild(wheels.endOfDayBtn);
   fixedWrap.appendChild(grid.group);
   fixedWrap.appendChild(mPick.el);
   fixedWrap.appendChild(wheelsWrap);

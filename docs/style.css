@@ -1260,9 +1260,15 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 .weekday-grid { grid-template-columns: repeat(7, 1fr); }
 .first-last-grid { grid-template-columns: repeat(2, 1fr); }
 
-/* The monthly day picker fills the full card width, also inside the
-   schedule (deadline) card, like the day grids inside rule sections. */
-.repeat-schedule > .monthly-picker { flex: 1 1 100%; min-width: 0; }
+/* The monthly day picker fills the full card width (also inside the
+   schedule/deadline card) and spaces its day + first/last grids. */
+.monthly-picker { flex: 1 1 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Inside rule cards (reset / ignore) space the day picker(s) and the
+   time wheels, and keep the end-of-day button on the wheels row. */
+.rule-fixed { display: flex; flex-wrap: wrap; gap: 8px; }
+.rule-fixed > .due-at-wheels { flex: 1 1 100%; }
+.due-at-wheels .end-of-day-btn { flex: 0 0 auto; align-self: center; }
 
 .day-toggle:disabled,
 .day-toggle.disabled {
