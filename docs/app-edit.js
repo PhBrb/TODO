@@ -218,13 +218,17 @@ function buildDeadlineOffsetWheels(wrap, rule) {
 // For weekly tasks the deadline toggle hides/shows the deadline wheels;
 // the kind button switches between fixed day/time and after-completion offset.
 function syncWeeklyWheels(scheduleArea) {
-  const weekly = scheduleArea.repeat === "weekly";
+  const repeat = scheduleArea.repeat;
+  const ruleRepeat = repeat === "weekly" || repeat === "monthly";
   if (scheduleArea.deadlineBtnRow) {
-    scheduleArea.deadlineBtnRow.classList.toggle("hidden", !weekly);
+    scheduleArea.deadlineBtnRow.classList.toggle("hidden", !ruleRepeat);
   }
-  if (scheduleArea.resetSection) scheduleArea.resetSection.el.classList.toggle("hidden", !weekly);
-  if (scheduleArea.ignoreSection) scheduleArea.ignoreSection.el.classList.toggle("hidden", !weekly);
-  if (!weekly) return;
+  if (scheduleArea.resetSection) {
+    scheduleArea.resetSection.el.classList.toggle("hidden", !ruleRepeat);
+    scheduleArea.resetSection.setFixedMode(repeat === "monthly" ? "monthly" : "weekly");
+  }
+  if (scheduleArea.ignoreSection) scheduleArea.ignoreSection.el.classList.toggle("hidden", repeat !== "weekly");
+  if (!ruleRepeat) return;
   const show = scheduleArea.deadlineEnabled;
   const offset = scheduleArea.deadlineKind === "offset";
   if (scheduleArea.schedule) scheduleArea.schedule.el.classList.toggle("hidden", !show || offset);
@@ -261,7 +265,7 @@ function buildEditScheduleArea(task) {
   state.deadlineOffsetWrap.className = "deadline-offset-wheels";
   scheduleWrap.appendChild(state.deadlineOffsetWrap);
   buildDeadlineOffsetWheels(state.deadlineOffsetWrap, task.deadlineRule);
-  state.resetSection = buildRuleSection({ label: ICONS.repeat + " Reset", rule: task.resetRule, enabled: task.resetRule != null, compact: true });
+  state.resetSection = buildRuleSection({ label: ICONS.repeat + " Reset", rule: task.resetRule, enabled: task.resetRule != null, compact: true, fixedMode: task.repeat === "monthly" ? "monthly" : "weekly" });
   state.ignoreSection = buildRuleSection({ label: ICONS.noEntry + " Ignore", rule: task.ignoreRule, enabled: task.ignoreRule != null, compact: true, allowOffset: false });
   if (state.deadlineKind === "offset") {
     state.resetSection.setKind("offset");
@@ -314,7 +318,7 @@ function refreshEditSchedule(task, edit) {
     for (const el of scheduleArea.dueAt.els) scheduleArea.dueAtWheelsWrap.appendChild(el);
     const labelRow = scheduleArea.dueAtField.querySelector(".field-label-row");
     labelRow.querySelectorAll(".field-toggle-btn").forEach((b) => b.remove());
-    if (repeat !== "weekly") {
+    if (repeat !== "weekly" && repeat !== "monthly") {
       const toggle = createFieldToggle(scheduleArea.deadlineEnabled, (on) => {
         scheduleArea.deadlineEnabled = on;
         syncEditDueAtLabel(scheduleArea);
@@ -335,7 +339,7 @@ function syncEditDueAtLabel(scheduleArea) {
   const label = scheduleArea.dueAtField.querySelector(".field-label");
   if (label) {
     label.textContent =
-      scheduleArea.repeat === "weekly" || scheduleArea.deadlineEnabled ? ICONS.calendar + " Due at" : ICONS.bell + " Resets at";
+      scheduleArea.repeat === "weekly" || scheduleArea.repeat === "monthly" || scheduleArea.deadlineEnabled ? ICONS.calendar + " Due at" : ICONS.bell + " Resets at";
   }
 }
 
@@ -364,23 +368,33 @@ function saveEditRow(task, edit) {
     updates.repeatTime = scheduleArea.dueAt.read();
     updates.deadlineEnabled = scheduleArea.deadlineEnabled;
   }
-  if (repeat === "weekly") {
+  if (repeat === "weekly" || repeat === "monthly") {
     // Toggle off = no deadline. Otherwise the deadline is either a fixed
-    // weekday(s)+time or a days/hours/minutes offset after completion.
+    // day+time (weekdays for weekly, nth weekday of month for monthly) or a
+    // days/hours/minutes offset after completion.
     if (!scheduleArea.deadlineEnabled) {
       updates.deadlineRule = null;
     } else if (scheduleArea.deadlineKind === "offset" && scheduleArea.deadlineOffsetWrap.readOffsetMs) {
       const ms = scheduleArea.deadlineOffsetWrap.readOffsetMs();
       updates.deadlineRule = ms > 0 ? { kind: "offset", ms } : null;
     } else if (scheduleArea.dueAt) {
-      const weekdays = readScheduleValues(scheduleArea.schedule.read).repeatWeekdays || [1];
+      const sched = readScheduleValues(scheduleArea.schedule.read);
       const minutes = scheduleArea.dueAt.read();
       const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
       const mm = String(minutes % 60).padStart(2, "0");
-      updates.deadlineRule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
+      if (repeat === "monthly") {
+        if (sched.repeatMonthlyWeekday !== null && sched.repeatMonthlyWeekday !== undefined) {
+          updates.deadlineRule = { kind: "monthly", weekday: sched.repeatMonthlyWeekday, first: sched.repeatMonthlyFirst !== false, time: `${hh}:${mm}` };
+        } else {
+          updates.deadlineRule = null;
+        }
+      } else {
+        const weekdays = sched.repeatWeekdays || [1];
+        updates.deadlineRule = { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) };
+      }
     }
     if (scheduleArea.resetSection) updates.resetRule = scheduleArea.resetSection.read();
-    if (scheduleArea.ignoreSection) updates.ignoreRule = scheduleArea.ignoreSection.read();
+    if (repeat === "weekly" && scheduleArea.ignoreSection) updates.ignoreRule = scheduleArea.ignoreSection.read();
   }
   if (!isFun) updates.difficulty = diff.value;
   clearEditing();

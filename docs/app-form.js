@@ -49,16 +49,18 @@ function weeklySchedule(wrap, values, read) {
     buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
 }
 
-function monthlySchedule(wrap, values, read) {
-  const weekday = values.repeatMonthlyWeekday ?? null;
+function monthlyDayPicker(weekday, first) {
+  const wrap = document.createElement("div");
   const weekdayGroup = document.createElement("div");
   weekdayGroup.className = "day-toggle-grid weekday-grid";
+  let selected = weekday ?? null;
+  let firstSel = first !== false;
   const buttons = WEEKDAY_CHECKBOXES.map(([day, label]) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "day-toggle" + (weekday === day ? " on" : "");
+    btn.className = "day-toggle" + (selected === day ? " on" : "");
     btn.textContent = label;
-    btn.setAttribute("aria-pressed", String(weekday === day));
+    btn.setAttribute("aria-pressed", String(selected === day));
     btn.addEventListener("click", () => {
       const on = !btn.classList.contains("on");
       for (const b of buttons) {
@@ -68,9 +70,12 @@ function monthlySchedule(wrap, values, read) {
       if (on) {
         btn.classList.add("on");
         btn.setAttribute("aria-pressed", "true");
+        selected = day;
+      } else {
+        selected = null;
       }
-      setFirstLastEnabled(on);
-      if (on) setFirstLast(true);
+      setFirstLastEnabled(selected !== null);
+      if (selected !== null) setFirstLast(true);
     });
     weekdayGroup.appendChild(btn);
     return { btn, day };
@@ -81,11 +86,11 @@ function monthlySchedule(wrap, values, read) {
   firstLast.className = "day-toggle-grid first-last-grid";
   const firstBtn = document.createElement("button");
   firstBtn.type = "button";
-  firstBtn.className = "day-toggle" + (weekday !== null && values.repeatMonthlyFirst !== false ? " on" : "");
+  firstBtn.className = "day-toggle" + (selected !== null && firstSel ? " on" : "");
   firstBtn.textContent = "First";
   const lastBtn = document.createElement("button");
   lastBtn.type = "button";
-  lastBtn.className = "day-toggle" + (weekday !== null && values.repeatMonthlyFirst === false ? " on" : "");
+  lastBtn.className = "day-toggle" + (selected !== null && !firstSel ? " on" : "");
   lastBtn.textContent = "Last";
   function setFirstLastEnabled(enabled) {
     for (const b of [firstBtn, lastBtn]) {
@@ -97,26 +102,44 @@ function monthlySchedule(wrap, values, read) {
       }
     }
   }
-  firstBtn.setAttribute("aria-pressed", String(weekday !== null && values.repeatMonthlyFirst !== false));
-  lastBtn.setAttribute("aria-pressed", String(weekday !== null && values.repeatMonthlyFirst === false));
+  firstBtn.setAttribute("aria-pressed", String(selected !== null && firstSel));
+  lastBtn.setAttribute("aria-pressed", String(selected !== null && !firstSel));
   firstBtn.addEventListener("click", () => setFirstLast(true));
   lastBtn.addEventListener("click", () => setFirstLast(false));
   function setFirstLast(first) {
+    firstSel = first;
     firstBtn.classList.toggle("on", first);
     firstBtn.setAttribute("aria-pressed", String(first));
     lastBtn.classList.toggle("on", !first);
     lastBtn.setAttribute("aria-pressed", String(!first));
   }
-  setFirstLastEnabled(weekday !== null);
+  setFirstLastEnabled(selected !== null);
   firstLast.appendChild(firstBtn);
   firstLast.appendChild(lastBtn);
   wrap.appendChild(firstLast);
 
-  read.repeatMonthlyWeekday = () => {
-    const on = buttons.find((b) => b.btn.classList.contains("on"));
-    return on ? on.day : null;
-  };
-  read.repeatMonthlyFirst = () => firstBtn.classList.contains("on");
+  function read() {
+    return { weekday: selected, first: selected !== null && firstSel };
+  }
+  function set(wd, first) {
+    selected = wd ?? null;
+    firstSel = first !== false;
+    for (const b of buttons) {
+      const on = b.day === selected;
+      b.btn.classList.toggle("on", on);
+      b.btn.setAttribute("aria-pressed", String(on));
+    }
+    setFirstLastEnabled(selected !== null);
+    setFirstLast(firstSel);
+  }
+  return { el: wrap, buttons, firstBtn, lastBtn, read, set };
+}
+
+function monthlySchedule(wrap, values, read) {
+  const pick = monthlyDayPicker(values.repeatMonthlyWeekday ?? null, values.repeatMonthlyFirst);
+  wrap.appendChild(pick.el);
+  read.repeatMonthlyWeekday = () => pick.read().weekday;
+  read.repeatMonthlyFirst = () => pick.read().first;
 }
 
 function customSchedule(wrap, values, read, compact) {
@@ -187,11 +210,12 @@ function buildOffsetWheelsInto(wrap, rule, compact = true) {
 
 // A labeled rule section: enable toggle + kind switch (fixed day/time vs
 // after-completion offset) + the corresponding wheel selectors.
-function buildRuleSection({ label, rule, enabled = true, onKind = null, compact = true, allowOffset = true }) {
+function buildRuleSection({ label, rule, enabled = true, onKind = null, compact = true, allowOffset = true, fixedMode = "weekly" }) {
   const section = document.createElement("div");
   section.className = "rule-section";
   let kind = !allowOffset ? "fixed" : rule && rule.kind === "offset" ? "offset" : "fixed";
   let isEnabled = enabled !== false;
+  let mode = fixedMode === "monthly" ? "monthly" : "weekly";
   const kindLabel = (k) => (k === "offset" ? ICONS.hourglass + " After completion" : ICONS.calendar + " Fixed day + time");
   const btnRow = document.createElement("div");
   btnRow.className = "deadline-btn-row";
@@ -210,11 +234,16 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
 
   const fixedWrap = document.createElement("div");
   const grid = weekdayToggleGrid(rule && rule.kind === "fixed" ? rule.slots.map((sl) => sl.weekday) : [1]);
-  const wheels = createDueAtWheels(timeToMinutes(rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : "18:00"), compact);
+  const mPick = monthlyDayPicker(
+    rule && rule.kind === "monthly" ? rule.weekday : rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].weekday : null,
+    rule && rule.kind === "monthly" ? rule.first : true
+  );
+  const wheels = createDueAtWheels(timeToMinutes(rule && rule.kind === "fixed" && rule.slots[0] ? rule.slots[0].time : rule && rule.kind === "monthly" ? rule.time : "18:00"), compact);
   const wheelsWrap = document.createElement("div");
   wheelsWrap.className = "due-at-wheels";
   for (const el of wheels.els) wheelsWrap.appendChild(el);
   fixedWrap.appendChild(grid.group);
+  fixedWrap.appendChild(mPick.el);
   fixedWrap.appendChild(wheelsWrap);
 
   const offsetWrap = document.createElement("div");
@@ -223,7 +252,8 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
 
   function sync() {
     const showFixed = isEnabled && kind === "fixed";
-    grid.group.classList.toggle("hidden", !showFixed);
+    grid.group.classList.toggle("hidden", !showFixed || mode !== "weekly");
+    mPick.el.classList.toggle("hidden", !showFixed || mode !== "monthly");
     for (const el of wheels.els) el.classList.toggle("hidden", !showFixed);
     offsetWrap.classList.toggle("hidden", !(isEnabled && kind === "offset"));
   }
@@ -252,10 +282,14 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
       const ms = offsetWrap.readOffsetMs();
       return ms > 0 ? { kind: "offset", ms } : null;
     }
-    const weekdays = grid.buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
     const minutes = wheels.read();
     const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
     const mm = String(minutes % 60).padStart(2, "0");
+    if (mode === "monthly") {
+      const { weekday, first } = mPick.read();
+      return weekday === null ? null : { kind: "monthly", weekday, first, time: `${hh}:${mm}` };
+    }
+    const weekdays = grid.buttons.filter((b) => b.btn.classList.contains("on")).map((b) => b.day);
     return weekdays.length ? { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) } : null;
   }
   return {
@@ -276,6 +310,25 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
       kindBtn.disabled = !e;
       kindBtn.classList.toggle("disabled", !e);
     },
+    setFixedMode(m) {
+      m = m === "monthly" ? "monthly" : "weekly";
+      if (m !== mode && kind === "fixed") {
+        if (m === "monthly") {
+          const on = grid.buttons.find((b) => b.btn.classList.contains("on"));
+          mPick.set(on ? on.day : null, true);
+        } else {
+          const wd = mPick.read().weekday;
+          for (const b of grid.buttons) {
+            const on = wd !== null && b.day === wd;
+            b.btn.classList.toggle("on", on);
+            b.btn.setAttribute("aria-pressed", String(on));
+          }
+        }
+      }
+      mode = m;
+      sync();
+    },
+    getFixedMode: () => mode,
   };
 }
 
@@ -341,7 +394,7 @@ function updateCreateFormMode() {
   if (scheduleShowsTimeOfDay(repeat)) {
     AppUI.dueAtWheelsControls = createDueAtWheels(undefined, false);
     for (const el of AppUI.dueAtWheelsControls.els) AppUI.els.dueAtWheelsEl.appendChild(el);
-    if (repeat !== "weekly") {
+    if (repeat !== "weekly" && repeat !== "monthly") {
       AppUI.els.dueAtLabelRow.appendChild(createFieldToggle(AppUI.createDeadlineEnabled, (on) => {
         AppUI.createDeadlineEnabled = on;
         syncDueAtLabel();
@@ -372,11 +425,15 @@ function buildCreateOffsetWheels() {
 }
 
 function syncCreateWeeklyWheels() {
-  const weekly = AppUI.lastRepeat === "weekly";
-  if (AppUI.deadlineBtnRow) AppUI.deadlineBtnRow.classList.toggle("hidden", !weekly);
-  if (AppUI.resetSection) AppUI.resetSection.el.classList.toggle("hidden", !weekly);
-  if (AppUI.ignoreSection) AppUI.ignoreSection.el.classList.toggle("hidden", !weekly);
-  if (!weekly) return;
+  const repeat = AppUI.lastRepeat;
+  const ruleRepeat = repeat === "weekly" || repeat === "monthly";
+  if (AppUI.deadlineBtnRow) AppUI.deadlineBtnRow.classList.toggle("hidden", !ruleRepeat);
+  if (AppUI.resetSection) {
+    AppUI.resetSection.el.classList.toggle("hidden", !ruleRepeat);
+    AppUI.resetSection.setFixedMode(repeat === "monthly" ? "monthly" : "weekly");
+  }
+  if (AppUI.ignoreSection) AppUI.ignoreSection.el.classList.toggle("hidden", repeat !== "weekly");
+  if (!ruleRepeat) return;
   const show = AppUI.createDeadlineEnabled;
   const offset = AppUI.deadlineKind === "offset";
   if (AppUI.scheduleControls) {
@@ -389,7 +446,7 @@ function syncCreateWeeklyWheels() {
 
 function syncDueAtLabel() {
   if (!AppUI.els.dueAtLabel) return;
-  AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.createDeadlineEnabled) ? ICONS.clock + " Due at" : ICONS.clock + " Resets at";
+  AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.lastRepeat === "monthly" || AppUI.createDeadlineEnabled) ? ICONS.clock + " Due at" : ICONS.clock + " Resets at";
 }
 
 function setCreateDeadlineEnabled(on) {
@@ -432,20 +489,28 @@ function initForm() {
     if (isRepeatingRepeat(repeat)) {
       Game.editTask(taskId, values);
     }
-    if (repeat === "weekly") {
+    if (repeat === "weekly" || repeat === "monthly") {
       if (AppUI.resetSection) Game.editTask(taskId, { resetRule: AppUI.resetSection.read() });
-      if (AppUI.ignoreSection) Game.editTask(taskId, { ignoreRule: AppUI.ignoreSection.read() });
+      if (repeat === "weekly" && AppUI.ignoreSection) Game.editTask(taskId, { ignoreRule: AppUI.ignoreSection.read() });
       if (!AppUI.createDeadlineEnabled) {
         Game.editTask(taskId, { deadlineRule: null });
       } else if (AppUI.deadlineKind === "offset" && AppUI.deadlineOffsetWrap.readOffsetMs) {
         const ms = AppUI.deadlineOffsetWrap.readOffsetMs();
         Game.editTask(taskId, { deadlineRule: ms > 0 ? { kind: "offset", ms } : null });
       } else if (AppUI.dueAtWheelsControls) {
-        const weekdays = values.repeatWeekdays || [1];
         const minutes = AppUI.dueAtWheelsControls.read();
         const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
         const mm = String(minutes % 60).padStart(2, "0");
-        Game.editTask(taskId, { deadlineRule: { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) } });
+        if (repeat === "monthly") {
+          if (values.repeatMonthlyWeekday !== null && values.repeatMonthlyWeekday !== undefined) {
+            Game.editTask(taskId, { deadlineRule: { kind: "monthly", weekday: values.repeatMonthlyWeekday, first: values.repeatMonthlyFirst !== false, time: `${hh}:${mm}` } });
+          } else {
+            Game.editTask(taskId, { deadlineRule: null });
+          }
+        } else {
+          const weekdays = values.repeatWeekdays || [1];
+          Game.editTask(taskId, { deadlineRule: { kind: "fixed", slots: weekdays.map((weekday) => ({ weekday, time: `${hh}:${mm}` })) } });
+        }
       }
     }
     AppUI.els.taskInput.value = "";
@@ -454,4 +519,4 @@ function initForm() {
   });
 }
 
-export {  SCHEDULE_BUILDERS, buildCreateOffsetWheels, buildRuleSection, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };
+export {  SCHEDULE_BUILDERS, buildCreateOffsetWheels, buildRuleSection, syncCreateWeeklyWheels, buildScheduleControls, customSchedule, deadlineSchedule, initForm, monthlyDayPicker, monthlySchedule, scheduleShowsTimeOfDay, updateCreateFormMode, weekdayToggleGrid, weeklySchedule  };
