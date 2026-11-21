@@ -48,7 +48,7 @@ textarea {
 
 body.room-disabled #room-view { display: none; }
 
-body.room-disabled .sheet-handle { cursor: default; touch-action: auto; padding: 8px 0 4px; }
+body.room-disabled .sheet-handle { cursor: default; touch-action: auto; padding: 2px 0 2px; }
 
 body.room-disabled .sheet-handle-bar { display: none; }
 
@@ -72,7 +72,7 @@ body.room-disabled .ui-sheet { border-radius: 0; box-shadow: none; }
 
 .sheet-handle {
   flex: none;
-  padding: 6px 0 4px;
+  padding: 4px 0 2px;
   cursor: grab;
   touch-action: none;
   position: relative;
@@ -111,7 +111,7 @@ body.actions-hidden .subtask-add { display: none; }
 .sheet-content {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 10px calc(24px + env(safe-area-inset-bottom));
+  padding: 4px 10px calc(24px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
 }
 
