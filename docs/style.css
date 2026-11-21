@@ -202,6 +202,7 @@ body.actions-hidden .subtask-add { display: none; }
   align-self: center;
   font-size: 0.6rem;
   color: var(--muted);
+  margin-right: 2px;
 }
 
 .daily-goal-check {

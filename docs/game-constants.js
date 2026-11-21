@@ -1,6 +1,6 @@
 import { ICONS } from "./game-icons.js";
 
-const VERSION = "0.79.63";
+const VERSION = "0.79.64";
 const STORAGE_KEY = "todo-mwe-state";
 
 const REMINDER_HOUR = 20;
