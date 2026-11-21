@@ -449,7 +449,7 @@ function syncCreateWeeklyWheels() {
 
 function syncDueAtLabel() {
   if (!AppUI.els.dueAtLabel) return;
-  AppUI.els.dueAtLabel.textContent = (AppUI.lastRepeat === "weekly" || AppUI.lastRepeat === "monthly" || AppUI.createDeadlineEnabled) ? ICONS.clock + " Due at" : ICONS.clock + " Resets at";
+  AppUI.els.dueAtLabel.textContent = ICONS.clock + " Time";
 }
 
 function setCreateDeadlineEnabled(on) {

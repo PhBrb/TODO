@@ -274,7 +274,7 @@ function buildEditScheduleArea(task) {
   syncDeadlineSlot(state);
   state.dueAtWheelsWrap = document.createElement("div");
   state.dueAtWheelsWrap.className = "due-at-wheels";
-  state.dueAtField = labeledField(ICONS.clock + " Due at", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
+  state.dueAtField = labeledField(ICONS.clock + " Time", [state.dueAtWheelsWrap], true, state.endOfDayBtn);
   scheduleWrap.appendChild(state.dueAtField);
 
   function setDeadlineEnabled(on) {
@@ -338,8 +338,7 @@ function refreshEditSchedule(task, edit) {
 function syncEditDueAtLabel(scheduleArea) {
   const label = scheduleArea.dueAtField.querySelector(".field-label");
   if (label) {
-    label.textContent =
-      scheduleArea.repeat === "weekly" || scheduleArea.repeat === "monthly" || scheduleArea.deadlineEnabled ? ICONS.calendar + " Due at" : ICONS.bell + " Resets at";
+    label.textContent = ICONS.clock + " Time";
   }
 }
 
