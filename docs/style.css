@@ -1293,7 +1293,7 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 #deadline-slot { flex: 2 1 0%; min-width: 190px; }
 #due-at-field { flex: 2 1 0%; }
 
-.edit-schedule { margin-top: 6px; flex: 1 1 100%; min-width: 0; }
+.edit-schedule { flex: 1 1 100%; min-width: 0; }
 .edit-schedule > .repeat-schedule { flex: 1 1 100%; min-width: 0; }
 
 .confetti-layer {
@@ -1418,7 +1418,6 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 8px;
 }
 
 /* Visual grouping: each rule block (deadline/schedule, reset, ignore,
@@ -1447,3 +1446,8 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
   flex: 1 1 100%;
   min-width: 0;
 }
+
+/* Hide a wrapper row when all its fields are hidden (weekly/monthly move
+   the due-at field into the schedule card), so no empty double gap remains. */
+.form-row:not(:has(> .labeled-field:not(.hidden))),
+.edit-selectors-row:not(:has(> .labeled-field:not(.hidden))) { display: none; }
