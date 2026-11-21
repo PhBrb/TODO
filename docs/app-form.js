@@ -51,6 +51,7 @@ function weeklySchedule(wrap, values, read) {
 
 function monthlyDayPicker(weekday, first) {
   const wrap = document.createElement("div");
+  wrap.className = "monthly-picker";
   const weekdayGroup = document.createElement("div");
   weekdayGroup.className = "day-toggle-grid weekday-grid";
   let selected = weekday ?? null;

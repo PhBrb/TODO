@@ -1260,6 +1260,10 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 .weekday-grid { grid-template-columns: repeat(7, 1fr); }
 .first-last-grid { grid-template-columns: repeat(2, 1fr); }
 
+/* The monthly day picker fills the full card width, also inside the
+   schedule (deadline) card, like the day grids inside rule sections. */
+.repeat-schedule > .monthly-picker { flex: 1 1 100%; min-width: 0; }
+
 .day-toggle:disabled,
 .day-toggle.disabled {
   opacity: 0.4;
