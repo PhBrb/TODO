@@ -171,11 +171,8 @@ function chainIn(siblings, item, targetId, linkEmoji) {
   }
   if (target.chainedAfter === item.id) return { ok: false, reason: "would swap" };
   if (chainWouldCycleIn(siblings, item, target)) return { ok: false, reason: "cycle" };
-  for (const other of siblings) {
-    if (other.chainedAfter === item.id && other.id !== target.id) {
-      other.chainedAfter = target.id;
-    }
-  }
+  // Re-chaining only moves the item itself; tasks chained after it stay
+  // attached to it instead of being re-linked to the new target.
   item.chainedAfter = target.id;
   const headList = chainHead(siblings, item).list;
   for (const other of siblings) {
@@ -190,11 +187,8 @@ function chainIn(siblings, item, targetId, linkEmoji) {
 
 function unchainIn(siblings, item) {
   if (!item.chainedAfter) return;
-  const oldId = item.chainedAfter;
+  // Successors stay chained to this item (it simply becomes the new head).
   item.chainedAfter = 0;
-  for (const other of siblings) {
-    if (other.chainedAfter === item.id) other.chainedAfter = oldId;
-  }
   saveState();
   emitRender();
 }
