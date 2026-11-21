@@ -244,10 +244,10 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
   const wheelsWrap = document.createElement("div");
   wheelsWrap.className = "due-at-wheels";
   for (const el of wheels.els) wheelsWrap.appendChild(el);
-  wheelsWrap.appendChild(wheels.endOfDayBtn);
+  const wheelsField = labeledField(ICONS.clock + " Time", [wheelsWrap], false, wheels.endOfDayBtn);
   fixedWrap.appendChild(grid.group);
   fixedWrap.appendChild(mPick.el);
-  fixedWrap.appendChild(wheelsWrap);
+  fixedWrap.appendChild(wheelsField);
 
   const offsetWrap = document.createElement("div");
   offsetWrap.className = "deadline-offset-wheels";
@@ -257,7 +257,7 @@ function buildRuleSection({ label, rule, enabled = true, onKind = null, compact 
     const showFixed = isEnabled && kind === "fixed";
     grid.group.classList.toggle("hidden", !showFixed || mode !== "weekly");
     mPick.el.classList.toggle("hidden", !showFixed || mode !== "monthly");
-    for (const el of wheels.els) el.classList.toggle("hidden", !showFixed);
+    wheelsField.classList.toggle("hidden", !showFixed);
     offsetWrap.classList.toggle("hidden", !(isEnabled && kind === "offset"));
   }
   section.appendChild(btnRow);

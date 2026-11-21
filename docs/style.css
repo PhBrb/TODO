@@ -1265,10 +1265,10 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 .monthly-picker { flex: 1 1 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* Inside rule cards (reset / ignore) space the day picker(s) and the
-   time wheels, and keep the end-of-day button on the wheels row. */
+   time field; the end-of-day button sits in the field's label row,
+   above the time wheels, like in the due-at field. */
 .rule-fixed { display: flex; flex-wrap: wrap; gap: 8px; }
-.rule-fixed > .due-at-wheels { flex: 1 1 100%; }
-.due-at-wheels .end-of-day-btn { flex: 0 0 auto; align-self: center; }
+.rule-fixed > .labeled-field { flex: 1 1 100%; min-width: 0; }
 
 .day-toggle:disabled,
 .day-toggle.disabled {
