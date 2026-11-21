@@ -43,8 +43,6 @@
     <div id="sheet-handle" class="sheet-handle">
       <div id="boost-banner" class="boost-banner hidden"><span data-icon="bolt"></span> x1.5 <span id="boost-timer"></span></div>
       <span class="sheet-handle-bar"></span>
-      <span class="version" id="app-version"></span>
-      <button id="toggle-actions-btn" type="button" aria-label="Show edit and delete buttons" aria-pressed="false"><span data-icon="pencil"></span></button>
     </div>
     <div class="sheet-content">
 
@@ -54,6 +52,7 @@
           <button type="button" data-tab="todo">Todo</button>
           <button type="button" data-tab="backlog">Backlog</button>
           <button type="button" data-tab="fun">Fun</button>
+          <button id="toggle-actions-btn" type="button" aria-label="Show edit and delete buttons" aria-pressed="false"><span data-icon="pencil"></span></button>
         </div>
         <ul id="task-list"></ul>
         <p id="empty-hint" class="empty-hint hidden">Nothing to do yet <span data-icon="emDash"></span> add a task! <span data-icon="party"></span></p>
@@ -106,6 +105,7 @@
         <button id="shop-close" type="button" aria-label="Close shop"><span data-icon="x"></span></button>
       </div>
       <div class="shop-tabs">
+        <span class="version" id="app-version"></span>
         <button id="tab-shop" type="button" class="active">Shop</button>
         <button id="tab-owned" type="button">Owned</button>
       </div>
