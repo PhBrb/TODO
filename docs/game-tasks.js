@@ -356,6 +356,17 @@ function completeTask(task) {
   task.completedAt = Date.now();
   if (task.repeat !== "manual") updateStreak(task, task.completedAt);
 
+  // Checking off a parent also checks off all its subtasks (the user did
+  // them all at once). Subtasks already done are left untouched, so the
+  // all-subtasks-done path in toggleSubtask does not double-award.
+  if (task.subtasks && task.subtasks.length > 0) {
+    for (const st of task.subtasks) {
+      if (st.done) continue;
+      st.done = true;
+      awardSubtask(st);
+    }
+  }
+
   const firstBonus = applyFirstTaskBonus();
   if (firstBonus) {
     reward.coins += firstBonus.coins;
