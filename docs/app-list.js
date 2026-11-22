@@ -304,7 +304,9 @@ function subtaskListNode(task, li, chainInfo = null) {
     }
   }
   sublist.classList.toggle("has-chain-link", anyChainSymbol);
-  if (!task.done) sublist.appendChild(subtaskAddRow(task));
+  // The + row is hidden by CSS unless global edit mode is on; show it for
+  // finished parents too, so subtasks can still be added in edit mode.
+  if (!task.done || isGlobalEditMode()) sublist.appendChild(subtaskAddRow(task));
   return sublist;
 }
 
