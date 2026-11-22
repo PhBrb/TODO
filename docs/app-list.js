@@ -581,24 +581,21 @@ let render = function () {
   AppUI.els.streakSumEl.textContent = streakSum;
   AppUI.els.streakSumEl.closest(".streak-sum").classList.toggle("off", streakSum < Game.state.maxStreakSum);
 
-  if (Game.isBoostActive()) {
-    AppUI.els.boostBannerEl.classList.remove("hidden");
-    const remaining = Math.max(0, Game.state.boostUntil - Date.now());
-    AppUI.els.boostTimerEl.textContent = formatMinutesSeconds(remaining);
-  } else {
-    AppUI.els.boostBannerEl.classList.add("hidden");
-  }
+  updateBoostBar();
+}
+
+function updateBoostBar() {
+  const active = Game.isBoostActive();
+  AppUI.els.boostBannerEl.classList.toggle("hidden", !active);
+  if (!active) return;
+  const remaining = Math.max(0, Game.state.boostUntil - Date.now());
+  const pct = Math.min(100, (remaining / Game.BOOST_DURATION_MS) * 100);
+  AppUI.els.boostBarFillEl.style.width = pct + "%";
 }
 
 function updateLiveClocks() {
   const now = Date.now();
-  if (Game.isBoostActive()) {
-    AppUI.els.boostBannerEl.classList.remove("hidden");
-    const remaining = Math.max(0, Game.state.boostUntil - now);
-    AppUI.els.boostTimerEl.textContent = formatMinutesSeconds(remaining);
-  } else {
-    AppUI.els.boostBannerEl.classList.add("hidden");
-  }
+  updateBoostBar();
 
   for (const node of AppUI.els.listEl.querySelectorAll(".badge.deadline")) {
     const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
