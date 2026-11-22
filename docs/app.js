@@ -33,7 +33,7 @@ syncDailyReminder({ streak: state.firstTaskStreak, dailyCompleted: state.dailyCo
 setInterval(() => { checkRecurringTasks(); purgeOldCompletedTasks(); }, 15000);
 setInterval(rolloverCheckpoints, 60000);
 setInterval(updateLiveClocks, 1000);
-setInterval(() => { if (state.boostUntil > Date.now()) spawnBoostSparkle(); }, 220);
+setInterval(() => { if (state.boostUntil > Date.now()) spawnBoostSparkle(); }, 150);
 
 AppUI.els.resetBtn.addEventListener("click", () => {
   if (!confirm("Reset ALL data? This can not be undone.")) return;

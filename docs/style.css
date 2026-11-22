@@ -459,7 +459,7 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 #boost-bar-fill {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, #f5b301, #e89b00);
+  background: linear-gradient(90deg, #f2a900, #e08e00);
   transition: width 1s linear;
 }
 

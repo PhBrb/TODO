@@ -593,7 +593,7 @@ function spawnBoostSparkle() {
   Confetti.burstAt(
     { x: r.right - 2, y: r.top + r.height / 2, width: 0, height: r.height },
     1,
-    { colors: ["#f5b301", "#e89b00", "#ffd35c"], sizePx: 3, vyMin: 15, vyMax: 45, vx: 12, spin: 240, gravity: 500, lifetimeMs: 350 }
+    { colors: ["#f2a900", "#e08e00", "#e08e00", "#f7c04a"], sizePx: 3, vyMin: 15, vyMax: 45, vx: 12, spin: 240, gravity: 500, lifetimeMs: 350 }
   );
 }
 
