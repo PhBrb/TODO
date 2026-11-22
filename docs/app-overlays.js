@@ -317,6 +317,14 @@ function initOverlays() {
     window.location.reload();
   });
 
+  els.autoCleanCheck.checked = (Game.state.autoRemoveCompletedDays | 0) > 0;
+  els.autoCleanCheck.addEventListener("change", () => {
+    Game.setAutoRemoveCompletedDays(els.autoCleanCheck.checked ? 30 : 0);
+    showToast(els.autoCleanCheck.checked
+      ? `${ICONS.trash} Completed one-off tasks will be removed after 30 days`
+      : `${ICONS.trash} Automatic removal disabled`);
+  });
+
   els.exportBtn.addEventListener("click", () => {
     const blob = new Blob([Game.exportState()], { type: "application/json" });
     const link = document.createElement("a");

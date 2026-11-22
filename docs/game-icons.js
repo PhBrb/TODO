@@ -61,6 +61,7 @@ export const ICONS = {
   testTube: "🧪",
   timeLimit: "⏱️",
   times: "×",
+  trash: "🗑",
   triDown: "▾",
   triRight: "▸",
   trophy: "🏆",

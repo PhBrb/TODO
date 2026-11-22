@@ -520,6 +520,33 @@ function setRoomEnabled(enabled) {
   saveState();
 }
 
+function setAutoRemoveCompletedDays(days) {
+  state.autoRemoveCompletedDays = Math.max(0, Math.floor(Number(days) || 0));
+  saveState();
+  purgeOldCompletedTasks();
+}
+
+// Remove completed non-repeating tasks older than the configured retention
+// (settings option: 30 days). Off when autoRemoveCompletedDays is 0.
+function purgeOldCompletedTasks() {
+  const days = state.autoRemoveCompletedDays | 0;
+  if (days <= 0) return;
+  const cutoff = Date.now() - days * 86400000;
+  const removed = state.tasks.filter(
+    (t) => t.done && t.completedAt && t.repeat === "none" && t.list !== "fun" && t.list !== "group" && t.completedAt <= cutoff
+  );
+  if (!removed.length) return;
+  const removedIds = new Set(removed.map((t) => t.id));
+  for (const other of state.tasks) {
+    if (removedIds.has(other.chainedAfter)) other.chainedAfter = 0;
+    if (other.groupId && removedIds.has(other.groupId)) other.groupId = null;
+  }
+  state.tasks = state.tasks.filter((t) => !removedIds.has(t.id));
+  emitToast(`${ICONS.trash} Removed ${removed.length} completed task${removed.length === 1 ? "" : "s"} older than ${days} days`);
+  saveState();
+  emitRender();
+}
+
 function maybeSuggestDifficultyReduction(task) {
   if (task.difficultySuggested) return;
   if (task.streak < DIFFICULTY_SUGGESTION_STREAK) return;
@@ -625,4 +652,4 @@ function editTask(id, updates) {
   emitRender();
 }
 
-export { EDIT_UPDATERS, addSubtask, addTask, chainHead, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
+export { EDIT_UPDATERS, addSubtask, addTask, chainHead, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
