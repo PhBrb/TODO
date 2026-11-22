@@ -584,6 +584,19 @@ let render = function () {
   updateBoostBar();
 }
 
+// Tiny yellowish confetti particles at the moving (right) end of the boost
+// bar: small, short fall, downward only (positive vy = down in Confetti).
+function spawnBoostSparkle() {
+  const fill = AppUI.els.boostBarFillEl;
+  if (!fill || AppUI.els.boostBannerEl.classList.contains("hidden")) return;
+  const r = fill.getBoundingClientRect();
+  Confetti.burstAt(
+    { x: r.right - 2, y: r.top + r.height / 2, width: 0, height: r.height },
+    1,
+    { colors: ["#ffd32a", "#f7b733", "#fff6d8"], sizePx: 3, vyMin: 15, vyMax: 45, vx: 12, spin: 240, gravity: 500, lifetimeMs: 350 }
+  );
+}
+
 function updateBoostBar() {
   const active = Game.isBoostActive();
   AppUI.els.boostBannerEl.classList.toggle("hidden", !active);
@@ -618,4 +631,4 @@ function updateLiveClocks() {
 
 }
 
-export { deleteTaskWithConfirm, render, subtaskAddRow, subtaskCheckbox, subtaskListNode, subtaskRow, taskActionsNode, taskCheckbox, taskMetaNode, taskNode, taskTimeBadge, taskTitleNode, tasksForTab, updateLiveClocks  };
+export { deleteTaskWithConfirm, render, spawnBoostSparkle, subtaskAddRow, subtaskCheckbox, subtaskListNode, subtaskRow, taskActionsNode, taskCheckbox, taskMetaNode, taskNode, taskTimeBadge, taskTitleNode, tasksForTab, updateLiveClocks  };
