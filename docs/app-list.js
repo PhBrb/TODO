@@ -570,7 +570,7 @@ let render = function () {
   AppUI.els.listEl.classList.toggle("editing", E.taskId !== null || E.subtaskKey !== null);
   AppUI.els.emptyHint.classList.toggle("hidden", shown.length > 0);
   AppUI.els.emptyHint.textContent = AppUI.activeTab === "highlight"
-    ? "Nothing to highlight " + ICONS.emDash + " complete tasks to earn recommendations! " + ICONS.party
+    ? "Everything done! " + ICONS.party
     : "Nothing to do yet " + ICONS.emDash + " add a task! " + ICONS.party;
   renderBalances();
 
@@ -581,24 +581,34 @@ let render = function () {
   AppUI.els.streakSumEl.textContent = streakSum;
   AppUI.els.streakSumEl.closest(".streak-sum").classList.toggle("off", streakSum < Game.state.maxStreakSum);
 
-  if (Game.isBoostActive()) {
-    AppUI.els.boostBannerEl.classList.remove("hidden");
-    const remaining = Math.max(0, Game.state.boostUntil - Date.now());
-    AppUI.els.boostTimerEl.textContent = formatMinutesSeconds(remaining);
-  } else {
-    AppUI.els.boostBannerEl.classList.add("hidden");
-  }
+  updateBoostBar();
+}
+
+// Tiny yellowish confetti particles at the moving (right) end of the boost
+// bar: small, short fall, downward only (positive vy = down in Confetti).
+function spawnBoostSparkle() {
+  const fill = AppUI.els.boostBarFillEl;
+  if (!fill || AppUI.els.boostBannerEl.classList.contains("hidden")) return;
+  const r = fill.getBoundingClientRect();
+  Confetti.burstAt(
+    { x: r.right - 2, y: r.top + r.height / 2, width: 0, height: r.height },
+    1,
+    { colors: ["#f2a900", "#e08e00", "#e08e00", "#f7c04a"], sizePx: 3, vyMin: 15, vyMax: 45, vx: 12, spin: 240, gravity: 500, lifetimeMs: 350 }
+  );
+}
+
+function updateBoostBar() {
+  const active = Game.isBoostActive();
+  AppUI.els.boostBannerEl.classList.toggle("hidden", !active);
+  if (!active) return;
+  const remaining = Math.max(0, Game.state.boostUntil - Date.now());
+  const pct = Math.min(100, (remaining / Game.BOOST_DURATION_MS) * 100);
+  AppUI.els.boostBarFillEl.style.width = pct + "%";
 }
 
 function updateLiveClocks() {
   const now = Date.now();
-  if (Game.isBoostActive()) {
-    AppUI.els.boostBannerEl.classList.remove("hidden");
-    const remaining = Math.max(0, Game.state.boostUntil - now);
-    AppUI.els.boostTimerEl.textContent = formatMinutesSeconds(remaining);
-  } else {
-    AppUI.els.boostBannerEl.classList.add("hidden");
-  }
+  updateBoostBar();
 
   for (const node of AppUI.els.listEl.querySelectorAll(".badge.deadline")) {
     const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
@@ -621,4 +631,4 @@ function updateLiveClocks() {
 
 }
 
-export { deleteTaskWithConfirm, render, subtaskAddRow, subtaskCheckbox, subtaskListNode, subtaskRow, taskActionsNode, taskCheckbox, taskMetaNode, taskNode, taskTimeBadge, taskTitleNode, tasksForTab, updateLiveClocks  };
+export { deleteTaskWithConfirm, render, spawnBoostSparkle, subtaskAddRow, subtaskCheckbox, subtaskListNode, subtaskRow, taskActionsNode, taskCheckbox, taskMetaNode, taskNode, taskTimeBadge, taskTitleNode, tasksForTab, updateLiveClocks  };
