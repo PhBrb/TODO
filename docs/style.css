@@ -230,8 +230,9 @@ body.actions-hidden .subtask-add { display: none; }
   position: relative;
 }
 
-.task.done { opacity: 0.55; }
-.task.done .task-title { text-decoration: line-through; }
+.task.done, .task.ignored { opacity: 0.55; }
+.task.done .task-title, .task.ignored .task-title { text-decoration: line-through; }
+.badge.ignored { background: #eee; color: var(--muted); margin-left: 4px; }
 
 .task input[type="checkbox"] {
   width: 22px;

@@ -136,6 +136,12 @@ function taskMetaNode(task) {
     dl.textContent = neutral ? formatResetIn(task.deadline) : formatDeadline(task.deadline);
     meta.appendChild(dl);
   }
+  if (Game.isIgnored(task)) {
+    const ig = document.createElement("span");
+    ig.className = "badge ignored";
+    ig.textContent = ICONS.noEntry + " ignored";
+    meta.appendChild(ig);
+  }
   if (task.timeLimit && !task.done) {
     meta.appendChild(taskTimeBadge(task));
   }
@@ -426,7 +432,7 @@ function groupNode(task, chainInfo = null, chainVis = null) {
 function taskNode(task, chainInfo = null, chainUi = null, chainVis = null) {
   if (task.list === "group") return groupNode(task, chainInfo, chainVis);
   const li = document.createElement("li");
-  li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "");
+  li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "") + (Game.isIgnored(task) ? " ignored" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
   const liColor = chainInfo ? chainInfo.branchDots.get(task.id) : null;
@@ -609,6 +615,11 @@ function updateBoostBar() {
 function updateLiveClocks() {
   const now = Date.now();
   updateBoostBar();
+
+  for (const li of AppUI.els.listEl.querySelectorAll("li.task")) {
+    const t = Game.state.tasks.find((x) => x.id === Number(li.dataset.id));
+    if (t) li.classList.toggle("ignored", Game.isIgnored(t, now));
+  }
 
   for (const node of AppUI.els.listEl.querySelectorAll(".badge.deadline")) {
     const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
