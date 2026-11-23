@@ -22,13 +22,14 @@ function highlightRating(task, now) {
   else if (task.difficulty === "medium") score += 5;
   if (task.list === "backlog") score -= 10;
   if (isIgnored(task, now)) score -= 30;
+  if (task.list === "fun") score += 1; // fun tasks show in highlights, but with a low rating
   return score;
 }
 
 function highlightTasks() {
   const now = Date.now();
   const candidates = state.tasks
-    .filter((t) => !t.done && t.list !== "fun")
+    .filter((t) => !t.done)
     .map((t) => ({ task: t, score: highlightRating(t, now) }))
     .sort((a, b) => b.score - a.score);
   const result = [];
@@ -47,7 +48,7 @@ function highlightTasks() {
     if (countedChains.size >= HIGHLIGHT_COUNT) break;
   }
   for (const p of state.tasks) {
-    if (p.pinned && !p.done && p.list !== "fun" && !result.includes(p)) result.push(p);
+    if (p.pinned && !p.done && !result.includes(p)) result.push(p);
   }
   return result;
 }

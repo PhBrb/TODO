@@ -432,7 +432,7 @@ function groupNode(task, chainInfo = null, chainVis = null) {
 function taskNode(task, chainInfo = null, chainUi = null, chainVis = null) {
   if (task.list === "group") return groupNode(task, chainInfo, chainVis);
   const li = document.createElement("li");
-  li.className = "task diff-" + (task.difficulty || "fun") + (task.done ? " done" : "") + (Game.isIgnored(task) ? " ignored" : "");
+  li.className = "task diff-" + (task.difficulty || "fun") + (task.list === "fun" ? " fun" : "") + (task.done ? " done" : "") + (Game.isIgnored(task) ? " ignored" : "");
   li.dataset.id = task.id;
   li.title = task.list === "fun" ? "Fun task" : "Difficulty: " + task.difficulty.replace("_", " ");
   const liColor = chainInfo ? chainInfo.branchDots.get(task.id) : null;
