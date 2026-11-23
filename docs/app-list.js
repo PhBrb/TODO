@@ -136,12 +136,6 @@ function taskMetaNode(task) {
     dl.textContent = neutral ? formatResetIn(task.deadline) : formatDeadline(task.deadline);
     meta.appendChild(dl);
   }
-  if (Game.isIgnored(task)) {
-    const ig = document.createElement("span");
-    ig.className = "badge ignored";
-    ig.textContent = ICONS.noEntry + " ignored";
-    meta.appendChild(ig);
-  }
   const enAt = (task.done || Game.isIgnored(task)) ? Game.enabledAtMs(task) : null;
   if (enAt) {
     const en = document.createElement("span");
