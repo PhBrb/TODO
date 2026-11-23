@@ -283,6 +283,10 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 .task.diff-medium   { --diff-color: #e9a470; }
 .task.diff-hard     { --diff-color: #e08e87; }
 .task.diff-fun      { --diff-color: #d63384; }
+/* fun tasks get a rainbow gradient as their difficulty banner */
+.task.fun::after, .task.diff-fun::after {
+  background: linear-gradient(180deg, #ff5f6d 0%, #ffc371 20%, #f9f871 40%, #7bed9f 60%, #70a1ff 80%, #e056fd 100%);
+}
 
 .badge {
   display: inline-block;
