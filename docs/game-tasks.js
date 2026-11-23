@@ -30,23 +30,31 @@ function highlightTasks() {
   const now = Date.now();
   const candidates = state.tasks
     .filter((t) => !t.done)
-    .map((t) => ({ task: t, score: highlightRating(t, now) }))
+    .map((t) => ({ task: t, score: highlightRating(t, now), ignored: isIgnored(t, now) }))
     .sort((a, b) => b.score - a.score);
-  const result = [];
-  const countedChains = new Set();
-  for (const { task } of candidates) {
-    const head = chainHead(state.tasks, task);
-    if (countedChains.has(head.id)) continue;
-    countedChains.add(head.id);
-    const chainTasks = [];
-    for (let cur = task; cur && !cur.done; cur = chainPredecessorIn(state.tasks, cur)) {
-      chainTasks.unshift(cur);
+  // Pick up to HIGHLIGHT_COUNT chain heads, highest score first.
+  const pick = (list) => {
+    const result = [];
+    const countedChains = new Set();
+    for (const { task } of list) {
+      const head = chainHead(state.tasks, task);
+      if (countedChains.has(head.id)) continue;
+      countedChains.add(head.id);
+      const chainTasks = [];
+      for (let cur = task; cur && !cur.done; cur = chainPredecessorIn(state.tasks, cur)) {
+        chainTasks.unshift(cur);
+      }
+      for (const t of chainTasks) {
+        if (!result.includes(t)) result.push(t);
+      }
+      if (countedChains.size >= HIGHLIGHT_COUNT) break;
     }
-    for (const t of chainTasks) {
-      if (!result.includes(t)) result.push(t);
-    }
-    if (countedChains.size >= HIGHLIGHT_COUNT) break;
-  }
+    return result;
+  };
+  // Ignored tasks are never prioritised over other tasks: they are only
+  // shown when there is nothing else to highlight.
+  let result = pick(candidates.filter((c) => !c.ignored));
+  if (result.length === 0) result = pick(candidates.filter((c) => c.ignored));
   for (const p of state.tasks) {
     if (p.pinned && !p.done && !result.includes(p)) result.push(p);
   }
