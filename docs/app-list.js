@@ -128,7 +128,7 @@ function taskMetaNode(task) {
       meta.appendChild(st);
     }
   }
-  if (task.deadline && !task.done) {
+  if (task.deadline && !task.done && !Game.isIgnored(task)) {
     const dl = document.createElement("span");
     const neutral = task.deadlineEnabled === false && task.repeat !== "none";
     dl.className = "badge deadline" + (neutral ? " reset" : (task.deadline < Date.now() ? " overdue" : ""));
@@ -624,6 +624,8 @@ function updateLiveClocks() {
   for (const node of AppUI.els.listEl.querySelectorAll(".badge.deadline")) {
     const task = Game.state.tasks.find((t) => t.id === Number(node.dataset.taskId));
     if (!task || task.done) continue;
+    node.classList.toggle("hidden", Game.isIgnored(task, now));
+    if (node.classList.contains("hidden")) continue;
     if (node.classList.contains("reset")) {
       node.textContent = formatResetIn(task.deadline);
     } else {
