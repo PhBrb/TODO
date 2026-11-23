@@ -1,4 +1,4 @@
-import { BONUS_TASK_RATE, CHEST_ITEM_ID, COIN_REWARD, CUSTOM_REPEAT_DEFAULT_MS, DIFFICULTY_ORDER, DIFFICULTY_SUGGESTION_STREAK, FUN_TASK_COINS, FUN_TASK_XP, GOAL_REWARD, HIGHLIGHT_COUNT, REPEAT_VALUES, TASK_LISTS, TIME_LIMIT_MINUTES, WEEKLY_GOAL_REWARD } from "./game-constants.js";
+import { BACKUP_REMINDER_MS, BACKUP_TASK_TITLE, BONUS_TASK_RATE, CHEST_ITEM_ID, COIN_REWARD, CUSTOM_REPEAT_DEFAULT_MS, DIFFICULTY_ORDER, DIFFICULTY_SUGGESTION_STREAK, FUN_TASK_COINS, FUN_TASK_XP, GOAL_REWARD, HIGHLIGHT_COUNT, REPEAT_VALUES, TASK_LISTS, TIME_LIMIT_MINUTES, WEEKLY_GOAL_REWARD } from "./game-constants.js";
 import { normalizeRule } from "./game-rules.js";
 import { applyFirstTaskBonus, maybeStartBoost } from "./game-progression.js";
 import { achievementProgressFromCompletion, announceAchievements, announceLevelUp, awardSubtask, buildRewardMessage, clawBackMilestone, computeReward, earnChest, grantMilestones, grantXpAndCoins, reachedGoalCount, reachedWeeklyGoalCount, trackAchievement, trackDailyGoal, updateStreak } from "./game-rewards.js";
@@ -78,6 +78,7 @@ function addTask(title, difficulty, repeat, deadlineInput, list, timeLimit = 0) 
     streak: 0,
     streakDayKeys: [],
     bonus: isBonus,
+    backupReminder: false,
     deadline: isNonTask ? null : (deadlineInput ? new Date(deadlineInput).getTime() : null),
     deadlineEnabled: true,
     repeatTime: NaN,
@@ -358,6 +359,7 @@ function completeTask(task) {
   task.done = true;
   task.startedAt = 0;
   task.completedAt = Date.now();
+  if (task.backupReminder) state.backupReminderSnoozedAt = task.completedAt;
   if (task.repeat !== "manual") updateStreak(task, task.completedAt);
 
   // Checking off a parent also checks off all its subtasks (the user did
@@ -499,6 +501,7 @@ function uncompleteTask(task, cascadeSubtasks = true) {
 
 function deleteTask(id, opts = {}) {
   const deleted = state.tasks.find((t) => t.id === id);
+  if (deleted && deleted.backupReminder) state.backupReminderSnoozedAt = Date.now();
   const isGroup = Boolean(deleted && deleted.list === "group");
   const deleteMembers = isGroup && opts.deleteMembers === true;
   const removedIds = new Set([id]);
@@ -534,6 +537,31 @@ function setAutoRemoveCompletedDays(days) {
   state.autoRemoveCompletedDays = Math.max(0, Math.floor(Number(days) || 0));
   saveState();
   purgeOldCompletedTasks();
+}
+
+function normalizeTaskTitle(t) {
+  return String(t || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+// Auto-create a one-off "create a backup" task when the last data export
+// (or first use, if never exported) is at least BACKUP_REMINDER_MS ago.
+// Never duplicates an unfinished task with the same title, and snoozes for
+// BACKUP_REMINDER_MS after the reminder task was completed or deleted.
+function ensureBackupReminder(now = Date.now()) {
+  const lastExport = state.lastExportAt > 0 ? state.lastExportAt : state.createdAt || now;
+  if (now - lastExport < BACKUP_REMINDER_MS) return false;
+  if (state.backupReminderSnoozedAt > 0 && now - state.backupReminderSnoozedAt < BACKUP_REMINDER_MS) return false;
+  const exists = state.tasks.some(
+    (t) => !t.done && t.list !== "group" && normalizeTaskTitle(t.title) === BACKUP_TASK_TITLE
+  );
+  if (exists) return false;
+  const id = addTask(BACKUP_TASK_TITLE, "easy", "none", null, "todo");
+  const task = state.tasks.find((t) => t.id === id);
+  if (task) {
+    task.backupReminder = true;
+    saveState();
+  }
+  return true;
 }
 
 // Remove completed non-repeating tasks older than the configured retention
@@ -662,4 +690,4 @@ function editTask(id, updates) {
   emitRender();
 }
 
-export { EDIT_UPDATERS, addSubtask, addTask, chainHead, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
+export { EDIT_UPDATERS, addSubtask, addTask, chainHead, ensureBackupReminder, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
