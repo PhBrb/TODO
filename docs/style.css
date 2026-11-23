@@ -302,6 +302,7 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 .badge.deadline { background: #e0f2f1; color: #00897b; margin-left: 4px; }
 .badge.deadline.overdue { background: #f8e9ee; color: #9d585e; }
 .badge.deadline.reset { background: #eeeef4; color: var(--muted); }
+.badge.enable-in { background: #eeeef4; color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
 .badge.timer { background: #e8f0ff; color: #3f6ab5; margin-left: 4px; }
 .badge.timer.running { background: #dcebff; color: #23509c; font-variant-numeric: tabular-nums; }
 .badge.timer.overdue { background: #ffe3e3; color: #c0392b; }
