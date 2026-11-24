@@ -144,6 +144,7 @@ function promptDifficultyRating(task) {
     btn.textContent = opt.label;
     btn.addEventListener("click", () => {
       task.ratedDifficulty = opt.value;
+      const origin = Confetti.originOf(btn); // capture before dismiss() removes the panel
       dismiss();
       if (opt.value === "easier") {
         showToast(ICONS.grin + " Noted! You can edit the task's difficulty.");
@@ -152,7 +153,6 @@ function promptDifficultyRating(task) {
       }
       const bonus = Game.awardRatingBonus(task);
       if (bonus) {
-        const origin = Confetti.originOf(btn);
         Confetti.burstAt(origin, 18, { sizePx: 4, colors: ["#f2a900", "#f7c04a", "#ffe9a8"], vyMin: -70, vyMax: 60, lifetimeMs: 900 });
         RewardFlight.flyRewards(
           { x: origin.x + origin.width / 2, y: origin.y },
