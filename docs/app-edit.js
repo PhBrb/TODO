@@ -146,11 +146,6 @@ function promptDifficultyRating(task) {
       task.ratedDifficulty = opt.value;
       const origin = Confetti.originOf(btn); // capture before dismiss() removes the panel
       dismiss();
-      if (opt.value === "easier") {
-        showToast(ICONS.grin + " Noted! You can edit the task's difficulty.");
-      } else {
-        showToast("Noted, thanks!");
-      }
       const bonus = Game.awardRatingBonus(task);
       if (bonus) {
         Confetti.burstAt(origin, 18, { sizePx: 4, colors: ["#f2a900", "#f7c04a", "#ffe9a8"], vyMin: -70, vyMax: 60, lifetimeMs: 900 });
