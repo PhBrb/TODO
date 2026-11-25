@@ -370,8 +370,8 @@ function startWeekReviewSparkles() {
     // One sparkler source at each side of the screen, at the top of the view.
     const y = r.top + 2;
     const opts = { colors: REVIEW_SPARKLER_COLORS, sizePx: 3, vyMin: 10, vyMax: 60, vx: 40, spin: 300, gravity: 650, lifetimeMs: 700 };
-    Confetti.burstAt({ x: 4, y, width: 26, height: 4 }, 4, opts);
-    Confetti.burstAt({ x: Math.max(4, window.innerWidth - 30), y, width: 26, height: 4 }, 4, opts);
+    Confetti.burstAt({ x: 4, y, width: 14, height: 4 }, 8, opts);
+    Confetti.burstAt({ x: Math.max(4, window.innerWidth - 18), y, width: 14, height: 4 }, 8, opts);
   };
   spawn();
   c._sparklerTimer = setInterval(spawn, 150);
