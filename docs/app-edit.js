@@ -154,13 +154,12 @@ function promptDifficultyRating(task) {
           bonus.coins,
           bonus.gems,
           AppUI.els.coinBalanceEl,
-          AppUI.els.gemBalanceEl,
+          AppUI.els.gemBalanceEl || AppUI.els.coinBalanceEl,
           { perCoin: true }
         );
         const parts = [];
         if (bonus.coins > 0) parts.push(`+${bonus.coins} ${ICONS.coin}`);
         if (bonus.gems > 0) parts.push(`+${bonus.gems} ${ICONS.gem}`);
-        if (bonus.xp > 0) parts.push(`+${bonus.xp} ${ICONS.sparkles}`);
         showToast(`${ICONS.sparkles} Rating bonus (10%): ${parts.join(" ")}`);
       }
       Game.saveState();
