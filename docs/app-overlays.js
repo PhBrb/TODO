@@ -240,6 +240,58 @@ function setShopTab(ctx, tab) {
   renderShop(ctx);
 }
 
+function renderWeekReview() {
+  const els = AppUI.els;
+  const entries = Game.weekCompletions();
+  const n = entries.length;
+  const coins = entries.reduce((s, e) => s + (e.coins || 0), 0);
+  const gems = entries.reduce((s, e) => s + (e.gems || 0), 0);
+  const xp = entries.reduce((s, e) => s + (e.xp || 0), 0);
+  const praise =
+    n === 0 ? ICONS.smile + " No tasks completed yet this week — a fresh start!"
+    : n < 3 ? ICONS.star + " Nice start to your week!"
+    : n < 7 ? ICONS.party + " Great week so far — keep it up!"
+    : ICONS.fire + " Amazing week — you are on fire!";
+  els.weekReviewContent.innerHTML = "";
+  const p = document.createElement("p");
+  p.className = "week-review-praise";
+  p.textContent = praise;
+  els.weekReviewContent.appendChild(p);
+  const total = document.createElement("p");
+  total.className = "week-review-total";
+  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin} +${gems} ${ICONS.gem} +${xp} ${ICONS.sparkles}`;
+  els.weekReviewContent.appendChild(total);
+  if (n > 0) {
+    const ul = document.createElement("ul");
+    ul.className = "week-review-list";
+    for (const e of entries) {
+      const li = document.createElement("li");
+      li.className = "week-review-item";
+      const check = document.createElement("span");
+      check.className = "week-review-check";
+      check.textContent = ICONS.check;
+      const title = document.createElement("span");
+      title.className = "week-review-title";
+      title.textContent = e.title;
+      const rw = document.createElement("span");
+      rw.className = "week-review-reward";
+      rw.textContent = `+${e.coins || 0} ${ICONS.coin}`;
+      li.append(check, title, rw);
+      ul.appendChild(li);
+    }
+    els.weekReviewContent.appendChild(ul);
+  }
+}
+
+function openWeekReview() {
+  renderWeekReview();
+  AppUI.els.weekReviewOverlay.classList.remove("hidden");
+}
+
+function closeWeekReview() {
+  AppUI.els.weekReviewOverlay.classList.add("hidden");
+}
+
 function initOverlays() {
   const els = AppUI.els;
   const ctx = {
@@ -292,6 +344,12 @@ function initOverlays() {
   });
 
   const openSettings = () => els.settingsOverlay.classList.remove("hidden");
+  els.weekReviewBtn.addEventListener("click", openWeekReview);
+  els.weekReviewClose.addEventListener("click", closeWeekReview);
+  els.weekReviewOverlay.addEventListener("click", (e) => {
+    if (e.target === els.weekReviewOverlay) closeWeekReview();
+  });
+
   const closeSettings = () => els.settingsOverlay.classList.add("hidden");
   els.settingsBtn.addEventListener("click", openSettings);
   els.settingsClose.addEventListener("click", closeSettings);
@@ -353,4 +411,4 @@ function initOverlays() {
   });
 }
 
-export { ACHIEVEMENT_STAT_KEYS, achievementNode, achievementProgressValue, initOverlays, itemCostLabel, renderAchievements, renderShop, setShopTab, shopItemNode, streakFreezeNode };
+export { ACHIEVEMENT_STAT_KEYS, achievementNode, achievementProgressValue, initOverlays, itemCostLabel, openWeekReview, renderAchievements, renderShop, renderWeekReview, setShopTab, shopItemNode, streakFreezeNode };

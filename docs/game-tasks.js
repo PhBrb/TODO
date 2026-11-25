@@ -2,7 +2,7 @@ import { BACKUP_REMINDER_MS, BACKUP_TASK_TITLE, BONUS_TASK_RATE, CHEST_ITEM_ID, 
 import { normalizeRule } from "./game-rules.js";
 import { applyFirstTaskBonus, maybeStartBoost } from "./game-progression.js";
 import { achievementProgressFromCompletion, announceAchievements, announceLevelUp, awardSubtask, buildRewardMessage, clawBackMilestone, computeReward, earnChest, grantMilestones, grantXpAndCoins, reachedGoalCount, reachedWeeklyGoalCount, trackAchievement, trackDailyGoal, updateStreak } from "./game-rewards.js";
-import { isIgnored, nextDeadlineFor, nextOccurrence, repeatKey } from "./game-schedule.js";
+import { isIgnored, isoWeekKey, nextDeadlineFor, nextOccurrence, repeatKey } from "./game-schedule.js";
 import { clampWeekdays, itemIsOwned, emitPromptDifficultyRating, emitRender, saveState, emitToast, state } from "./game-state.js";
 import { hapticImpact, hapticNotification } from "./native-bridge.js";
 import { ICONS } from "./game-icons.js";
@@ -339,6 +339,7 @@ function completeFunTask(task) {
   task.completedAt = Date.now();
   task.reward = { coins: FUN_TASK_COINS, gems: 0, xp: FUN_TASK_XP };
   grantXpAndCoins(FUN_TASK_COINS, 0, FUN_TASK_XP);
+  logCompletion(task, task.reward);
   emitToast(`${ICONS.party} +${FUN_TASK_COINS} ${ICONS.coin} +${FUN_TASK_XP} ${ICONS.sparkles}`);
   announceAchievements(trackAchievement({
     totalCompleted: state.achievements.stats.totalCompleted + 1,
@@ -406,6 +407,7 @@ function completeTask(task) {
     emitToast(`${ICONS.party} Daily goal reached! +${GOAL_REWARD} ${ICONS.coin}`);
   }
   emitToast(buildRewardMessage(task, reward, firstBonus));
+  logCompletion(task, reward);
 
   if (chestEarned) emitToast(ICONS.chest + " Chest earned! Opens in 12h");
   maybeStartBoost();
@@ -435,6 +437,45 @@ function awardRatingBonus(task) {
   base.xp = (base.xp || 0) + bonus.xp;
   if (leveledUp) announceLevelUp();
   return bonus;
+}
+
+const COMPLETION_LOG_MAX = 500;
+
+// Append a completion to the weekly review log (capped).
+function logCompletion(task, reward) {
+  const at = task.completedAt || Date.now();
+  state.completionLog.push({
+    title: task.title,
+    list: task.list || "todo",
+    difficulty: task.difficulty ?? null,
+    coins: reward && reward.coins ? reward.coins : 0,
+    gems: reward && reward.gems ? reward.gems : 0,
+    xp: reward && reward.xp ? reward.xp : 0,
+    completedAt: at,
+    weekKey: isoWeekKey(at),
+  });
+  if (state.completionLog.length > COMPLETION_LOG_MAX) {
+    state.completionLog.splice(0, state.completionLog.length - COMPLETION_LOG_MAX);
+  }
+}
+
+// Completed-task log entries for the week containing `now` (ISO week, Mon-Sun).
+function weekCompletions(now = Date.now()) {
+  const wk = isoWeekKey(now);
+  return (state.completionLog || [])
+    .filter((e) => e.weekKey === wk)
+    .sort((a, b) => (a.completedAt || 0) - (b.completedAt || 0));
+}
+
+// On Sundays, flag the week review as due (once per week). Returns true when
+// the review should be shown automatically.
+function maybeAutoWeekReview(now = Date.now()) {
+  if (new Date(now).getDay() !== 0) return false;
+  const wk = isoWeekKey(now);
+  if (state.lastWeekReviewKey === wk) return false;
+  state.lastWeekReviewKey = wk;
+  saveState();
+  return true;
 }
 
 function clawBackReward(reward) {
@@ -710,4 +751,4 @@ function editTask(id, updates) {
   emitRender();
 }
 
-export { EDIT_UPDATERS, addSubtask, addTask, awardRatingBonus, chainHead, ensureBackupReminder, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
+export { EDIT_UPDATERS, addSubtask, addTask, awardRatingBonus, chainHead, ensureBackupReminder, maybeAutoWeekReview, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask, weekCompletions };
