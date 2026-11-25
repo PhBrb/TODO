@@ -245,7 +245,6 @@ function renderWeekReview() {
   const entries = Game.weekCompletions();
   const n = entries.length;
   const coins = entries.reduce((s, e) => s + (e.coins || 0), 0);
-  const gems = entries.reduce((s, e) => s + (e.gems || 0), 0);
   const praise =
     n === 0 ? ICONS.smile + " No tasks completed yet this week — a fresh start!"
     : n < 3 ? ICONS.star + " Nice start to your week!"
@@ -258,7 +257,7 @@ function renderWeekReview() {
   els.weekReviewContent.appendChild(p);
   const total = document.createElement("p");
   total.className = "week-review-total";
-  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin} +${gems} ${ICONS.gem}`;
+  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin}`;
   els.weekReviewContent.appendChild(total);
   if (n > 0) {
     const ul = document.createElement("ul");
@@ -296,7 +295,8 @@ function stopWeekReviewAutoScroll() {
 function startWeekReviewAutoScroll() {
   const c = AppUI.els.weekReviewContent;
   stopWeekReviewAutoScroll();
-  if (c.scrollHeight <= c.clientHeight + 4) return;
+  const list = c.querySelector(".week-review-list");
+  if (!list || list.scrollHeight <= list.clientHeight + 4) return;
   const SPEED = 16; // px/s
   let dir = 1;
   let pauseUntil = 0;
@@ -313,15 +313,15 @@ function startWeekReviewAutoScroll() {
       acc += dir * SPEED * dt;
       const whole = Math.trunc(acc);
       if (whole !== 0) {
-        c.scrollTop += whole;
+        list.scrollTop += whole;
         acc -= whole;
       }
-      if (c.scrollTop + c.clientHeight >= c.scrollHeight - 1) {
-        c.scrollTop = c.scrollHeight - c.clientHeight;
+      if (list.scrollTop + list.clientHeight >= list.scrollHeight - 1) {
+        list.scrollTop = list.scrollHeight - list.clientHeight;
         dir = -1;
         pauseUntil = t + 2000;
-      } else if (dir < 0 && c.scrollTop <= 0) {
-        c.scrollTop = 0;
+      } else if (dir < 0 && list.scrollTop <= 0) {
+        list.scrollTop = 0;
         dir = 1;
         pauseUntil = t + 2000;
       }
