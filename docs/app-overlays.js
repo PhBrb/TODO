@@ -345,7 +345,7 @@ function closeWeekReview() {
 
 // New-year-sparkler particles dripping down from the top-left and top-right
 // corners of the review scroll view while the overlay is open.
-const REVIEW_SPARKLER_COLORS = ["#f7c04a", "#ffe9a8", "#ffffff", "#f2a900", "#ffd166", "#74b9ff"];
+const REVIEW_SPARKLER_COLORS = ["#f2a900", "#e08e00", "#f7c04a", "#ffd166", "#ffe9a8"];
 
 function stopWeekReviewSparkles() {
   const c = AppUI.els.weekReviewContent;
@@ -366,11 +366,14 @@ function startWeekReviewSparkles() {
     const host = c.querySelector(".week-review-list") || c;
     const r = host.getBoundingClientRect();
     if (r.width < 10) return;
-    for (const x of [r.left + 3, r.right - 3]) {
+    // 50% between the screen edge and the card edge
+    const leftX = Math.round(r.left / 2);
+    const rightX = Math.round((window.innerWidth + r.right) / 2);
+    for (const x of [leftX, rightX]) {
       Confetti.burstAt(
-        { x, y: r.top + 3, width: 0, height: 0 },
-        1,
-        { colors: REVIEW_SPARKLER_COLORS, sizePx: 3, vyMin: 12, vyMax: 42, vx: 10, spin: 300, gravity: 650, lifetimeMs: 700 }
+        { x, y: r.top + 2, width: 26, height: 4 },
+        3,
+        { colors: REVIEW_SPARKLER_COLORS, sizePx: 3, vyMin: 10, vyMax: 60, vx: 40, spin: 300, gravity: 650, lifetimeMs: 700 }
       );
     }
   };
