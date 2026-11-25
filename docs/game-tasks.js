@@ -1,4 +1,4 @@
-import { BACKUP_REMINDER_MS, BACKUP_TASK_TITLE, BONUS_TASK_RATE, CHEST_ITEM_ID, COIN_REWARD, CUSTOM_REPEAT_DEFAULT_MS, DIFFICULTY_ORDER, DIFFICULTY_SUGGESTION_STREAK, FUN_TASK_COINS, FUN_TASK_XP, GOAL_REWARD, HIGHLIGHT_COUNT, REPEAT_VALUES, TASK_LISTS, TIME_LIMIT_MINUTES, WEEKLY_GOAL_REWARD } from "./game-constants.js";
+import { BACKUP_REMINDER_MS, BACKUP_TASK_TITLE, BONUS_TASK_RATE, CHEST_ITEM_ID, COIN_REWARD, CUSTOM_REPEAT_DEFAULT_MS, DIFFICULTY_ORDER, DIFFICULTY_SUGGESTION_STREAK, FUN_TASK_COINS, FUN_TASK_XP, GOAL_REWARD, HIGHLIGHT_COUNT, RATING_BONUS_RATE, REPEAT_VALUES, TASK_LISTS, TIME_LIMIT_MINUTES, WEEKLY_GOAL_REWARD } from "./game-constants.js";
 import { normalizeRule } from "./game-rules.js";
 import { applyFirstTaskBonus, maybeStartBoost } from "./game-progression.js";
 import { achievementProgressFromCompletion, announceAchievements, announceLevelUp, awardSubtask, buildRewardMessage, clawBackMilestone, computeReward, earnChest, grantMilestones, grantXpAndCoins, reachedGoalCount, reachedWeeklyGoalCount, trackAchievement, trackDailyGoal, updateStreak } from "./game-rewards.js";
@@ -417,6 +417,26 @@ function completeTask(task) {
   emitRender();
 }
 
+// 10% bonus on the task's stored reward when the user rates the task after
+// completing it. The bonus is folded into task.reward so an uncheck claws
+// it back together with the original reward. Returns the bonus granted.
+function awardRatingBonus(task) {
+  const base = task.reward;
+  if (!base) return null;
+  const bonus = {
+    coins: Math.round((base.coins || 0) * RATING_BONUS_RATE),
+    gems: Math.round((base.gems || 0) * RATING_BONUS_RATE),
+    xp: Math.round((base.xp || 0) * RATING_BONUS_RATE),
+  };
+  if (!bonus.coins && !bonus.gems && !bonus.xp) return null;
+  const leveledUp = grantXpAndCoins(bonus.coins, bonus.gems, bonus.xp);
+  base.coins = (base.coins || 0) + bonus.coins;
+  base.gems = (base.gems || 0) + bonus.gems;
+  base.xp = (base.xp || 0) + bonus.xp;
+  if (leveledUp) announceLevelUp();
+  return bonus;
+}
+
 function clawBackReward(reward) {
   if (!reward) return;
   state.coins = Math.max(0, state.coins - reward.coins);
@@ -690,4 +710,4 @@ function editTask(id, updates) {
   emitRender();
 }
 
-export { EDIT_UPDATERS, addSubtask, addTask, chainHead, ensureBackupReminder, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
+export { EDIT_UPDATERS, addSubtask, addTask, awardRatingBonus, chainHead, ensureBackupReminder, purgeOldCompletedTasks, setAutoRemoveCompletedDays, chainIn, chainPredecessor, chainPredecessorIn, chainSatisfiedIn, chainSatisfiesDependency, chainSubtask, chainTask, chainWouldCycleIn, clawBackReward, completeFunTask, completeTask, deleteSubtask, deleteTask, deriveDifficulty, moveTaskIntoGroup, editSubtask, editTask, enableTask, highlightRating, highlightTasks, maybeSuggestDifficultyReduction, setDayStartHour, setRoomEnabled, setUiSheetHeightVh, startTask, subtaskChainSatisfies, subtaskPredecessor, subtasksLockedByChain, toggleSubtask, unchainIn, unchainSubtask, unchainTask, uncompleteFunTask, uncompleteTask };
