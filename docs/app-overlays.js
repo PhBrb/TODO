@@ -245,6 +245,7 @@ function renderWeekReview() {
   const entries = Game.weekCompletions();
   const n = entries.length;
   const coins = entries.reduce((s, e) => s + (e.coins || 0), 0);
+  const gems = entries.reduce((s, e) => s + (e.gems || 0), 0);
   const praise =
     n === 0 ? ICONS.smile + " No tasks completed yet this week — a fresh start!"
     : n < 3 ? ICONS.star + " Nice start to your week!"
@@ -257,7 +258,7 @@ function renderWeekReview() {
   els.weekReviewContent.appendChild(p);
   const total = document.createElement("p");
   total.className = "week-review-total";
-  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin}`;
+  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin}${gems > 0 ? ` +${gems} ${ICONS.gem}` : ""}`;
   els.weekReviewContent.appendChild(total);
   if (n > 0) {
     const ul = document.createElement("ul");
@@ -273,7 +274,7 @@ function renderWeekReview() {
       title.textContent = e.title;
       const rw = document.createElement("span");
       rw.className = "week-review-reward";
-      rw.textContent = `+${e.coins || 0} ${ICONS.coin}`;
+      rw.textContent = `+${e.coins || 0} ${ICONS.coin}${(e.gems || 0) > 0 ? ` +${e.gems} ${ICONS.gem}` : ""}`;
       li.append(check, title, rw);
       ul.appendChild(li);
     }
