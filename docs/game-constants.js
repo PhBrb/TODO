@@ -1,6 +1,6 @@
 import { ICONS } from "./game-icons.js";
 
-const VERSION = "0.79.86";
+const VERSION = "0.79.87";
 const STORAGE_KEY = "todo-mwe-state";
 
 const REMINDER_HOUR = 20;
@@ -126,7 +126,7 @@ const FUN_TASK_COINS = 5;
 
 const FUN_TASK_XP = 5;
 
-const HIGHLIGHT_COUNT = 4;
+const HIGHLIGHT_COUNT = 5;
 
 const STREAK_FREEZE_GEM_COST = 2;
 
