@@ -340,7 +340,7 @@ function completeFunTask(task) {
   task.reward = { coins: FUN_TASK_COINS, gems: 0, xp: FUN_TASK_XP };
   grantXpAndCoins(FUN_TASK_COINS, 0, FUN_TASK_XP);
   logCompletion(task, task.reward);
-  emitToast(`${ICONS.party} +${FUN_TASK_COINS} ${ICONS.coin} +${FUN_TASK_XP} ${ICONS.sparkles}`);
+  emitToast(`${ICONS.party} +${FUN_TASK_COINS} ${ICONS.coin}`);
   announceAchievements(trackAchievement({
     totalCompleted: state.achievements.stats.totalCompleted + 1,
     funCompleted: state.achievements.stats.funCompleted + 1,
@@ -493,8 +493,22 @@ function clawBackReward(reward) {
   }
 }
 
+// Manual unchecking removes the completion from the week review log.
+function removeCompletionLogEntry(task) {
+  const at = task.completedAt;
+  if (!at || !Array.isArray(state.completionLog)) return;
+  for (let i = state.completionLog.length - 1; i >= 0; i--) {
+    const e = state.completionLog[i];
+    if (e.completedAt === at && e.title === task.title) {
+      state.completionLog.splice(i, 1);
+      return;
+    }
+  }
+}
+
 function uncompleteFunTask(task) {
   task.done = false;
+  removeCompletionLogEntry(task);
   task.completedAt = null;
   clawBackReward(task.reward);
   task.reward = null;
@@ -505,6 +519,7 @@ function uncompleteFunTask(task) {
 function uncompleteOneTask(task) {
   task.done = false;
   task.startedAt = 0;
+  removeCompletionLogEntry(task);
   const key = task.completedAt ? repeatKey(task, task.completedAt) : null;
   if (key && task.streakDayKeys.includes(key)) {
     task.streakDayKeys.pop();

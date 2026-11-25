@@ -246,7 +246,6 @@ function renderWeekReview() {
   const n = entries.length;
   const coins = entries.reduce((s, e) => s + (e.coins || 0), 0);
   const gems = entries.reduce((s, e) => s + (e.gems || 0), 0);
-  const xp = entries.reduce((s, e) => s + (e.xp || 0), 0);
   const praise =
     n === 0 ? ICONS.smile + " No tasks completed yet this week — a fresh start!"
     : n < 3 ? ICONS.star + " Nice start to your week!"
@@ -259,7 +258,7 @@ function renderWeekReview() {
   els.weekReviewContent.appendChild(p);
   const total = document.createElement("p");
   total.className = "week-review-total";
-  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin} +${gems} ${ICONS.gem} +${xp} ${ICONS.sparkles}`;
+  total.textContent = `${n} task${n === 1 ? "" : "s"} completed this week · +${coins} ${ICONS.coin} +${gems} ${ICONS.gem}`;
   els.weekReviewContent.appendChild(total);
   if (n > 0) {
     const ul = document.createElement("ul");
@@ -281,11 +280,60 @@ function renderWeekReview() {
     }
     els.weekReviewContent.appendChild(ul);
   }
+  startWeekReviewAutoScroll();
+}
+
+// Slow automatic ping-pong scrolling of the review list while the overlay is
+// open; stops when the user scrolls manually or the overlay is closed.
+function stopWeekReviewAutoScroll() {
+  const c = AppUI.els.weekReviewContent;
+  if (c._reviewRaf) {
+    cancelAnimationFrame(c._reviewRaf);
+    c._reviewRaf = null;
+  }
+}
+
+function startWeekReviewAutoScroll() {
+  const c = AppUI.els.weekReviewContent;
+  stopWeekReviewAutoScroll();
+  if (c.scrollHeight <= c.clientHeight + 4) return;
+  const SPEED = 16; // px/s
+  let dir = 1;
+  let pauseUntil = 0;
+  let last = performance.now();
+  let acc = 0; // fractional px accumulate here; scrollTop snaps to integers
+  const step = (t) => {
+    if (AppUI.els.weekReviewOverlay.classList.contains("hidden")) {
+      c._reviewRaf = null;
+      return;
+    }
+    const dt = Math.min(0.05, (t - last) / 1000);
+    last = t;
+    if (t >= pauseUntil) {
+      acc += dir * SPEED * dt;
+      const whole = Math.trunc(acc);
+      if (whole !== 0) {
+        c.scrollTop += whole;
+        acc -= whole;
+      }
+      if (c.scrollTop + c.clientHeight >= c.scrollHeight - 1) {
+        c.scrollTop = c.scrollHeight - c.clientHeight;
+        dir = -1;
+        pauseUntil = t + 2000;
+      } else if (dir < 0 && c.scrollTop <= 0) {
+        c.scrollTop = 0;
+        dir = 1;
+        pauseUntil = t + 2000;
+      }
+    }
+    c._reviewRaf = requestAnimationFrame(step);
+  };
+  c._reviewRaf = requestAnimationFrame(step);
 }
 
 function openWeekReview() {
-  renderWeekReview();
   AppUI.els.weekReviewOverlay.classList.remove("hidden");
+  renderWeekReview(); // after unhiding, so scroll measurements are valid
 }
 
 function closeWeekReview() {
@@ -346,6 +394,9 @@ function initOverlays() {
   const openSettings = () => els.settingsOverlay.classList.remove("hidden");
   els.weekReviewBtn.addEventListener("click", openWeekReview);
   els.weekReviewClose.addEventListener("click", closeWeekReview);
+  for (const ev of ["wheel", "touchstart", "pointerdown"]) {
+    els.weekReviewContent.addEventListener(ev, stopWeekReviewAutoScroll, { passive: true });
+  }
   els.weekReviewOverlay.addEventListener("click", (e) => {
     if (e.target === els.weekReviewOverlay) closeWeekReview();
   });
