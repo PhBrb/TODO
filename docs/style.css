@@ -1491,7 +1491,7 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
 }
 
 #week-review-overlay .shop-panel { max-height: 50vh; }
-#week-review-content { flex: 1; min-height: 0; overflow-y: auto; }
+#week-review-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
 .week-review-praise { margin: 4px 0 2px; font-weight: 600; }
 .week-review-total { margin: 0 0 8px; font-size: 0.8rem; color: var(--muted); }
@@ -1502,6 +1502,9 @@ body:not(.actions-hidden) .task.group > .task-actions { position: absolute; top:
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .week-review-item {
   display: flex;
