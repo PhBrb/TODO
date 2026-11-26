@@ -12,6 +12,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
@@ -32,6 +33,19 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
+
+      # deploy-pages@v4 sometimes queries the artifact metadata before the
+      # upload is visible ("Found 0 artifact(s)"); poll up to 5s to avoid it.
+      - name: Wait for Pages artifact to register (max 5s)
+        run: |
+          for i in $(seq 1 10); do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" --jq '.artifacts[].name' 2>/dev/null | grep -qx "github-pages"; then
+              echo "github-pages artifact visible (poll $i)"
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "::warning::github-pages artifact still not visible after 5s; deploying anyway"
 
       - name: Deploy to GitHub Pages
         id: deployment
