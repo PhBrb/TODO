@@ -343,9 +343,10 @@ function closeWeekReview() {
   stopWeekReviewSparkles();
 }
 
-// New-year-sparkler particles dripping down from the top-left and top-right
-// corners of the review scroll view while the overlay is open.
-const REVIEW_SPARKLER_COLORS = ["#f2a900", "#e08e00", "#f7c04a", "#ffd166", "#ffe9a8"];
+// New-year-sparkler particles dripping down from a single source line across
+// the top of the review scroll view (spanning 50% between screen edge and
+// card edge on both sides) while the overlay is open.
+const REVIEW_SPARKLER_COLORS = ["#ffd700", "#ffe066", "#fff3b0", "#ffc300", "#ffee88"];
 
 function stopWeekReviewSparkles() {
   const c = AppUI.els.weekReviewContent;
@@ -366,16 +367,15 @@ function startWeekReviewSparkles() {
     const host = c.querySelector(".week-review-list") || c;
     const r = host.getBoundingClientRect();
     if (r.width < 10) return;
-    // 50% between the screen edge and the card edge
+    // One source spanning 50% between the screen edge and the card edge on
+    // both sides; pieces spread across the full width of that span.
     const leftX = Math.round(r.left / 2);
     const rightX = Math.round((window.innerWidth + r.right) / 2);
-    for (const x of [leftX, rightX]) {
-      Confetti.burstAt(
-        { x, y: r.top + 2, width: 26, height: 4 },
-        3,
-        { colors: REVIEW_SPARKLER_COLORS, sizePx: 3, vyMin: 10, vyMax: 60, vx: 40, spin: 300, gravity: 650, lifetimeMs: 700 }
-      );
-    }
+    Confetti.burstAt(
+      { x: leftX, y: r.top + 2, width: Math.max(0, rightX - leftX), height: 4 },
+      8,
+      { colors: REVIEW_SPARKLER_COLORS, sizePx: 3, vyMin: 10, vyMax: 60, vx: 40, spin: 300, gravity: 650, lifetimeMs: 700 }
+    );
   };
   spawn();
   c._sparklerTimer = setInterval(spawn, 150);
