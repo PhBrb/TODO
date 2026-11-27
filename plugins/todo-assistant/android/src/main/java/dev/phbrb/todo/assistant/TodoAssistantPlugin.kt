@@ -22,6 +22,8 @@ class TodoAssistantPlugin : Plugin() {
 
     override fun load() {
         WebViewHolder.webView = bridge?.webView
+        // Schedule the background widget recompute (also re-enqueued on boot).
+        bridge?.context?.let { WidgetRecomputeWorker.enqueue(it) }
     }
 
     /**
