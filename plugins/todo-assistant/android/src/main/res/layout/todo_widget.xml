@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/todo_widget_bg">
+
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/todo_widget_title"
+        android:textColor="#2D2A3D"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView android:id="@+id/row0" style="@style/TodoWidgetRow" />
+    <TextView android:id="@+id/row1" style="@style/TodoWidgetRow" />
+    <TextView android:id="@+id/row2" style="@style/TodoWidgetRow" />
+    <TextView android:id="@+id/row3" style="@style/TodoWidgetRow" />
+    <TextView android:id="@+id/row4" style="@style/TodoWidgetRow" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="@string/todo_widget_empty"
+        android:textColor="#8A86A3"
+        android:textSize="12sp"
+        android:visibility="gone" />
+</LinearLayout>
