@@ -30,26 +30,26 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <LinearLayout android:id="@+id/rowwrap0" style="@style/TodoWidgetRowWrap">
-        <View android:id="@+id/dot0" style="@style/TodoWidgetDot" />
+    <FrameLayout android:id="@+id/rowwrap0" style="@style/TodoWidgetRowWrap">
         <TextView android:id="@+id/row0" style="@style/TodoWidgetRowText" />
-    </LinearLayout>
-    <LinearLayout android:id="@+id/rowwrap1" style="@style/TodoWidgetRowWrap">
-        <View android:id="@+id/dot1" style="@style/TodoWidgetDot" />
+        <View android:id="@+id/stripe0" style="@style/TodoWidgetStripe" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/rowwrap1" style="@style/TodoWidgetRowWrap">
         <TextView android:id="@+id/row1" style="@style/TodoWidgetRowText" />
-    </LinearLayout>
-    <LinearLayout android:id="@+id/rowwrap2" style="@style/TodoWidgetRowWrap">
-        <View android:id="@+id/dot2" style="@style/TodoWidgetDot" />
+        <View android:id="@+id/stripe1" style="@style/TodoWidgetStripe" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/rowwrap2" style="@style/TodoWidgetRowWrap">
         <TextView android:id="@+id/row2" style="@style/TodoWidgetRowText" />
-    </LinearLayout>
-    <LinearLayout android:id="@+id/rowwrap3" style="@style/TodoWidgetRowWrap">
-        <View android:id="@+id/dot3" style="@style/TodoWidgetDot" />
+        <View android:id="@+id/stripe2" style="@style/TodoWidgetStripe" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/rowwrap3" style="@style/TodoWidgetRowWrap">
         <TextView android:id="@+id/row3" style="@style/TodoWidgetRowText" />
-    </LinearLayout>
-    <LinearLayout android:id="@+id/rowwrap4" style="@style/TodoWidgetRowWrap">
-        <View android:id="@+id/dot4" style="@style/TodoWidgetDot" />
+        <View android:id="@+id/stripe3" style="@style/TodoWidgetStripe" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/rowwrap4" style="@style/TodoWidgetRowWrap">
         <TextView android:id="@+id/row4" style="@style/TodoWidgetRowText" />
-    </LinearLayout>
+        <View android:id="@+id/stripe4" style="@style/TodoWidgetStripe" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/widget_empty"
