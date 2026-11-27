@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import kotlinx.coroutines.flow.first
@@ -19,7 +20,22 @@ import org.json.JSONArray
 class TodoWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        for (id in appWidgetIds) updateWidget(context, appWidgetManager, id)
+        for (id in appWidgetIds) {
+            try {
+                updateWidget(context, appWidgetManager, id)
+            } catch (e: Exception) {
+                // Never let onUpdate throw: a crash here makes the launcher show
+                // "widget could not be added". Fall back to an empty card.
+                Log.e("TodoWidgetProvider", "updateWidget failed for $id", e)
+                try {
+                    val views = RemoteViews(context.packageName, R.layout.todo_widget)
+                    for (i in 0 until MAX_ROWS) views.setViewVisibility(ROW_WRAP_IDS[i], View.GONE)
+                    views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
+                    appWidgetManager.updateAppWidget(id, views)
+                } catch (_: Exception) {
+                }
+            }
+        }
     }
 
     companion object {
@@ -44,7 +60,12 @@ class TodoWidgetProvider : AppWidgetProvider() {
         private fun readWidgetJson(context: Context): String {
             cachedWidgetJson?.let { return it }
             // Cold start: read the mirror from DataStore (small file, one-shot).
-            return runBlocking { context.mirrorDataStore.data.first()[MirrorKeys.WIDGET_JSON] } ?: "[]"
+            return try {
+                runBlocking { context.mirrorDataStore.data.first()[MirrorKeys.WIDGET_JSON] } ?: "[]"
+            } catch (e: Exception) {
+                Log.e("TodoWidgetProvider", "failed to read mirror", e)
+                "[]"
+            }
         }
 
         fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
