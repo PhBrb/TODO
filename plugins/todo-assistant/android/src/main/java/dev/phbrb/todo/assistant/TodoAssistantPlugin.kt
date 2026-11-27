@@ -1,8 +1,6 @@
 package dev.phbrb.todo.assistant
 
 import android.webkit.WebView
-import androidx.datastore.core.updateData
-import androidx.datastore.preferences.core.toMutablePreferences
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
