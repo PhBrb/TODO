@@ -1,10 +1,11 @@
 package dev.phbrb.todo.assistant
 
 import android.webkit.WebView
+import androidx.datastore.preferences.edit
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
+import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
-import com.getcapacitor.annotation.PluginMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,22 +34,20 @@ class TodoAssistantPlugin : Plugin() {
     fun mirrorState(call: PluginCall) {
         val ctx = bridge?.context
         if (ctx == null) {
-            call.error("no context")
+            call.reject("no context")
             return
         }
         val stateJson = call.getString("state") ?: "{}"
         val widgetJson = call.getString("widget") ?: "[]"
         scope.launch {
-            ctx.mirrorDataStore.updateData { prefs ->
-                prefs.toMutablePreferences().apply {
-                    put(MirrorKeys.STATE_JSON, stateJson)
-                    put(MirrorKeys.WIDGET_JSON, widgetJson)
-                }
+            ctx.mirrorDataStore.edit { prefs ->
+                prefs[MirrorKeys.STATE_JSON] = stateJson
+                prefs[MirrorKeys.WIDGET_JSON] = widgetJson
             }
             TodoWidgetProvider.cachedWidgetJson = widgetJson
             withContext(Dispatchers.Main) {
                 TodoWidgetProvider.updateAll(ctx)
-                call.success()
+                call.resolve()
             }
         }
     }
