@@ -24,7 +24,18 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val MAX_ROWS = 5
+        private val ROW_WRAP_IDS = intArrayOf(R.id.rowwrap0, R.id.rowwrap1, R.id.rowwrap2, R.id.rowwrap3, R.id.rowwrap4)
         private val ROW_IDS = intArrayOf(R.id.row0, R.id.row1, R.id.row2, R.id.row3, R.id.row4)
+        private val DOT_IDS = intArrayOf(R.id.dot0, R.id.dot1, R.id.dot2, R.id.dot3, R.id.dot4)
+
+        /** Difficulty dot colors matching the web app's --diff-color values. */
+        private fun difficultyColor(difficulty: String): Int = when (difficulty) {
+            "easy" -> 0xFF70C4AE.toInt()
+            "medium" -> 0xFFE9A470.toInt()
+            "hard" -> 0xFFE08E87.toInt()
+            "fun" -> 0xFFD63384.toInt()
+            else -> 0xFF8A86A3.toInt()
+        }
 
         /** Last widget payload seen in this process; avoids a disk read when warm. */
         @Volatile
@@ -59,10 +70,11 @@ class TodoWidgetProvider : AppWidgetProvider() {
             for (i in 0 until minOf(items.length(), MAX_ROWS)) {
                 val obj = items.optJSONObject(i) ?: continue
                 views.setTextViewText(ROW_IDS[i], obj.optString("title", ""))
-                views.setViewVisibility(ROW_IDS[i], View.VISIBLE)
+                views.setInt(DOT_IDS[i], "setColorFilter", difficultyColor(obj.optString("difficulty", "")))
+                views.setViewVisibility(ROW_WRAP_IDS[i], View.VISIBLE)
                 shown++
             }
-            for (i in shown until MAX_ROWS) views.setViewVisibility(ROW_IDS[i], View.GONE)
+            for (i in shown until MAX_ROWS) views.setViewVisibility(ROW_WRAP_IDS[i], View.GONE)
             views.setViewVisibility(R.id.widget_empty, if (shown == 0) View.VISIBLE else View.GONE)
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }

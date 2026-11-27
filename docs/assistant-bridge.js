@@ -26,7 +26,7 @@ function mirrorStateToNative(stateJson) {
   if (!plugin) return;
   try {
     const widget = JSON.stringify(
-      highlightTasks().slice(0, WIDGET_MAX_ITEMS).map((t) => ({ title: t.title }))
+      highlightTasks().slice(0, WIDGET_MAX_ITEMS).map((t) => ({ title: t.title, difficulty: t.difficulty ?? null }))
     );
     plugin.mirrorState({ state: stateJson, widget });
   } catch {
