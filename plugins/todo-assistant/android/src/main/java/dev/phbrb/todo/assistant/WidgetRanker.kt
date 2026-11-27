@@ -2,7 +2,7 @@ package dev.phbrb.todo.assistant
 
 import android.content.Context
 import android.util.Log
-import org.mozilla.javascript.Context
+import org.mozilla.javascript.Context as RhinoContext
 import org.mozilla.javascript.ScriptableObject
 
 /**
@@ -46,19 +46,19 @@ object WidgetRanker {
             Log.e(TAG, "game-bundle.js missing from assets", e)
             return null
         }
-        val cx = Context.enter()
+        val cx = RhinoContext.enter()
         return try {
-            cx.languageVersion = Context.VERSION_ES6
+            cx.languageVersion = RhinoContext.VERSION_ES6
             val scope = cx.initStandardObjects()
             ScriptableObject.putProperty(scope, "MIRROR_JSON", stateJson)
             cx.evaluateString(scope, SHIM, "shim.js", 1, null)
             cx.evaluateString(scope, bundle, "game-bundle.js", 1, null)
-            Context.toString(cx.evaluateString(scope, COMPUTE, "compute.js", 1, null))
+            RhinoContext.toString(cx.evaluateString(scope, COMPUTE, "compute.js", 1, null))
         } catch (e: Exception) {
             Log.e(TAG, "highlight recompute failed", e)
             null
         } finally {
-            Context.exit()
+            RhinoContext.exit()
         }
     }
 }
