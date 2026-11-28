@@ -61,6 +61,25 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0"
 
+      # Materialize the shared signing keystore from secrets so every CI APK is
+      # signed identically and installs as an in-place update. Secrets to create:
+      #   TODO_KEYSTORE_B64      = base64 of the keystore file
+      #   TODO_KEYSTORE_PASSWORD, TODO_KEY_PASSWORD, TODO_KEY_ALIAS (optional)
+      - name: Materialize CI signing keystore
+        env:
+          TODO_KEYSTORE_B64: ${{ secrets.TODO_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$TODO_KEYSTORE_B64" ]; then
+            echo "$TODO_KEYSTORE_B64" | base64 -d > android/app/ci-signing.jks
+            echo "TODO_KEYSTORE_PATH=$PWD/android/app/ci-signing.jks" >> "$GITHUB_ENV"
+            echo "TODO_KEYSTORE_PASSWORD=${{ secrets.TODO_KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "TODO_KEY_PASSWORD=${{ secrets.TODO_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "TODO_KEY_ALIAS=${{ secrets.TODO_KEY_ALIAS }}" >> "$GITHUB_ENV"
+            echo "signing with CI keystore"
+          else
+            echo "TODO_KEYSTORE_B64 not set; falling back to runner default debug keystore"
+          fi
+
       - name: Build debug APK
         uses: gradle/gradle-build-action@v3
         with:
